@@ -2366,7 +2366,7 @@ const App = {
 
   // Mobile Bottom Navigation Scroll Spy
   setupMobileScrollSpy() {
-    const sectionIds = ['home', 'guestDashboardSection', 'wayfinder-section', 'map-section', 'dining-section'];
+    const sectionIds = ['home', 'guestDashboardSection', 'wayfinder-section', 'map-section'];
     let scrollDebounce;
 
     window.addEventListener('scroll', () => {
@@ -2388,8 +2388,6 @@ const App = {
                 activeTarget = 'wayfinder-section';
               } else if (sId === 'map-section') {
                 activeTarget = 'map-section';
-              } else if (sId === 'dining-section') {
-                activeTarget = 'dining-section';
               }
             }
           }

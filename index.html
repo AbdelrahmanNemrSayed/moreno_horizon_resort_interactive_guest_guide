@@ -66,7 +66,7 @@
   </script>
 
   <!-- Modular Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=23.0">
+  <link rel="stylesheet" href="css/style.css?v=24.0">
 </head>
 
 <body class="bg-slate-50 dark:bg-brand-darkBg text-slate-800 dark:text-slate-100 font-cairo antialiased min-h-screen selection:bg-brand-gold selection:text-white transition-colors duration-300">
@@ -737,20 +737,6 @@
     </section>
 
 
-    <!-- Directory & Facilities Section -->
-    <section class="mb-6" id="dining-section">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-base sm:text-lg font-extrabold text-brand-navy dark:text-brand-sand flex items-center gap-2" data-i18n="directory_title">
-          <span>📖</span> دليل المرافق والمطاعم (Directory & Services)
-        </h3>
-      </div>
-
-      <!-- Dynamic Directory Cards Grid -->
-      <div id="directoryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Populated by App.renderDirectory() -->
-      </div>
-    </section>
-
   </main>
 
   <!-- Main End -->
@@ -783,10 +769,10 @@
         <span class="text-[10px] font-bold" data-i18n="nav_rooms">غرفتي</span>
       </button>
 
-      <!-- 5. Dining & Services Tab -->
-      <button onclick="scrollToSection('dining-section')" id="bottomNavDining" class="mobile-nav-item tap-effect" data-target="dining-section">
-        <span class="text-lg leading-none">🍽️</span>
-        <span class="text-[10px] font-bold" data-i18n="nav_services">المطاعم</span>
+      <!-- 5. Services & Concierge Tab -->
+      <button onclick="App.openSmartHubModal()" id="bottomNavServices" class="mobile-nav-item tap-effect" data-target="smartHub">
+        <span class="text-lg leading-none">🛎️</span>
+        <span class="text-[10px] font-bold" data-i18n="nav_services">الخدمات</span>
       </button>
 
     </div>
@@ -1283,9 +1269,9 @@
   </div>
 
   <!-- Modular Scripts Architecture -->
-  <script src="js/data.js?v=23.0"></script>
-  <script src="js/map-engine.js?v=23.0"></script>
-  <script src="js/wayfinder.js?v=23.0"></script>
-  <script src="js/app.js?v=23.0"></script>
+  <script src="js/data.js?v=24.0"></script>
+  <script src="js/map-engine.js?v=24.0"></script>
+  <script src="js/wayfinder.js?v=24.0"></script>
+  <script src="js/app.js?v=24.0"></script>
 </body>
 </html>
