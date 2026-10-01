@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/guide",
+      "destination": "/moreno_horizon_resort_interactive_guest_guide.html"
+    }
+  ]
+}
