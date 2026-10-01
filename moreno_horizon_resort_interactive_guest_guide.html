@@ -66,7 +66,7 @@
   </script>
 
   <!-- Modular Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=22.0">
+  <link rel="stylesheet" href="css/style.css?v=23.0">
 </head>
 
 <body class="bg-slate-50 dark:bg-brand-darkBg text-slate-800 dark:text-slate-100 font-cairo antialiased min-h-screen selection:bg-brand-gold selection:text-white transition-colors duration-300">
@@ -737,41 +737,15 @@
     </section>
 
 
-    <!-- Directory & Facilities Section with Synced Filters -->
-    <section class="mb-4" id="dining-section">
+    <!-- Directory & Facilities Section -->
+    <section class="mb-6" id="dining-section">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-base sm:text-lg font-extrabold text-brand-navy dark:text-brand-sand flex items-center gap-2" data-i18n="directory_title">
           <span>📖</span> دليل المرافق والمطاعم (Directory & Services)
         </h3>
       </div>
 
-      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 pb-2" id="categoriesTabsBar">
-        <button onclick="filterCategory('all', this)" class="category-btn active tap-effect px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-brand-navy text-white text-xs sm:text-sm font-bold shadow-md shadow-brand-navy/20 whitespace-nowrap">
-          🌟 <span class="tab-txt" data-i18n="tab_all">الكل</span>
-        </button>
-        <button onclick="filterCategory('dine', this)" class="category-btn tap-effect px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white dark:bg-brand-cardDark text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-800 whitespace-nowrap">
-          🍽️ <span class="tab-txt" data-i18n="tab_food">أين آكل؟ (Dine & Indulge)</span>
-        </button>
-        <button onclick="filterCategory('relax', this)" class="category-btn tap-effect px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white dark:bg-brand-cardDark text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-800 whitespace-nowrap">
-          🏄‍♂️ <span class="tab-txt" data-i18n="tab_activities">الشاطئ والمسابح (Explore & Relax)</span>
-        </button>
-        <button onclick="filterCategory('wellness', this)" class="category-btn tap-effect px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white dark:bg-brand-cardDark text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-800 whitespace-nowrap">
-          🎾 <span class="tab-txt" data-i18n="tab_wellness">الرياضة والسبا (Wellness)</span>
-        </button>
-        <button onclick="filterCategory('services', this)" class="category-btn tap-effect px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white dark:bg-brand-cardDark text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-800 whitespace-nowrap">
-          🛎️ <span class="tab-txt" data-i18n="tab_services">المرافق والخدمات (Facilities)</span>
-        </button>
-        <button onclick="filterCategory('buildings', this)" class="category-btn tap-effect px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white dark:bg-brand-cardDark text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-800 whitespace-nowrap">
-          🏢 <span class="tab-txt" data-i18n="tab_buildings">مباني الغرف (Rooms & Wings)</span>
-        </button>
-        <button onclick="filterCategory('excursions', this)" class="category-btn tap-effect px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white dark:bg-brand-cardDark text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold border border-slate-200 dark:border-slate-800 whitespace-nowrap">
-          🛥️ <span class="tab-txt" data-i18n="tab_excursions">رحلات الغردقة (Excursions)</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- Dynamic Directory Cards Grid -->
-    <section>
+      <!-- Dynamic Directory Cards Grid -->
       <div id="directoryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- Populated by App.renderDirectory() -->
       </div>
@@ -1309,9 +1283,9 @@
   </div>
 
   <!-- Modular Scripts Architecture -->
-  <script src="js/data.js?v=22.0"></script>
-  <script src="js/map-engine.js?v=22.0"></script>
-  <script src="js/wayfinder.js?v=22.0"></script>
-  <script src="js/app.js?v=22.0"></script>
+  <script src="js/data.js?v=23.0"></script>
+  <script src="js/map-engine.js?v=23.0"></script>
+  <script src="js/wayfinder.js?v=23.0"></script>
+  <script src="js/app.js?v=23.0"></script>
 </body>
 </html>
