@@ -1,0 +1,6 @@
+server.js
+test_*.js
+*.log
+scratch/
+.git/
+.vscode/
