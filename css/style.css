@@ -1,0 +1,1617 @@
+/* Moreno Horizon Spa & Resort - Core Luxury Stylesheet */
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Strict modal and utility visibility guard */
+.hidden {
+  display: none !important;
+}
+
+/* Custom Smooth Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+/* Glassmorphism Styles */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.dark .glass-nav {
+  background: rgba(8, 18, 30, 0.94);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.dark .glass-card {
+  background: rgba(11, 27, 47, 0.94);
+}
+
+.gold-gradient-border {
+  border: 1px solid rgba(221, 161, 94, 0.3);
+}
+.dark .gold-gradient-border {
+  border: 1px solid rgba(221, 161, 94, 0.2);
+}
+
+/* Pulse Glow & Radar Keyframes */
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(221, 161, 94, 0.6); }
+  50% { box-shadow: 0 0 0 14px rgba(221, 161, 94, 0); }
+}
+.glow-gold {
+  animation: pulse-gold 2.4s infinite;
+}
+
+@keyframes radar-ping {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.95; }
+  100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+}
+.radar-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+/* Animated Wayfinding SVG Route */
+@keyframes dash-crawl {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+.animated-route-line {
+  stroke-dasharray: 8 6;
+  animation: dash-crawl 1.2s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.85));
+}
+.animated-route-glow {
+  filter: drop-shadow(0 0 14px rgba(221, 161, 94, 0.9));
+}
+
+/* Tap & Click Feedback */
+.tap-effect {
+  transition: transform 0.15s ease, filter 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.tap-effect:active {
+  transform: scale(0.96);
+}
+
+/* Map Pan-Zoom Viewport */
+.map-viewport {
+  direction: ltr !important;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.map-viewport:active {
+  cursor: grabbing;
+}
+
+#mapCanvasWrapper {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* Smooth Hotspot Pins */
+.map-pin {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, filter 0.25s ease;
+  transform: translate(-50%, -50%);
+}
+.map-pin:hover {
+  transform: translate(-50%, -50%) scale(1.32);
+  z-index: 30;
+}
+.map-pin.active-pin {
+  transform: translate(-50%, -50%) scale(1.45);
+  z-index: 35;
+  filter: drop-shadow(0 0 14px #dda15e);
+}
+.map-pin.dimmed {
+  opacity: 0.22;
+  filter: grayscale(85%);
+  pointer-events: none;
+}
+
+/* Tooltip on pin hover */
+.pin-tooltip {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.map-pin:hover .pin-tooltip {
+  opacity: 1;
+  transform: translate(-50%, -100%) translateY(-10px);
+}
+
+/* Luxury Floating Toast Notifications */
+#toastContainer {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+  max-width: 90vw;
+  width: 380px;
+}
+.toast-msg {
+  pointer-events: auto;
+  animation: toastSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.3s ease;
+}
+.toast-msg.toast-leave {
+  animation: toastFadeUp 0.3s ease forwards;
+}
+@keyframes toastSlideDown {
+  from { opacity: 0; transform: translateY(-20px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastFadeUp {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-16px) scale(0.94); }
+}
+
+/* Shimmer Loading Effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Compass Rose on Map */
+.map-compass {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ================= NEW LUXURY EXTENSIONS ================= */
+
+/* 1. Sunlight Beach Mode (High-Contrast for Direct Sunlight) */
+body.sunlight-mode {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  filter: contrast(110%);
+}
+body.sunlight-mode .glass-card,
+body.sunlight-mode .glass-nav {
+  background-color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+body.sunlight-mode .map-pin {
+  border: 3px solid #000000 !important;
+  font-weight: 900 !important;
+}
+
+/* 2. Apple Wallet Style Digital Room Pass */
+.wallet-pass {
+  background: linear-gradient(145deg, #0d2238 0%, #06111e 100%);
+  border: 1px solid rgba(221, 161, 94, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  position: relative;
+  overflow: hidden;
+}
+.wallet-pass::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(221, 161, 94, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.pass-notch-left, .pass-notch-right {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(15, 23, 42, 0.95);
+  border-radius: 9999px;
+  top: 68%;
+}
+.pass-notch-left { left: -12px; }
+.pass-notch-right { right: -12px; }
+
+/* 3. Interactive Qibla Compass */
+.qibla-dial {
+  background: radial-gradient(circle, #0f2b48 0%, #081626 100%);
+  border: 3px solid #dda15e;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7), 0 8px 25px rgba(221, 161, 94, 0.25);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.qibla-needle {
+  transform-origin: 50% 85%;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 4. Cinematic Auto-Tour HUD Bar */
+.cinematic-hud {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(11, 27, 47, 0.92);
+  border: 1px solid rgba(221, 161, 94, 0.4);
+  animation: hudSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes hudSlideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 5. Star Rating Component */
+.star-btn {
+  color: #cbd5e1;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.star-btn.active, .star-btn:hover {
+  color: #f59e0b;
+  transform: scale(1.2);
+}
+
+/* 6. Smart Guest Floating Hub (FAB & Cart) */
+.smart-fab-container {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+[dir="ltr"] .smart-fab-container {
+  left: auto;
+  right: 2rem;
+}
+
+.smart-fab-trigger,
+.smart-fab-cart-btn {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.smart-fab-trigger {
+  background: linear-gradient(135deg, #134074 0%, #0B2545 100%);
+  color: #FBBF24;
+  border: 2px solid rgba(221, 161, 94, 0.45);
+}
+
+.smart-fab-trigger:hover {
+  transform: scale(1.08);
+  border-color: #FBBF24;
+  box-shadow: 0 12px 28px rgba(19, 64, 116, 0.6), 0 0 16px rgba(251, 191, 36, 0.4);
+}
+
+.smart-fab-trigger.open {
+  transform: rotate(45deg) scale(1.05);
+  background: #0f172a;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.smart-fab-cart-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 22px rgba(217, 119, 6, 0.4);
+}
+
+.smart-fab-cart-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 26px rgba(217, 119, 6, 0.55), 0 0 14px rgba(245, 158, 11, 0.5);
+}
+
+.smart-fab-cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background-color: #e11d48;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  animation: cartBadgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes cartBadgePop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+.smart-fab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(15px) scale(0.92);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.smart-fab-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.smart-fab-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.85rem;
+  background: rgba(11, 27, 47, 0.95);
+  border: 1px solid rgba(221, 161, 94, 0.35);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-radius: 1rem;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  white-space: nowrap;
+}
+.smart-fab-item:hover {
+  transform: translateX(4px) scale(1.03);
+  background: linear-gradient(90deg, #134074 0%, #1d976c 100%);
+  border-color: #dda15e;
+  box-shadow: 0 10px 25px rgba(29, 151, 108, 0.35);
+}
+[dir="ltr"] .smart-fab-item:hover {
+  transform: translateX(-4px) scale(1.03);
+}
+
+/* 7. Turn-by-Turn Navigation HUD (Responsive Floating Card) */
+.turn-nav-bar {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 38;
+  background: rgba(11, 27, 47, 0.96);
+  border: 1px solid rgba(221, 161, 94, 0.55);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 1.25rem;
+  padding: 0.75rem 0.95rem;
+  color: #ffffff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 240, 255, 0.2);
+  animation: turnNavSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto;
+}
+@keyframes turnNavSlideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.turn-progress-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+.turn-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00f0ff 0%, #dda15e 100%);
+  transition: width 0.4s ease;
+}
+
+/* Animated Dynamic Map Routing Line & Traveling Particles */
+.animated-route-line {
+  stroke-dasharray: 14, 10;
+  animation: routeDashFlow 1.1s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.85));
+}
+
+.accessible-route-line {
+  stroke-dasharray: 12, 8;
+  animation: routeDashFlow 0.9s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9));
+}
+
+@keyframes routeDashFlow {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.route-particle-glow {
+  filter: drop-shadow(0 0 8px #fbbf24) drop-shadow(0 0 16px #f59e0b);
+}
+
+.route-particle-cyan {
+  filter: drop-shadow(0 0 8px #00f0ff) drop-shadow(0 0 16px #0284c7);
+}
+
+/* Floating Dynamic Map Route HUD Overlay */
+.map-route-hud {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  max-width: calc(100% - 110px);
+  z-index: 25;
+  background: rgba(11, 27, 47, 0.94);
+  border: 1px solid rgba(221, 161, 94, 0.45);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-radius: 1.25rem;
+  padding: 0.5rem 0.85rem;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  animation: hudSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes hudSlideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 8. My Location GPS Beacon (Blue Dot) */
+.my-location-marker {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  pointer-events: none;
+}
+.my-location-dot {
+  width: 14px;
+  height: 14px;
+  background-color: #0077ff;
+  border: 2.5px solid #ffffff;
+  border-radius: 9999px;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  box-shadow: 0 0 12px #0077ff;
+}
+.my-location-pulse {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: rgba(0, 119, 255, 0.4);
+  animation: myLocPulse 1.8s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+@keyframes myLocPulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* 9. Open Now Radar Indicator */
+.open-now-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  display: inline-block;
+  animation: openNowGlow 1.5s infinite alternate;
+}
+@keyframes openNowGlow {
+  from { opacity: 0.6; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px #10b981; }
+}
+
+/* Accessible step-free route line */
+.accessible-route-line {
+  stroke-dasharray: 4 4 !important;
+  stroke: #10b981 !important;
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.9)) !important;
+}
+
+/* 10. Cinematic Promo Video Player Styles */
+.promo-cinema-overlay {
+  background: radial-gradient(circle at center, rgba(11, 37, 69, 0.4) 0%, rgba(4, 10, 20, 0.96) 100%);
+}
+
+.promo-vignette {
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(4, 10, 20, 0.85) 100%),
+              linear-gradient(to top, rgba(4, 10, 20, 0.96) 0%, rgba(4, 10, 20, 0.55) 30%, transparent 65%),
+              linear-gradient(to bottom, rgba(4, 10, 20, 0.88) 0%, transparent 40%);
+}
+
+.ken-burns-anim-a {
+  animation: promoKenBurnsA 14s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+}
+
+.ken-burns-anim-b {
+  animation: promoKenBurnsB 14s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+}
+
+@keyframes promoKenBurnsA {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.08) translate(-1.5%, -1%); }
+  100% { transform: scale(1.15) translate(1.5%, 1%); }
+}
+
+@keyframes promoKenBurnsB {
+  0% { transform: scale(1.15) translate(1%, -1%); }
+  50% { transform: scale(1.08) translate(-1%, 1.5%); }
+  100% { transform: scale(1) translate(0, 0); }
+}
+
+.promo-text-fade-in {
+  animation: promoTextFade 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes promoTextFade {
+  0% { opacity: 0; transform: translateY(22px); filter: blur(5px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Sound wave animated equalizer bars */
+.sound-wave-bar {
+  display: inline-block;
+  width: 3px;
+  background-color: #FBBF24;
+  border-radius: 9999px;
+  animation: soundBarDance 1.2s ease-in-out infinite alternate;
+}
+.sound-wave-bar:nth-child(2) { animation-delay: 0.2s; height: 14px; }
+.sound-wave-bar:nth-child(3) { animation-delay: 0.4s; height: 8px; }
+.sound-wave-bar:nth-child(4) { animation-delay: 0.1s; height: 16px; }
+
+@keyframes soundBarDance {
+  0% { height: 4px; }
+  50% { height: 18px; }
+  100% { height: 7px; }
+}
+
+/* Story chapter bar */
+.story-step-bar {
+  position: relative;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  height: 3px;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.story-step-bar.active {
+  background: rgba(255, 255, 255, 0.35);
+  height: 4px;
+}
+
+.story-step-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #FBBF24;
+  width: 0%;
+  border-radius: 9999px;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+}
+
+/* ========================================================
+   11. COMPREHENSIVE MULTI-SCREEN & MOBILE RESPONSIVE ENGINE
+   ======================================================== */
+
+/* Prevent horizontal overflow across all screens */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* iOS Safe Area Padding for Notch Devices */
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Touch responsiveness & fast taps */
+button, a, select, input, .tap-effect {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile Safe Area & Viewport Spacing */
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+main {
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 16px)) !important;
+}
+
+/* Smooth anchor scroll offset beneath sticky mobile header */
+#home,
+#wayfinder-section,
+#map-section,
+#dining-section,
+#guestDashboardSection {
+  scroll-margin-top: 4.5rem;
+}
+
+/* Prevent automatic zoom on focus in iOS Safari */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile Bottom Navigation Bar: visible on mobile/tablet, hidden on desktop */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  padding-top: 0.4rem;
+  padding-bottom: max(0.55rem, env(safe-area-inset-bottom, 12px));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.08);
+  touch-action: manipulation;
+}
+
+.dark .mobile-bottom-nav {
+  background: rgba(8, 20, 36, 0.96);
+  border-top-color: rgba(30, 41, 59, 0.85);
+  box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+/* Mobile Nav Item Interactions */
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.85rem;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 52px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dark .mobile-nav-item {
+  color: #94a3b8;
+}
+
+.mobile-nav-item.active {
+  color: #bc6c25;
+}
+
+.dark .mobile-nav-item.active {
+  color: #dda15e;
+}
+
+.mobile-nav-item.active span:first-child {
+  transform: scale(1.15);
+  filter: drop-shadow(0 2px 6px rgba(221, 161, 94, 0.4));
+}
+
+/* On mobile screens, hide floating action buttons completely to eliminate any overlap with forms & inputs */
+@media (max-width: 768px) {
+  .smart-fab-container {
+    display: none !important;
+  }
+}
+
+/* Interactive Map Viewport Adaptive Mobile Heights */
+@media (max-width: 640px) {
+  .map-viewport {
+    height: 420px !important;
+    max-height: 60vh !important;
+  }
+
+  /* Expand touch target hit-box for pins on mobile without altering visual style */
+  .map-pin::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 9999px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .map-viewport {
+    height: 520px !important;
+  }
+}
+
+/* Fullscreen Map Mode on Mobile (iOS Safari & Android Fallback) */
+.map-viewport.fullscreen-active {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  z-index: 99999 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+.map-viewport.fullscreen-active .earth-compass-container,
+.map-viewport.fullscreen-active .earth-camera-controls {
+  top: max(1rem, env(safe-area-inset-top, 16px)) !important;
+}
+
+.map-exit-fullscreen-btn {
+  position: absolute;
+  top: max(1rem, env(safe-area-inset-top, 16px));
+  left: 1rem;
+  z-index: 60;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.85rem;
+  background: rgba(225, 29, 72, 0.92);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Native Mobile Bottom Sheet Modals */
+@media (max-width: 640px) {
+  #detailModal,
+  #tableBookingModal,
+  #guestServicesModal,
+  #guestProfileModal,
+  #aiChatModal,
+  #aiItineraryModal,
+  #smartHubModal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  #detailModal > div,
+  #tableBookingModal > div,
+  #guestServicesModal > div,
+  #guestProfileModal > div,
+  #aiItineraryModal > div,
+  #smartHubModal > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 1.75rem !important;
+    border-top-right-radius: 1.75rem !important;
+    max-height: 88dvh !important;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 22px)) !important;
+    animation: mobileSlideUpSheet 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    overscroll-behavior: contain;
+  }
+
+  #aiChatModal > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 1.75rem !important;
+    border-top-right-radius: 1.75rem !important;
+    height: 82dvh !important;
+    max-height: 85dvh !important;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 16px)) !important;
+    animation: mobileSlideUpSheet 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  @keyframes mobileSlideUpSheet {
+    from {
+      opacity: 0.5;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Visual Mobile Sheet Pull Handle Bar */
+  .modal-sheet-handle {
+    width: 2.75rem;
+    height: 0.28rem;
+    border-radius: 9999px;
+    background: #cbd5e1;
+    margin: 0 auto 0.75rem auto;
+    opacity: 0.85;
+  }
+  .dark .modal-sheet-handle {
+    background: #475569;
+  }
+}
+
+/* Cinematic Promo Video Player Mobile Adaptations */
+@media (max-width: 640px) {
+  #promoVideoModal > div {
+    border-radius: 0 !important;
+    max-height: 100dvh !important;
+    height: 100% !important;
+  }
+  #promoSceneHud {
+    padding: 1rem !important;
+  }
+  #promoSceneTitle {
+    font-size: 1.15rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 0.35rem !important;
+  }
+  #promoSceneDesc {
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.75rem !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  #promoSceneActions {
+    gap: 0.4rem !important;
+  }
+  #promoSceneActions button {
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Modals Safe-Area Scroll on Compact Screens */
+@media (max-height: 700px) {
+  #detailModal > div,
+  #tableBookingModal > div,
+  #guestServicesModal > div,
+  #aiItineraryModal > div {
+    max-height: 94dvh !important;
+    padding: 1rem !important;
+  }
+}
+
+/* ========================================================
+   GOOGLE EARTH 3D RESORT MAP ENGINE STYLES
+   ======================================================== */
+
+.map-viewport.mode-3d {
+  perspective: 1250px !important;
+  perspective-origin: 50% 72% !important;
+}
+
+.map-viewport.mode-3d #mapCanvasWrapper {
+  transform-style: preserve-3d !important;
+  will-change: transform;
+}
+
+/* Atmospheric Horizon Glow when camera tilts in 3D */
+.earth-horizon-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  background: linear-gradient(180deg, rgba(14, 165, 233, 0.45) 0%, rgba(6, 182, 212, 0.25) 35%, rgba(15, 23, 42, 0) 100%);
+  pointer-events: none;
+  z-index: 25;
+  transition: opacity 0.5s ease;
+}
+
+/* 3D Billboard Pin Stalk and Ground Drop Shadow */
+.map-pin.pin-3d {
+  filter: drop-shadow(0 14px 10px rgba(0, 0, 0, 0.75)) !important;
+  transform-origin: center bottom !important;
+}
+
+.map-pin.pin-3d::after {
+  content: '';
+  position: absolute;
+  top: 96%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(221, 161, 94, 0.75) 65%, transparent 100%);
+  pointer-events: none;
+}
+
+.map-pin.pin-3d::before {
+  content: '';
+  position: absolute;
+  top: calc(96% + 15px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 7px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7) 0%, transparent 75%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Google Earth 3D Compass Gizmo */
+.earth-compass-container {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.earth-compass-gizmo {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(11, 37, 69, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.earth-compass-gizmo:hover {
+  border-color: #dda15e;
+  transform: scale(1.06);
+}
+
+.earth-compass-needle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 38px;
+  margin-left: -3px;
+  margin-top: -19px;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.earth-compass-north {
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-bottom: 19px solid #ef4444;
+}
+
+.earth-compass-south {
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 19px solid #94a3b8;
+}
+
+/* Unified Google Earth 3D Camera & Compass Controls (Top Right) */
+.earth-camera-controls {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: auto;
+}
+
+/* 3D Vertical Tilt Control Widget */
+.earth-tilt-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Google Earth Status HUD Footer */
+.earth-hud-bar {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.earth-hud-pill {
+  pointer-events: auto;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.85rem;
+  background: rgba(11, 37, 69, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+/* Active 3D Pin Beacon */
+@keyframes beaconRays {
+  0% { opacity: 0.8; transform: translate(-50%, -100%) scaleY(0.9); }
+  50% { opacity: 1; transform: translate(-50%, -100%) scaleY(1.05); }
+  100% { opacity: 0.8; transform: translate(-50%, -100%) scaleY(0.9); }
+}
+
+.active-3d-beacon-beam {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  height: 140px;
+  background: linear-gradient(0deg, #06d6a0 0%, #38bdf8 60%, rgba(251, 191, 36, 0) 100%);
+  animation: beaconRays 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+/* Layer crossfade styling */
+.earth-layer-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: opacity 0.45s ease-in-out;
+}
+
+.earth-layer-img.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.earth-layer-img.inactive {
+  opacity: 0;
+  z-index: 0;
+}
+
+/* 3D Tilt & Orbit Controls Buttons */
+.earth-control-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.85rem;
+  background: rgba(11, 37, 69, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.earth-control-btn:hover {
+  background: rgba(20, 60, 110, 0.95);
+  border-color: #dda15e;
+  transform: scale(1.08);
+  color: #dda15e;
+}
+
+.earth-control-btn.active-mode {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.55);
+}
+
+.earth-orbit-running {
+  animation: orbitPulseGlow 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes orbitPulseGlow {
+  0% { box-shadow: 0 0 6px #dda15e, inset 0 0 4px #dda15e; }
+  100% { box-shadow: 0 0 18px #f59e0b, inset 0 0 10px #f59e0b; }
+}
+
+/* Layer Switcher Pill Buttons */
+.map-layer-pill {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.map-layer-pill.active {
+  background: #0b2545;
+  color: #ffffff;
+  border-color: rgba(221, 161, 94, 0.6);
+  box-shadow: 0 2px 8px rgba(11, 37, 69, 0.35);
+}
+
+.dark .map-layer-pill.active {
+  background: linear-gradient(135deg, #dda15e 0%, #b8860b 100%);
+  color: #0b2545;
+  border-color: #dda15e;
+}
+
+.map-layer-pill:not(.active) {
+  background: rgba(241, 245, 249, 0.9);
+  color: #475569;
+}
+
+.dark .map-layer-pill:not(.active) {
+  background: rgba(30, 41, 59, 0.85);
+  color: #cbd5e1;
+}
+
+.map-layer-pill:not(.active):hover {
+  background: rgba(226, 232, 240, 1);
+  color: #0b2545;
+}
+
+.dark .map-layer-pill:not(.active):hover {
+  background: rgba(51, 65, 85, 0.95);
+  color: #ffffff;
+}
+
+/* ================= LIVING VIRTUAL RESORT GAME WORLD STYLES ================= */
+
+/* Time Mode Switcher Buttons */
+.time-mode-btn {
+  background: transparent;
+  color: #475569;
+  border-radius: 0.75rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.dark .time-mode-btn {
+  color: #cbd5e1;
+}
+
+.time-mode-btn.active-mode {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #0b2545 !important;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+  border: 1px solid rgba(251, 191, 36, 0.8);
+}
+
+/* Interactive Buildings 2.5D Hover Lift */
+.interactive-bld {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+  transform-origin: center;
+}
+
+.interactive-bld:hover {
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.45));
+  transform: scale(1.05) translateY(-4px);
+}
+
+/* Sea Shore Wave Animations */
+.wave-anim-1 {
+  animation: waveFloat1 4.5s ease-in-out infinite alternate;
+}
+
+.wave-anim-2 {
+  animation: waveFloat2 3.8s ease-in-out infinite alternate;
+}
+
+@keyframes waveFloat1 {
+  0% { transform: translateY(0px) scaleY(1); }
+  100% { transform: translateY(5px) scaleY(1.08); }
+}
+
+@keyframes waveFloat2 {
+  0% { transform: translateY(0px) scaleY(1); }
+  100% { transform: translateY(-4px) scaleY(0.94); }
+}
+
+/* Floating Boats */
+.boat-float-anim {
+  animation: boatFloat 4s ease-in-out infinite alternate;
+}
+
+.boat-float-anim-2 {
+  animation: boatFloat 5s ease-in-out infinite alternate;
+  animation-delay: 1.2s;
+}
+
+@keyframes boatFloat {
+  0% { transform: translate(640px, 90px) rotate(-1.5deg); }
+  100% { transform: translate(640px, 94px) rotate(2deg); }
+}
+
+/* Swaying Tropical Palm Trees */
+.swaying-palm {
+  transform-origin: bottom center;
+  animation: palmSway 5s ease-in-out infinite alternate;
+}
+
+.swaying-palm:nth-child(2n) {
+  animation-duration: 6.2s;
+  animation-delay: -1.5s;
+}
+
+.swaying-palm:nth-child(3n) {
+  animation-duration: 4.8s;
+  animation-delay: -3s;
+}
+
+@keyframes palmSway {
+  0% { transform: rotate(-2deg); }
+  100% { transform: rotate(2.5deg); }
+}
+
+/* Shimmering Pool Water */
+.pool-water-shimmer {
+  animation: poolShimmer 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes poolShimmer {
+  0% { filter: brightness(1) saturate(1); }
+  100% { filter: brightness(1.12) saturate(1.2); }
+}
+
+/* Water Splash Fountains */
+.fountain-anim {
+  animation: fountainSpray 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes fountainSpray {
+  0% { r: 5; opacity: 0.5; }
+  100% { r: 9; opacity: 0.9; }
+}
+
+/* Living Route Neon Dash Animation */
+.route-line-dynamic {
+  stroke-dasharray: 12 8;
+  animation: dynamicRouteDash 1.2s linear infinite;
+}
+
+@keyframes dynamicRouteDash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+/* Player Avatar Glow Ring */
+.player-pulse-ring {
+  animation: playerRingPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes playerRingPulse {
+  0% { r: 14; opacity: 0.8; }
+  50% { r: 26; opacity: 0.2; }
+  100% { r: 14; opacity: 0.8; }
+}
+
+/* Night Mode Lanterns */
+.lantern-pulse {
+  animation: lanternFlicker 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes lanternFlicker {
+  0% { opacity: 0.2; transform: scale(0.9); }
+  100% { opacity: 0.45; transform: scale(1.15); }
+}
+
+.pool-night-glow {
+  animation: underwaterPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes underwaterPulse {
+  0% { opacity: 0.25; transform: scale(0.95); }
+  100% { opacity: 0.5; transform: scale(1.1); }
+}
+
+/* ================= LUXURY MAP ENGINE 2.0 & MOBILE NAV STYLES ================= */
+
+/* Enhanced Map Pin Design */
+.map-pin {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, filter 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.map-pin:hover {
+  transform: translate(-50%, -50%) scale(1.3);
+  z-index: 40;
+  box-shadow: 0 0 20px rgba(221, 161, 94, 0.8), 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+.map-pin.active-pin {
+  transform: translate(-50%, -50%) scale(1.42);
+  z-index: 50;
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 24px #fbbf24, 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Floating Responsive POI Bottom Sheet Card on Map Viewport */
+.map-bottom-sheet-card,
+.map-popover-card {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 36;
+  background: rgba(11, 27, 47, 0.96);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(221, 161, 94, 0.5);
+  border-radius: 1.25rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(221, 161, 94, 0.2);
+  padding: 0.75rem 0.85rem;
+  color: #ffffff;
+  pointer-events: auto;
+  animation: sheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sheetSlideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Animated Live Walker Avatar for Simulated Navigation */
+.live-walker-avatar {
+  position: absolute;
+  z-index: 35;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 0.06s linear;
+}
+
+.live-walker-disc {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284c7 0%, #00f0ff 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.85), 0 4px 14px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  position: relative;
+}
+
+.live-walker-pulse {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.4);
+  animation: walkerRadarPulse 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes walkerRadarPulse {
+  0% { transform: scale(0.6); opacity: 0.95; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* In-Map Instant Search & Quick Chips */
+.map-search-bar {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: all 0.25s ease;
+}
+.dark .map-search-bar {
+  background: rgba(15, 23, 42, 0.94);
+  border-color: rgba(51, 65, 85, 0.8);
+}
+.map-search-bar:focus-within {
+  border-color: #dda15e;
+  box-shadow: 0 0 16px rgba(221, 161, 94, 0.35);
+}
+
+.map-quick-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  background: rgba(241, 245, 249, 0.9);
+  color: #334155;
+  border: 1px solid rgba(203, 213, 225, 0.7);
+}
+.dark .map-quick-chip {
+  background: rgba(30, 41, 59, 0.85);
+  color: #e2e8f0;
+  border-color: rgba(71, 85, 105, 0.6);
+}
+.map-quick-chip:hover {
+  background: #0b2545;
+  color: #ffffff;
+  border-color: #dda15e;
+  transform: translateY(-1px);
+}
+.dark .map-quick-chip:hover {
+  background: #dda15e;
+  color: #0b2545;
+  border-color: #dda15e;
+}
+
+/* Mini-Map Radar Viewport Locator */
+.mini-map-radar {
+  position: absolute;
+  bottom: 2.75rem;
+  right: 0.75rem;
+  width: 72px;
+  height: 96px;
+  background-color: rgba(15, 23, 42, 0.85);
+  background-image: url('../moreno_resort_map.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 0.75rem;
+  border: 1.5px solid rgba(221, 161, 94, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  z-index: 25;
+  pointer-events: none;
+  opacity: 0.88;
+  transition: opacity 0.3s ease;
+}
+.mini-map-viewport-box {
+  position: absolute;
+  border: 1.5px solid #00f0ff;
+  background: rgba(0, 240, 255, 0.2);
+  box-shadow: 0 0 6px rgba(0, 240, 255, 0.7);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: all 0.08s linear;
+}
+
+/* Luxury Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(11, 27, 47, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(221, 161, 94, 0.3);
+  padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom, 0px)) 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.45);
+}
+@media (min-width: 768px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+}
+.mobile-nav-item.active,
+.mobile-nav-item:hover {
+  color: #fbbf24;
+  transform: translateY(-2px);
+}
+.mobile-nav-item .nav-icon {
+  font-size: 1.25rem;
+  transition: transform 0.2s ease;
+}
+.mobile-nav-item.active .nav-icon {
+  transform: scale(1.15);
+}
+
+/* Add bottom padding to body on mobile so bottom bar does not hide content */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: 4.5rem !important;
+  }
+}
+
+

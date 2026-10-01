@@ -1,0 +1,8 @@
+node_modules/
+.vscode/
+.idea/
+*.log
+scratch/
+test_*.js
+.DS_Store
+Thumbs.db

@@ -1,0 +1,26 @@
+{
+  "name": "Moreno Horizon Spa & Resort - Guest Guide",
+  "short_name": "Moreno Horizon",
+  "description": "الدليل التفاعلي الذكي الشامل لنزلاء منتجع مورينو هورايزون الغردقة",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#06101E",
+  "theme_color": "#0B2545",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
