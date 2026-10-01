@@ -418,28 +418,38 @@ body.sunlight-mode .map-pin {
   transform: translateX(-4px) scale(1.03);
 }
 
-/* 7. Turn-by-Turn Navigation HUD (Responsive Floating Card) */
+/* 7. Turn-by-Turn Navigation HUD (External Container Outside Map Viewport) */
 .turn-nav-bar {
-  position: absolute;
-  bottom: 0.75rem;
-  left: 0.75rem;
-  right: 0.75rem;
-  max-width: 440px;
-  margin: 0 auto;
+  position: relative;
+  width: 100%;
+  margin: 0;
   z-index: 38;
-  background: rgba(11, 27, 47, 0.96);
+  background: rgba(11, 27, 47, 0.98);
   border: 1px solid rgba(221, 161, 94, 0.55);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-radius: 1.25rem;
-  padding: 0.75rem 0.95rem;
+  padding: 0.85rem 1rem;
   color: #ffffff;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 240, 255, 0.2);
-  animation: turnNavSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  animation: turnNavSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   pointer-events: auto;
 }
+
+/* Fullscreen Mode Override: float inside fullscreen viewport */
+.map-viewport.fullscreen-active .turn-nav-bar {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 50;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
 @keyframes turnNavSlideUp {
-  from { transform: translateY(100%); opacity: 0; }
+  from { transform: translateY(16px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
@@ -1423,31 +1433,123 @@ main {
   box-shadow: 0 0 24px #fbbf24, 0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* Floating Responsive POI Bottom Sheet Card on Map Viewport */
+/* Floating Responsive POI Bottom Sheet Card (Outside Map Viewport by default) */
 .map-bottom-sheet-card,
 .map-popover-card {
-  position: absolute;
-  bottom: 0.75rem;
-  left: 0.75rem;
-  right: 0.75rem;
-  max-width: 440px;
-  margin: 0 auto;
+  position: relative;
+  width: 100%;
+  margin: 0;
   z-index: 36;
-  background: rgba(11, 27, 47, 0.96);
+  background: rgba(11, 27, 47, 0.98);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(221, 161, 94, 0.5);
   border-radius: 1.25rem;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(221, 161, 94, 0.2);
-  padding: 0.75rem 0.85rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 0.85rem 1rem;
   color: #ffffff;
   pointer-events: auto;
   animation: sheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Fullscreen Mode Override for POI Card */
+.map-viewport.fullscreen-active .map-bottom-sheet-card,
+.map-viewport.fullscreen-active .map-popover-card {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 50;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
 @keyframes sheetSlideUp {
-  from { transform: translateY(30px); opacity: 0; }
+  from { transform: translateY(16px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* Active Room Target Beacon Over Matched Building */
+.active-room-beacon {
+  position: absolute;
+  z-index: 45;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: roomBeaconBounce 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes roomBeaconBounce {
+  0% { transform: translate(-50%, -100%) translateY(0); }
+  100% { transform: translate(-50%, -100%) translateY(-8px); }
+}
+
+.room-beacon-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 2px solid #dda15e;
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  box-shadow: 0 0 25px rgba(221, 161, 94, 0.8), 0 8px 24px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+}
+
+.room-beacon-icon {
+  font-size: 1.15rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.room-beacon-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  text-align: right;
+}
+
+.room-beacon-text .room-num {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: -0.02em;
+}
+
+.room-beacon-text .room-floor {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.room-beacon-pin-pointer {
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid #dda15e;
+  margin-top: -1px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.room-beacon-pulse {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(221, 161, 94, 0.45);
+  animation: roomRadarPulse 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes roomRadarPulse {
+  0% { transform: translateX(-50%) scale(0.4); opacity: 1; }
+  100% { transform: translateX(-50%) scale(2.4); opacity: 0; }
 }
 
 /* Animated Live Walker Avatar for Simulated Navigation */

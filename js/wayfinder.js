@@ -46,18 +46,31 @@ const Wayfinder = {
     const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
 
     if (matchedBuilding) {
-      MapEngine.selectPoi(matchedBuilding.id);
-      MapEngine.closePopover();
-      MapEngine.focusCoordinate(matchedBuilding.coords.x, matchedBuilding.coords.y, 1.45);
-
       const locBuilding = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(matchedBuilding, lang) : { name: matchedBuilding.nameAr };
       const locFloor = (typeof getLocalizedFloor === 'function') ? getLocalizedFloor(matchedFloor, lang) : matchedFloor;
 
-      // Draw animated SVG route from Main Lobby (M) to Matched Building & start live navigation
+      MapEngine.closePopover();
+
+      // Highlight the building pin without scrolling yet
+      MapEngine.selectPoi(matchedBuilding.id, false);
+      MapEngine.closePopover(); // keep popover closed so room beacon & map remain completely clear
+
+      // Draw animated SVG route from Main Lobby (M) to Matched Building
       const lobbyPoi = resortPois.find(p => p.id === 'M') || { coords: { x: 31.55, y: 68.36 } };
       const locLobby = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(lobbyPoi, lang) : { name: 'Main Lobby' };
       const routeInfo = MapEngine.drawRoute(lobbyPoi.coords, matchedBuilding.coords, locLobby.name, locBuilding.name);
-      MapEngine.startTurnByTurn(lobbyPoi, matchedBuilding, false);
+
+      // 1. Drop prominent bouncing golden room beacon right on the matched building coordinate
+      MapEngine.dropRoomBeacon(matchedBuilding.coords, roomNum, locBuilding.name, locFloor);
+
+      // 2. Start turn-by-turn navigation HUD outside the map, but DON'T recenter camera on lobby
+      MapEngine.startTurnByTurn(lobbyPoi, matchedBuilding, false, false);
+
+      // 3. Laser-focus camera directly onto the guest's room building with clear zoom (1.85x)
+      MapEngine.focusCoordinate(matchedBuilding.coords.x, matchedBuilding.coords.y, 1.85, true);
+
+      // 4. Accurately scroll to map viewport framed directly below the sticky header
+      MapEngine.scrollToMap();
 
       banner.innerHTML = `
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -237,27 +250,7 @@ const Wayfinder = {
     if (input) input.value = savedRoom;
 
     this.lookupRoom();
-
-    // Auto-launch turn-by-turn navigation
-    const roomNum = parseInt(savedRoom);
-    const buildings = resortPois.filter(p => p.isBuilding);
-    let matchedBuilding = null;
-    for (const b of buildings) {
-      for (const r of b.rooms) {
-        const isMatch = r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max);
-        if (isMatch) {
-          matchedBuilding = b;
-          break;
-        }
-      }
-      if (matchedBuilding) break;
-    }
-
-    if (matchedBuilding) {
-      const lobbyPoi = resortPois.find(p => p.id === 'M');
-      MapEngine.startTurnByTurn(lobbyPoi, matchedBuilding, false);
-      App.showToast(`🏠 ${t.nav_turn_title || 'الملاحة الحية إلى غرفتك'} (${savedRoom})`);
-    }
+    App.showToast(`🏠 ${t.nav_turn_title || 'الملاحة الحية إلى غرفتك'} (${savedRoom})`);
   }
 };
 

@@ -52,6 +52,11 @@ const MapEngine = {
     window.addEventListener('resize', () => {
       this.fitToViewport();
     });
+
+    document.addEventListener('fullscreenchange', () => {
+      this.syncExternalNavParent();
+      setTimeout(() => this.fitToViewport(), 100);
+    });
   },
 
   fitToViewport() {
@@ -407,12 +412,34 @@ const MapEngine = {
     this.updatePinBillboards();
   },
 
+  getNavContainer() {
+    const vp = document.getElementById('mapViewport');
+    const isFullscreen = (vp && vp.classList.contains('fullscreen-active')) || !!document.fullscreenElement;
+    if (isFullscreen) {
+      return vp;
+    }
+    return document.getElementById('mapExternalNavContainer') || vp;
+  },
+
+  syncExternalNavParent() {
+    const targetParent = this.getNavContainer();
+    if (!targetParent) return;
+    const hud = document.getElementById('turnNavHud');
+    if (hud && hud.parentElement !== targetParent) {
+      targetParent.appendChild(hud);
+    }
+    const pop = document.getElementById('activeMapPopover');
+    if (pop && pop.parentElement !== targetParent) {
+      targetParent.appendChild(pop);
+    }
+  },
+
   showPopover(poi) {
     this.closePopover();
     if (this.activeNavigation) return; // Don't show POI card if turn-by-turn navigation is already running
 
-    const viewport = document.getElementById('mapViewport');
-    if (!viewport) return;
+    const targetParent = this.getNavContainer();
+    if (!targetParent) return;
 
     const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
     const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, hours: poi.hours, tag: poi.tagAr, description: poi.descriptionAr, category: poi.categoryNameAr };
@@ -481,7 +508,7 @@ const MapEngine = {
       </div>
     `;
 
-    viewport.appendChild(popover);
+    targetParent.appendChild(popover);
   },
 
   closePopover() {
@@ -647,6 +674,7 @@ const MapEngine = {
   clearRoute() {
     this.endTurnByTurn();
     this.closePopover();
+    this.removeRoomBeacon();
     const svgLayer = document.getElementById('routeSvgLayer');
     if (svgLayer) svgLayer.innerHTML = '';
     const hud = document.getElementById('mapRouteHud');
@@ -1159,6 +1187,7 @@ const MapEngine = {
       document.body.classList.remove('map-is-fullscreen');
       const exitBtn = document.getElementById('mapExitFullscreenBtn');
       if (exitBtn) exitBtn.remove();
+      this.syncExternalNavParent();
       setTimeout(() => this.fitToViewport(), 150);
       return;
     }
@@ -1166,12 +1195,14 @@ const MapEngine = {
     // Attempt native Fullscreen API first
     if (!document.fullscreenElement && vp.requestFullscreen) {
       vp.requestFullscreen().then(() => {
+        this.syncExternalNavParent();
         setTimeout(() => this.fitToViewport(), 150);
       }).catch(() => {
         this.enablePseudoFullscreen(vp);
       });
     } else if (document.fullscreenElement) {
       document.exitFullscreen().then(() => {
+        this.syncExternalNavParent();
         setTimeout(() => this.fitToViewport(), 150);
       }).catch(() => {});
     } else {
@@ -1192,12 +1223,51 @@ const MapEngine = {
       exitBtn.onclick = () => this.toggleFullscreen();
       vp.appendChild(exitBtn);
     }
+    this.syncExternalNavParent();
     setTimeout(() => this.fitToViewport(), 150);
   },
 
-  scrollToMap() {
-    const el = document.getElementById('map-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollToMap(target = null) {
+    const el = target || document.getElementById('mapViewport') || document.getElementById('map-section');
+    if (!el) return;
+    const header = document.querySelector('header');
+    const headerHeight = header ? header.offsetHeight : 64;
+    const extraMargin = 14;
+    const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerHeight - extraMargin;
+    window.scrollTo({
+      top: Math.max(0, targetY),
+      behavior: 'smooth'
+    });
+  },
+
+  dropRoomBeacon(coords, roomNum, buildingName, floorName) {
+    let beacon = document.getElementById('activeRoomBeacon');
+    if (!beacon) {
+      beacon = document.createElement('div');
+      beacon.id = 'activeRoomBeacon';
+      beacon.className = 'active-room-beacon';
+      const overlay = document.getElementById('pinsOverlay');
+      if (overlay) overlay.appendChild(beacon);
+    }
+
+    beacon.style.left = `${coords.x}%`;
+    beacon.style.top = `${coords.y}%`;
+    beacon.innerHTML = `
+      <div class="room-beacon-pulse"></div>
+      <div class="room-beacon-badge">
+        <span class="room-beacon-icon">🔑</span>
+        <div class="room-beacon-text">
+          <span class="room-num">غرفة ${roomNum}</span>
+          <span class="room-floor">${buildingName ? buildingName + ' • ' : ''}${floorName || ''}</span>
+        </div>
+      </div>
+      <div class="room-beacon-pin-pointer"></div>
+    `;
+  },
+
+  removeRoomBeacon() {
+    const beacon = document.getElementById('activeRoomBeacon');
+    if (beacon) beacon.remove();
   },
 
   /* ================= GUEST EXPERIENCE CAPABILITIES ================= */
@@ -1277,7 +1347,7 @@ const MapEngine = {
   walkSpeed: 1,
   walkAnimFrame: null,
 
-  startTurnByTurn(originPoi, targetPoi, isAccessible = false) {
+  startTurnByTurn(originPoi, targetPoi, isAccessible = false, recenterCamera = true) {
     if (typeof App !== 'undefined' && App.playBeep) App.playBeep(850);
     this.closePopover(); // Always close POI popover so it never clutters the map
     const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
@@ -1308,22 +1378,26 @@ const MapEngine = {
     this.walkProgress = 0;
     this.isSimulatingWalk = false;
 
-    // Show HUD docked inside mapViewport
+    // Show HUD docked inside external container (or inside mapViewport if in fullscreen)
     let hud = document.getElementById('turnNavHud');
+    const targetParent = this.getNavContainer();
     if (!hud) {
       hud = document.createElement('div');
       hud.id = 'turnNavHud';
       hud.className = 'turn-nav-bar';
-      const viewport = document.getElementById('mapViewport');
-      if (viewport) viewport.appendChild(hud);
+    }
+    if (targetParent && hud.parentElement !== targetParent) {
+      targetParent.appendChild(hud);
     }
     hud.classList.remove('hidden');
 
     // Place initial walker marker at the starting coordinate
     this.initWalkerMarker(originPoi.coords);
 
-    this.renderTurnStep(true);
-    this.scrollToMap();
+    this.renderTurnStep(recenterCamera);
+    if (recenterCamera) {
+      this.scrollToMap();
+    }
   },
 
   renderTurnStep(recenterCamera = true) {
@@ -1653,6 +1727,7 @@ const MapEngine = {
     if (beacon) beacon.remove();
     const marker = document.getElementById('liveWalkerMarker');
     if (marker) marker.remove();
+    this.removeRoomBeacon();
   }
 };
 
