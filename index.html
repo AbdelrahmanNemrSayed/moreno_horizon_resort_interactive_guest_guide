@@ -66,7 +66,7 @@
   </script>
 
   <!-- Modular Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=24.0">
+  <link rel="stylesheet" href="css/style.css?v=25.0">
 </head>
 
 <body class="bg-slate-50 dark:bg-brand-darkBg text-slate-800 dark:text-slate-100 font-cairo antialiased min-h-screen selection:bg-brand-gold selection:text-white transition-colors duration-300">
@@ -561,34 +561,8 @@
           </div>
         </div>
 
-        <!-- Tier 2: Category Quick Filter Pills Bar (Responsive Flex-Wrap, No Cutoff) -->
-        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2" id="mapFiltersBar">
-          <button onclick="filterMapCategory('all', this)" data-cat="all" class="map-filter-btn map-cat-btn active tap-effect px-3.5 py-1.5 rounded-xl bg-brand-navy text-white text-xs font-bold shadow-sm transition" data-i18n="mf_all">
-            🌟 الكل
-          </button>
-          <button id="btnMapOpenNow" onclick="toggleOpenNowFilter(this)" class="map-filter-btn tap-effect px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-emerald-600 hover:text-white transition flex items-center gap-1.5">
-            <span class="open-now-dot"></span>
-            <span data-i18n="mf_open_now">⚡ مفتوح الآن (Open Now)</span>
-          </button>
-          <button onclick="filterMapCategory('dine', this)" data-cat="dine" class="map-filter-btn map-cat-btn tap-effect px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-amber-500 hover:text-white transition" data-i18n="mf_dine">
-            🍽️ المطاعم
-          </button>
-          <button onclick="filterMapCategory('relax', this)" data-cat="relax" class="map-filter-btn map-cat-btn tap-effect px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-amber-500 hover:text-white transition" data-i18n="mf_relax">
-            🏖️ الشاطئ والمسابح
-          </button>
-          <button onclick="filterMapCategory('wellness', this)" data-cat="wellness" class="map-filter-btn map-cat-btn tap-effect px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-amber-500 hover:text-white transition" data-i18n="mf_wellness">
-            💆 السبا والأنشطة
-          </button>
-          <button onclick="filterMapCategory('services', this)" data-cat="services" class="map-filter-btn map-cat-btn tap-effect px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-amber-500 hover:text-white transition" data-i18n="mf_services">
-            🛎️ الخدمات والمرافق
-          </button>
-          <button onclick="filterMapCategory('buildings', this)" data-cat="buildings" class="map-filter-btn map-cat-btn tap-effect px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-amber-500 hover:text-white transition" data-i18n="mf_buildings">
-            🏢 مباني الغرف
-          </button>
-        </div>
-
-        <!-- Tier 3: Landmark Quick Jump Chips (Responsive Flex-Wrap, No Cutoff) -->
-        <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 pt-2 border-t border-slate-200/70 dark:border-slate-800/70 text-[11px] font-bold" id="mapQuickLandmarksBar">
+        <!-- Tier 2: Landmark Quick Jump Chips (Responsive Flex-Wrap, No Cutoff) -->
+        <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 text-[11px] font-bold" id="mapQuickLandmarksBar">
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
             <span>⚡</span>
             <span data-i18n="map_quick_landmarks">وجهات سريعة:</span>
@@ -1269,9 +1243,9 @@
   </div>
 
   <!-- Modular Scripts Architecture -->
-  <script src="js/data.js?v=24.0"></script>
-  <script src="js/map-engine.js?v=24.0"></script>
-  <script src="js/wayfinder.js?v=24.0"></script>
-  <script src="js/app.js?v=24.0"></script>
+  <script src="js/data.js?v=25.0"></script>
+  <script src="js/map-engine.js?v=25.0"></script>
+  <script src="js/wayfinder.js?v=25.0"></script>
+  <script src="js/app.js?v=25.0"></script>
 </body>
 </html>
