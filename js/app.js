@@ -21,6 +21,121 @@ const App = {
     this.registerServiceWorker();
     this.setupMobileScrollSpy();
     this.setupPwaInstall();
+    this.refreshWeather();
+    this._weatherInterval = setInterval(() => this.refreshWeather(), 15 * 60 * 1000);
+  },
+
+  readWeatherCache() {
+    try {
+      const cached = JSON.parse(localStorage.getItem('moreno_weather_cache') || 'null');
+      return cached && Number.isFinite(cached.fetchedAt) ? cached : null;
+    } catch {
+      return null;
+    }
+  },
+
+  formatWeatherTime(value, locale) {
+    if (!value) return '—';
+    const match = value.match(/T(\d{2}):(\d{2})/);
+    if (!match) return '—';
+    const date = new Date(Date.UTC(2000, 0, 1, Number(match[1]), Number(match[2])));
+    return new Intl.DateTimeFormat(locale, {
+      timeZone: 'UTC',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: this.currentLang === 'ar' || this.currentLang === 'en'
+    }).format(date);
+  },
+
+  renderWeather(data = this.readWeatherCache()) {
+    const lang = this.currentLang || 'ar';
+    const locale = ({ ar: 'ar-EG', en: 'en-GB', ru: 'ru-RU', de: 'de-DE' })[lang] || 'ar-EG';
+    const t = i18n[lang] || i18n.ar;
+    const values = {
+      wvalTemp: document.getElementById('wvalTemp'),
+      wvalSea: document.getElementById('wvalSea'),
+      wvalUv: document.getElementById('wvalUv'),
+      wvalSunset: document.getElementById('wvalSunset'),
+      weatherStatus: document.getElementById('weatherStatus')
+    };
+
+    if (!data) {
+      Object.values(values).slice(0, 4).forEach(el => { if (el) el.innerText = '—'; });
+      if (values.weatherStatus) values.weatherStatus.innerText = t.weather_unavailable;
+      return;
+    }
+
+    const number = value => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
+    const condition = data.weatherCode === 0 ? t.weather_clear :
+      ([1, 2].includes(data.weatherCode) ? t.weather_partly_cloudy :
+      (data.weatherCode === 3 ? t.weather_cloudy :
+      (data.weatherCode >= 45 && data.weatherCode <= 48 ? t.weather_fog :
+      (data.weatherCode >= 95 ? t.weather_storm : t.weather_rain))));
+
+    if (values.wvalTemp) values.wvalTemp.innerText = t.weather_temperature
+      .replace('{temp}', number(data.temperatureC))
+      .replace('{condition}', condition);
+
+    const seaReadings = [];
+    if (Number.isFinite(data.waveHeight)) seaReadings.push(t.weather_wave.replace('{value}', number(data.waveHeight)));
+    if (Number.isFinite(data.seaTemperatureC)) seaReadings.push(t.weather_sea_temp.replace('{value}', number(data.seaTemperatureC)));
+    if (values.wvalSea) values.wvalSea.innerText = seaReadings.join(' • ') || '—';
+
+    if (values.wvalUv) values.wvalUv.innerText = Number.isFinite(data.uvMax)
+      ? t.weather_uv.replace('{value}', number(data.uvMax))
+      : '—';
+    if (values.wvalSunset) values.wvalSunset.innerText = this.formatWeatherTime(data.sunset, locale);
+
+    const updatedTime = new Intl.DateTimeFormat(locale, {
+      timeZone: 'Africa/Cairo',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(data.fetchedAt));
+    const isStale = Date.now() - data.fetchedAt > 30 * 60 * 1000;
+    if (values.weatherStatus) {
+      values.weatherStatus.innerText = isStale
+        ? t.weather_cached.replace('{time}', updatedTime)
+        : t.weather_updated.replace('{time}', updatedTime);
+    }
+  },
+
+  async refreshWeather() {
+    const cached = this.readWeatherCache();
+    if (cached) this.renderWeather(cached);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 9000);
+    const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=27.2579&longitude=33.8116&current=temperature_2m,weather_code&daily=uv_index_max,sunrise,sunset&timezone=Africa%2FCairo&forecast_days=1';
+    const marineUrl = 'https://marine-api.open-meteo.com/v1/marine?latitude=27.2579&longitude=33.8116&current=wave_height,sea_surface_temperature&timezone=Africa%2FCairo';
+
+    try {
+      const responses = await Promise.all([
+        fetch(weatherUrl, { signal: controller.signal, cache: 'no-store' }),
+        fetch(marineUrl, { signal: controller.signal, cache: 'no-store' })
+      ]);
+      if (responses.some(response => !response.ok)) throw new Error('Weather service unavailable');
+      const [weather, marine] = await Promise.all(responses.map(response => response.json()));
+      if (!weather.current || !weather.daily || !marine.current) throw new Error('Incomplete weather response');
+
+      const data = {
+        temperatureC: weather.current.temperature_2m,
+        weatherCode: weather.current.weather_code,
+        uvMax: weather.daily.uv_index_max?.[0],
+        sunrise: weather.daily.sunrise?.[0],
+        sunset: weather.daily.sunset?.[0],
+        waveHeight: marine.current.wave_height,
+        seaTemperatureC: marine.current.sea_surface_temperature,
+        fetchedAt: Date.now()
+      };
+      try {
+        localStorage.setItem('moreno_weather_cache', JSON.stringify(data));
+      } catch { /* Weather remains available for this page view. */ }
+      this.renderWeather(data);
+    } catch {
+      this.renderWeather(cached);
+    } finally {
+      clearTimeout(timeout);
+    }
   },
 
   // Luxury Toast Notification System
@@ -34,10 +149,13 @@ const App = {
 
     const toast = document.createElement('div');
     toast.className = 'toast-msg glass-card p-3 rounded-2xl border border-amber-500/30 shadow-2xl flex items-center gap-2.5 text-xs font-bold text-slate-800 dark:text-white';
-    toast.innerHTML = `
-      <span class="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm shadow-sm">${icon}</span>
-      <span class="flex-1">${msg}</span>
-    `;
+    const iconEl = document.createElement('span');
+    iconEl.className = 'w-7 h-7 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm shadow-sm';
+    iconEl.textContent = icon;
+    const messageEl = document.createElement('span');
+    messageEl.className = 'flex-1';
+    messageEl.textContent = msg;
+    toast.append(iconEl, messageEl);
 
     container.appendChild(toast);
     setTimeout(() => {
@@ -526,7 +644,8 @@ const App = {
     if (guest) localStorage.setItem('moreno_guest_name', guest);
 
     this.closeModal('detailModal');
-    this.showToast(`تم استلام طلب حجز: ${title} لغرفة ${room} بنجاح! 🛥️`, '✅');
+    const t = i18n[this.currentLang] || i18n.ar;
+    this.showToast(t.request_not_sent, '⚠️');
   },
 
   filterCategory(cat, btn) {
@@ -840,10 +959,8 @@ const App = {
     const rest = document.getElementById('bookingTargetRestaurant').value;
 
     this.closeModal('tableBookingModal');
-    this.showNotice(
-      'تم تأكيد حجز الطاولة بنجاح! 🍷',
-      `أهلاً بك أستاذ (${gName})، تم تأكيد حجز طاولتك في (${rest}) لغرفة [${rNum}] في تمام الساعة ${time}. طاقم المطعم بانتظاركم.`
-    );
+    const t = i18n[this.currentLang] || i18n.ar;
+    this.showNotice(t.request_not_sent_title, t.request_not_sent);
   },
 
   openGuestServicesModal() {
@@ -934,32 +1051,9 @@ const App = {
     const trackBox = document.getElementById('serviceTrackingBox');
     if (!trackBox) return;
 
-    const orderRef = `MRN-${Math.floor(1000 + Math.random() * 9000)}`;
-
     trackBox.classList.remove('hidden');
-    trackBox.innerHTML = `
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <span class="font-black text-slate-900 dark:text-white text-xs">${icon} ${t.vip_order_received || 'تم تسجيل طلب:'} (${serviceName})</span>
-          <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono font-bold text-[10px]">${orderRef}</span>
-        </div>
-        <p class="text-[11px] text-slate-600 dark:text-slate-400 mb-3">${t.vip_for_room || 'للغرفة رقم'} [${room}] • ${t.vip_eta || 'الوقت المتوقع للوصول: 10-15 دقيقة'}</p>
-
-        <!-- 3-step live tracking progress bar -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
-            <span class="text-emerald-600 font-black">${t.vip_step1}</span>
-            <span class="text-amber-500 font-black animate-pulse">${t.vip_step2}</span>
-            <span>${t.vip_step3}</span>
-          </div>
-          <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-brand-gold w-2/3 transition-all duration-1000"></div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    this.showToast(`${t.vip_order_received} (${serviceName}) [${room}] ✅`, '🛎️');
+    trackBox.textContent = t.request_not_sent;
+    this.showToast(t.request_not_sent, '⚠️');
   },
 
   // Spotlight Global Search Engine (Ctrl+K or Header Search)
@@ -1159,11 +1253,20 @@ const App = {
     if (!text) return;
 
     const container = document.getElementById('chatMessages');
-    container.innerHTML += `
-      <div class="p-3 rounded-2xl bg-brand-deep text-white text-left rtl:text-right font-medium">
-        ${text}
-      </div>
-    `;
+    const lang = this.currentLang || 'ar';
+    const t = i18n[lang] || i18n.ar;
+    const appendAnswer = answer => {
+      const message = document.createElement('div');
+      message.className = 'p-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/20 text-slate-800 dark:text-slate-100';
+      message.textContent = answer;
+      container.appendChild(message);
+      container.scrollTop = container.scrollHeight;
+    };
+
+    const userMessage = document.createElement('div');
+    userMessage.className = 'p-3 rounded-2xl bg-brand-deep text-white text-left rtl:text-right font-medium';
+    userMessage.textContent = text;
+    container.appendChild(userMessage);
     input.value = '';
     container.scrollTop = container.scrollHeight;
 
@@ -1179,24 +1282,13 @@ const App = {
 
     if (instantAnswer) {
       setTimeout(() => {
-        container.innerHTML += `
-          <div class="p-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/20 text-slate-800 dark:text-slate-100">
-            ${instantAnswer}
-          </div>
-        `;
-        container.scrollTop = container.scrollHeight;
+        appendAnswer(instantAnswer);
       }, 300);
       return;
     }
 
-    // Default friendly fallback
     setTimeout(() => {
-      container.innerHTML += `
-        <div class="p-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/20 text-slate-800 dark:text-slate-100">
-          أهلاً بك! فريق الكونسيرج ومكتب الاستقبال متاح دائماً على مدار الساعة لمساعدتك. يمكنك الاتصال فورياً على تحويلة (0) من هاتفك، أو مراسلتنا عبر الواتساب.
-        </div>
-      `;
-      container.scrollTop = container.scrollHeight;
+      appendAnswer(t.ai_fallback_response);
     }, 400);
   },
 
@@ -1419,6 +1511,7 @@ const App = {
     setTxt('wlblSea', t.wlblSea);
     setTxt('wlblUv', t.wlblUv);
     setTxt('wlblSunset', t.wlblSunset);
+    this.renderWeather();
     setTxt('heroBadge', t.heroBadge);
     setTxt('heroTitle', t.heroTitle);
     setTxt('heroSubtitle', t.heroSubtitle);
@@ -1493,19 +1586,10 @@ const App = {
     const origVal = selOrig.value;
     const destVal = selDest.value;
 
-    const origins = [
-      { id: 'M', default: '📍 الاستقبال واللوبي الرئيسي (M)' },
-      { id: '1', default: '📍 منطقة الشاطئ والمارينا (1)' },
-      { id: '3', default: '📍 الأكوا بارك والزلاجات (3)' },
-      { id: '11', default: '📍 مسبح لوتس المركزي (11)' },
-      { id: '8', default: '📍 مطعم لا ماما الإيطالي (8)' },
-      { id: '18', default: '📍 البوابة الرئيسية للمنتجع (18)' }
-    ];
-
-    selOrig.innerHTML = origins.map(o => {
-      const poi = resortPois.find(p => p.id === o.id);
-      const name = poi ? ((typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang).name : poi.nameAr) : o.default;
-      return `<option value="${o.id}">📍 ${name} (${o.id})</option>`;
+    const origins = resortPois;
+    selOrig.innerHTML = origins.map(poi => {
+      const name = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang).name : poi.nameAr;
+      return `<option value="${poi.id}">📍 ${name} (${poi.id})</option>`;
     }).join('');
     selOrig.value = origVal || 'M';
 
@@ -1808,13 +1892,9 @@ const App = {
 
   confirmSpaBooking(e) {
     e.preventDefault();
-    const treatSelect = document.getElementById('spaTreatmentSelect');
-    const treatText = treatSelect.options[treatSelect.selectedIndex].text;
-    const time = document.getElementById('spaTimeSelect').value;
-    const room = document.getElementById('spaRoomInput').value || '2015';
-
     this.closeModal('detailModal');
-    this.showToast(`تم تأكيد موعد السبا (${treatText}) لغرفة [${room}] الساعة ${time} بنجاح! 💆`, '✨', 4500);
+    const t = i18n[this.currentLang] || i18n.ar;
+    this.showToast(t.request_not_sent, '⚠️', 4500);
   },
 
   // 4. Qibla Compass & Prayer Times Modal
@@ -1969,17 +2049,9 @@ const App = {
 
   submitFeedback(e) {
     e.preventDefault();
-    const room = document.getElementById('feedbackRoomInput').value || '2015';
-    const comment = document.getElementById('feedbackComment').value;
-    const avg = (this.ratings.clean + this.ratings.food + this.ratings.service) / 3;
-
     this.closeModal('detailModal');
-
-    if (avg >= 4) {
-      this.showToast(`شكراً لك أستاذنا الكريم! يسعدنا جداً تقييمك الرائع لغرفة [${room}] 🌟`, '❤️', 4000);
-    } else {
-      this.showToast(`نعتذر عن أي تقصير. تم توجيه تنبيه مباشر لمشرف خدمة النزلاء لغرفة [${room}] لمتابعة طلبك فوراً!`, '🛎️', 5000);
-    }
+    const t = i18n[this.currentLang] || i18n.ar;
+    this.showToast(t.request_not_sent, '⚠️', 5000);
   },
 
   // 6. Sunlight Beach Mode Toggle
@@ -2051,31 +2123,8 @@ const App = {
   // Instant One-Tap Housekeeping & Guest Services Dispatcher
   requestOneTapService(item) {
     this.playBeep(850);
-    const room = localStorage.getItem('moreno_guest_room') || 'غير محدد';
-    const guestName = localStorage.getItem('moreno_guest_name') || 'نزيل كريم';
-    this.showToast(`تم استلام طلبك: ${item} (غرفة ${room}) 🛎️`, '✅');
-
-    const content = document.getElementById('modalContent');
-    if (content) {
-      const waMsg = encodeURIComponent(`مرحباً قسم خدمة الغرف بمنتجع مورينو هورايزون، أنا النزيل ${guestName} (غرفة: ${room})، أطلب لطفا: ${item}. شكراً لكم.`);
-      content.innerHTML = `
-        <div class="text-center py-4 space-y-3">
-          <div class="w-14 h-14 rounded-3xl bg-amber-500/20 text-amber-600 text-3xl flex items-center justify-center mx-auto shadow-md">🛎️</div>
-          <h3 class="text-base font-black text-slate-900 dark:text-white">تم تأكيد استلام طلب الخدمة الفورية</h3>
-          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
-            <span class="block font-bold text-amber-600 dark:text-amber-400 mb-1">الطلب: ${item}</span>
-            <span>رقم الغرفة: <strong>${room}</strong> • النزيل: <strong>${guestName}</strong></span>
-          </div>
-          <p class="text-xs text-slate-500">طاقم خدمة الغرف والإشراف الداخلي بالمنتجع في طريقه لتلبية طلبك فوراً.</p>
-          <div class="pt-2">
-            <button onclick="App.closeModal('detailModal')" class="tap-effect w-full py-3 rounded-2xl bg-brand-deep hover:bg-brand-navy text-white text-xs font-bold shadow-md transition">
-              حسناً، تم تأكيد الطلب ✓
-            </button>
-          </div>
-        </div>
-      `;
-      this.openModal('detailModal');
-    }
+    const t = i18n[this.currentLang] || i18n.ar;
+    this.showNotice(t.request_not_sent_title, t.request_not_sent);
   },
 
   // Save Room Modal
@@ -2224,11 +2273,14 @@ const App = {
     e.preventDefault();
     this.playBeep(900);
     const box = document.getElementById('shuttleStatusBox');
-    if (box) box.classList.remove('hidden');
+    if (box) {
+      box.classList.remove('hidden');
+      box.textContent = (i18n[this.currentLang] || i18n.ar).request_not_sent;
+    }
 
     const lang = this.currentLang || 'ar';
     const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
-    this.showToast(t.shuttle_dispatched_title || '🛺 تم تأكيد طلب عربة الجولف بنجاح!');
+    this.showToast(t.request_not_sent, '⚠️');
   },
 
   // Where Am I Modal
@@ -2287,7 +2339,7 @@ const App = {
     const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr };
     const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
 
-    MapEngine.setGuestLocation(poi.coords, loc.name);
+    MapEngine.setGuestLocation(poi.coords, loc.name, poi.id);
 
     // Sync origin select in wayfinder
     const selectOrigin = document.getElementById('selectOrigin');

@@ -160,13 +160,13 @@
       </div>
     </section>
 
-    <!-- Live Weather & Sea Info -->
+    <!-- Current Weather & Marine Forecast -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
       <div class="p-3 rounded-2xl bg-white dark:bg-brand-cardDark border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-500 flex items-center justify-center text-lg shadow-sm">☀️</div>
         <div>
           <span class="block text-[10px] text-slate-400 font-bold" id="wlblTemp" data-i18n="wlblTemp">طقس الغردقة اليوم</span>
-          <span class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white" data-i18n="wvalTemp">29°C • مشمس رائع</span>
+          <span id="wvalTemp" class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white" data-i18n="wvalTemp">—</span>
         </div>
       </div>
 
@@ -174,7 +174,7 @@
         <div class="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-500 flex items-center justify-center text-lg shadow-sm">🤿</div>
         <div>
           <span class="block text-[10px] text-slate-400 font-bold" id="wlblSea" data-i18n="wlblSea">حالة البحر والغطس</span>
-          <span class="text-xs sm:text-sm font-extrabold text-teal-600 dark:text-teal-400" data-i18n="wvalSea">مثالية للسنوركلينج</span>
+          <span id="wvalSea" class="text-xs sm:text-sm font-extrabold text-teal-600 dark:text-teal-400" data-i18n="wvalSea">—</span>
         </div>
       </div>
 
@@ -182,7 +182,7 @@
         <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center text-lg shadow-sm">🧴</div>
         <div>
           <span class="block text-[10px] text-slate-400 font-bold" id="wlblUv" data-i18n="wlblUv">مؤشر الشمس (UV)</span>
-          <span class="text-xs sm:text-sm font-extrabold text-amber-600 dark:text-amber-400" data-i18n="wvalUv">معتدل (5) • واقي شمس</span>
+          <span id="wvalUv" class="text-xs sm:text-sm font-extrabold text-amber-600 dark:text-amber-400" data-i18n="wvalUv">—</span>
         </div>
       </div>
 
@@ -190,10 +190,12 @@
         <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center text-lg shadow-sm">🌅</div>
         <div>
           <span class="block text-[10px] text-slate-400 font-bold" id="wlblSunset" data-i18n="wlblSunset">غروب الشمس بالمارينا</span>
-          <span class="text-xs sm:text-sm font-extrabold text-indigo-600 dark:text-indigo-400" data-i18n="wvalSunset">05:48 مساءً</span>
+          <span id="wvalSunset" class="text-xs sm:text-sm font-extrabold text-indigo-600 dark:text-indigo-400" data-i18n="wvalSunset">—</span>
         </div>
       </div>
     </section>
+    <p id="weatherStatus" class="-mt-3 mb-1 text-[10px] text-slate-500 dark:text-slate-400" role="status" aria-live="polite"></p>
+    <p class="mb-4 text-[10px] text-slate-400 dark:text-slate-500" data-i18n="weather_source_note">المصدر: Open-Meteo وDWD. بيانات تقريبية؛ ليست إرشاداً للسباحة أو الملاحة.</p>
 
     <!-- Ultra-Luxury Hero Banner with Real Aerial Photo Background -->
     <section class="relative rounded-3xl overflow-hidden shadow-2xl mb-5 border border-white/10 text-white min-h-[260px] flex items-center">
@@ -467,7 +469,7 @@
       <div id="routeResultBanner" class="hidden mt-3 p-4 rounded-2xl bg-sky-50 dark:bg-slate-800/90 border border-sky-100 dark:border-slate-700 transition-all"></div>
     </section>
 
-    <!-- Interactive 3D Google Earth Resort Map with Category Filters -->
+    <!-- Interactive illustrated resort map with visual perspective controls -->
     <section class="bg-white dark:bg-brand-cardDark rounded-3xl p-4 sm:p-6 shadow-md border border-slate-100 dark:border-slate-800/80 mb-6" id="map-section">
       
       <!-- Map Header & Controls -->
@@ -567,6 +569,9 @@
             <span>⚡</span>
             <span data-i18n="map_quick_landmarks">وجهات سريعة:</span>
           </span>
+          <button id="mapPickLocationBtn" onclick="MapEngine.beginLocationPick()" aria-pressed="false" class="landmark-preset-btn px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-600 hover:text-white text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 transition tap-effect">
+            📍 <span data-i18n="map_pick_location">حدد موقعي التقريبي</span>
+          </button>
           <button data-preset-id="M" onclick="MapEngine.focusPreset('M')" class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect">
             🏛️ الاستقبال (M)
           </button>
@@ -644,7 +649,7 @@
           </div>
         </div>
 
-        <!-- Unified Google Earth 3D Camera & Compass Controls (Top Right) -->
+        <!-- Visual map perspective and compass controls -->
         <div class="earth-camera-controls">
           <!-- 1. 3D Compass Gizmo -->
           <div class="earth-compass-gizmo" id="earthCompassGizmo" onclick="MapEngine.resetBearing()" title="انقر لإعادة ضبط اتجاه الشمال">
@@ -674,7 +679,7 @@
           </div>
         </div>
 
-        <!-- Google Earth HUD Bar (Bottom Status Bar) -->
+        <!-- Map view status bar -->
         <div class="earth-hud-bar">
           <!-- Active Pin Badge (Bottom Left) -->
           <div id="activePoiBadge" class="earth-hud-pill flex items-center gap-2 max-w-[50%] truncate">
@@ -682,13 +687,13 @@
             <span id="activePoiText" class="truncate" data-i18n="map_active_badge_default">انقر على أي نقطة في الخريطة لمعاينة التفاصيل</span>
           </div>
 
-          <!-- GPS Coordinates & Camera Telemetry (Bottom Right) -->
+          <!-- Resort reference and visual map telemetry (Bottom Right) -->
           <div class="earth-hud-pill hidden sm:flex items-center gap-2 font-mono text-[10px] text-slate-300">
-            <span id="hudCoords">27°13'42"N 33°50'54"E</span>
+            <span id="hudCoords" data-i18n="map_location_reference">موقع المنتجع (ليس موقعك الحالي)</span>
             <span>•</span>
-            <span id="hudPitch">منظور 2D مباشر</span>
+            <span id="hudPitch" data-i18n="map_view_2d">عرض خريطة 2D</span>
             <span>•</span>
-            <span id="hudAlt">ارتفاع ~180م</span>
+            <span id="hudAlt" data-i18n="map_zoom_level">مستوى التكبير</span>
           </div>
         </div>
 
@@ -1009,8 +1014,8 @@
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-900 font-black flex items-center justify-center text-sm shadow">✨</div>
           <div>
-            <h3 class="font-extrabold text-sm" id="aiChatModalTitle" data-i18n="ai_chat_title">مساعد مورينو الذكي (Moreno AI)</h3>
-            <span class="text-[11px] text-emerald-300 font-semibold" data-i18n="ai_chat_online">متصل للإجابة الفورية</span>
+            <h3 class="font-extrabold text-sm" id="aiChatModalTitle" data-i18n="ai_chat_title">الأسئلة الشائعة للمنتجع</h3>
+            <span class="text-[11px] text-emerald-300 font-semibold" data-i18n="ai_chat_online">إجابات محفوظة تعمل دون اتصال</span>
           </div>
         </div>
         <button onclick="closeModal('aiChatModal')" class="text-white hover:opacity-75 font-bold" aria-label="Close">✕</button>
@@ -1035,7 +1040,7 @@
       <!-- Chat Messages Scroll Container -->
       <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs leading-relaxed">
         <div class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200" data-i18n="ai_welcome_msg">
-          👋 مرحباً بك في منتجع مورينو هورايزون! أنا رفيقك الذكي، اسألني عن مواعيد المطاعم، مكان السبا، أفضل أوقات الغوص، أو أي شيء تريده داخل المنتجع.
+          👋 هذه قاعدة أسئلة شائعة محلية للمعلومات الأساسية. إذا لم تجد إجابتك، يرجى التواصل مع مكتب الاستقبال.
         </div>
       </div>
 
@@ -1091,7 +1096,7 @@
         <span>🏠</span>
         <span data-i18n="fab_my_room">خذني إلى غرفتي 🏠</span>
       </button>
-      <button onclick="openWhereAmIModal()" class="smart-fab-item tap-effect" title="تحديد مكاني بالمنتجع">
+      <button onclick="openWhereAmIModal()" class="smart-fab-item tap-effect" title="اختر أقرب معلم؛ لا يستخدم تحديد GPS" data-i18n-title="wai_sub">
         <span>📍</span>
         <span data-i18n="fab_where_am_i">أين أنا الآن؟ 📍</span>
       </button>
@@ -1244,6 +1249,7 @@
 
   <!-- Modular Scripts Architecture -->
   <script src="js/data.js?v=25.0"></script>
+  <script src="js/virtual-resort-map.js?v=25.0"></script>
   <script src="js/map-engine.js?v=25.0"></script>
   <script src="js/wayfinder.js?v=25.0"></script>
   <script src="js/app.js?v=25.0"></script>

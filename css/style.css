@@ -741,6 +741,56 @@ main {
   }
 }
 
+@media (max-width: 768px) {
+  body.turn-navigation-active .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  body.turn-navigation-active .turn-nav-bar {
+    position: fixed;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+    width: auto;
+    max-width: none;
+    max-height: min(40vh, 250px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  body.turn-navigation-active .turn-nav-bar {
+    max-height: min(60dvh, 360px);
+  }
+
+  #turnNavHud > div:last-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.35rem;
+  }
+
+  #btnSimulateWalk {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #turnNavHud > div:last-child > button:nth-child(2) {
+    grid-column: 3;
+  }
+
+  #turnNavHud > div:last-child > button:nth-child(3) {
+    grid-column: 2;
+  }
+
+  #turnNavHud > div:last-child > button:nth-child(4) {
+    grid-column: 1;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
 /* Mobile Nav Item Interactions */
 .mobile-nav-item {
   display: flex;

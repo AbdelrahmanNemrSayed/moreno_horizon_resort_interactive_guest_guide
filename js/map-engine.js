@@ -34,6 +34,8 @@ const MapEngine = {
   rotateStartBearing: 0,
   isOrbiting: false,
   orbitAnimId: null,
+  isPickingLocation: false,
+  guestLocationPoiId: null,
 
   init() {
     this.renderPins();
@@ -195,15 +197,16 @@ const MapEngine = {
   },
 
   updateEarthHud() {
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
     const hudPitch = document.getElementById('hudPitch');
     if (hudPitch) {
-      hudPitch.innerText = this.is3D ? `إمالة ${Math.round(this.pitch)}°` : 'وضع 2D أفقي';
+      hudPitch.innerText = this.is3D ? t.map_view_3d : t.map_view_2d;
     }
 
     const hudAlt = document.getElementById('hudAlt');
     if (hudAlt) {
-      const approxAlt = Math.max(45, Math.round(180 / Math.max(0.4, this.scale)));
-      hudAlt.innerText = `ارتفاع ~${approxAlt}م`;
+      hudAlt.innerText = `${t.map_zoom_level} ${this.scale.toFixed(1)}x`;
     }
 
     const glow = document.getElementById('earthHorizonGlow');
@@ -523,8 +526,9 @@ const MapEngine = {
 
     // Check if guest has saved room
     const savedRoom = localStorage.getItem('moreno_guest_room');
-    let originPoi = resortPois.find(p => p.id === 'M');
-    if (savedRoom) {
+    const pinnedOrigin = resortPois.find(p => p.id === this.guestLocationPoiId);
+    let originPoi = pinnedOrigin || resortPois.find(p => p.id === 'M');
+    if (!pinnedOrigin && savedRoom) {
       const roomNum = parseInt(savedRoom);
       const buildings = resortPois.filter(p => p.isBuilding);
       for (const b of buildings) {
@@ -551,19 +555,15 @@ const MapEngine = {
     const svgLayer = document.getElementById('routeSvgLayer');
     if (!svgLayer) return;
 
-    // Convert percentage coordinates to 896x1200 exact pixel coordinates
-    const x1 = (originCoords.x / 100) * this.CANVAS_WIDTH;
-    const y1 = (originCoords.y / 100) * this.CANVAS_HEIGHT;
-    const x2 = (destCoords.x / 100) * this.CANVAS_WIDTH;
-    const y2 = (destCoords.y / 100) * this.CANVAS_HEIGHT;
+    const routePoints = this.getWalkwayRoutePoints(originCoords, destCoords);
+    const [startPoint] = routePoints;
+    const endPoint = routePoints[routePoints.length - 1];
+    const pathD = routePoints.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
 
-    // Calculate a graceful curved path mimicking the resort walkways
-    const midX = (x1 + x2) / 2 + (x2 > x1 ? -28 : 28);
-    const midY = (y1 + y2) / 2 + (y2 > y1 ? -28 : 28);
-    const pathD = `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`;
-
-    // Calculate walking distance approx in meters
-    const distPx = Math.hypot(x2 - x1, y2 - y1);
+    let distPx = 0;
+    for (let index = 1; index < routePoints.length; index++) {
+      distPx += Math.hypot(routePoints[index].x - routePoints[index - 1].x, routePoints[index].y - routePoints[index - 1].y);
+    }
     const distMeters = Math.round(distPx * 0.42);
     const walkMin = Math.max(1, Math.round(distMeters / 65));
 
@@ -608,7 +608,7 @@ const MapEngine = {
       </circle>
 
       <!-- Origin Marker Pin Pulse -->
-      <g transform="translate(${x1}, ${y1})">
+      <g transform="translate(${startPoint.x}, ${startPoint.y})">
         <circle r="14" fill="#00f0ff" fill-opacity="0.35">
           <animate attributeName="r" values="7;18;7" dur="2s" repeatCount="indefinite" />
           <animate attributeName="opacity" values="0.9;0.1;0.9" dur="2s" repeatCount="indefinite" />
@@ -617,7 +617,7 @@ const MapEngine = {
       </g>
 
       <!-- Destination Target Beacon -->
-      <g transform="translate(${x2}, ${y2})">
+      <g transform="translate(${endPoint.x}, ${endPoint.y})">
         <circle r="18" fill="#fbbf24" fill-opacity="0.4">
           <animate attributeName="r" values="9;24;9" dur="1.6s" repeatCount="indefinite" />
           <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1.6s" repeatCount="indefinite" />
@@ -635,6 +635,101 @@ const MapEngine = {
     this.renderRouteHud(originTitle, destTitle, distMeters, walkMin);
 
     return { meters: distMeters, minutes: walkMin };
+  },
+
+  getWalkwayRoutePoints(originCoords, destCoords) {
+    const toPixels = coords => ({
+      x: (coords.x / 100) * this.CANVAS_WIDTH,
+      y: (coords.y / 100) * this.CANVAS_HEIGHT
+    });
+    const origin = toPixels(originCoords);
+    const destination = toPixels(destCoords);
+    const network = window.VirtualResortMap;
+
+    if (!network || !network.nodes || !network.poiToNodeMap || typeof network.findPath !== 'function') {
+      return [origin, destination];
+    }
+
+    const xOffsets = [];
+    const yOffsets = [];
+    resortPois.forEach(poi => {
+      const node = network.nodes[network.poiToNodeMap[poi.id]];
+      if (!node) return;
+      xOffsets.push((poi.coords.x / 100) * this.CANVAS_WIDTH - node.x);
+      yOffsets.push((poi.coords.y / 100) * this.CANVAS_HEIGHT - node.y);
+    });
+    const median = values => {
+      values.sort((a, b) => a - b);
+      return values[Math.floor(values.length / 2)] || 0;
+    };
+    const offsetX = median(xOffsets);
+    const offsetY = median(yOffsets);
+    const alignedNode = node => ({ x: node.x + offsetX, y: node.y + offsetY });
+    const nearestNodeKey = point => Object.keys(network.nodes).reduce((nearest, key) => {
+      const node = alignedNode(network.nodes[key]);
+      const currentDistance = Math.hypot(node.x - point.x, node.y - point.y);
+      return currentDistance < nearest.distance ? { key, distance: currentDistance } : nearest;
+    }, { key: null, distance: Infinity }).key;
+
+    const startKey = nearestNodeKey(origin);
+    const destinationKey = nearestNodeKey(destination);
+    const graphPath = network.findPath(startKey, destinationKey);
+    if (!graphPath.length || (startKey !== destinationKey && graphPath[0] !== network.nodes[startKey])) {
+      return [origin, destination];
+    }
+
+    const points = [origin, ...graphPath.map(alignedNode), destination];
+    return points.filter((point, index) => index === 0 || Math.hypot(point.x - points[index - 1].x, point.y - points[index - 1].y) > 1);
+  },
+
+  buildWalkwaySteps(originPoi, targetPoi, lang, isAccessible = false) {
+    const t = i18n[lang] || i18n.ar;
+    const origin = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(originPoi, lang) : { name: originPoi.nameAr };
+    const target = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(targetPoi, lang) : { name: targetPoi.nameAr };
+    const points = this.getWalkwayRoutePoints(originPoi.coords, targetPoi.coords);
+    const toCoords = point => ({
+      x: (point.x / this.CANVAS_WIDTH) * 100,
+      y: (point.y / this.CANVAS_HEIGHT) * 100
+    });
+    const steps = [{
+      stepNum: 1,
+      icon: '🚶‍♂️',
+      coords: toCoords(points[0]),
+      title: `${t.nav_route_start_title || 'ابدأ من'} [${origin.name}]`,
+      instruction: isAccessible
+        ? t.nav_route_accessibility_notice
+        : t.nav_route_start_instruction
+    }];
+
+    for (let index = 1; index < points.length - 1; index++) {
+      const previous = points[index - 1];
+      const current = points[index];
+      const next = points[index + 1];
+      const firstX = current.x - previous.x;
+      const firstY = current.y - previous.y;
+      const nextX = next.x - current.x;
+      const nextY = next.y - current.y;
+      const turn = Math.atan2(firstX * nextY - firstY * nextX, firstX * nextX + firstY * nextY);
+      if (Math.abs(turn) < 0.66) continue;
+
+      const direction = turn > 0 ? t.nav_route_right : t.nav_route_left;
+      steps.push({
+        stepNum: steps.length + 1,
+        icon: turn > 0 ? '↪️' : '↩️',
+        coords: toCoords(current),
+        title: (t.nav_route_turn_title || 'انعطف {direction} عند الممر').replace('{direction}', direction),
+        instruction: (t.nav_route_turn_instruction || 'اتبع الممر {direction} حتى نقطة الانعطاف التالية.').replace('{direction}', direction)
+      });
+    }
+
+    steps.push({
+      stepNum: steps.length + 1,
+      icon: '🎯',
+      coords: toCoords(points[points.length - 1]),
+      title: (t.nav_route_arrive_title || 'وصلت إلى {destination}').replace('{destination}', target.name),
+      instruction: (t.nav_route_arrive_instruction || 'وصلت إلى {destination}.').replace('{destination}', target.name)
+    });
+    return steps;
   },
 
   renderRouteHud(originTitle, destTitle, meters, minutes) {
@@ -1062,6 +1157,26 @@ const MapEngine = {
       return;
     }
 
+    if (this.isPickingLocation) {
+      this.isPickingLocation = false;
+      this.closePopover();
+      const button = document.getElementById('mapPickLocationBtn');
+      if (button) {
+        button.classList.remove('active-mode');
+        button.setAttribute('aria-pressed', 'false');
+      }
+      const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+      const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr };
+      this.setGuestLocation(poi.coords, loc.name, poi.id);
+      const originSelect = document.getElementById('selectOrigin');
+      if (originSelect) originSelect.value = poi.id;
+      const t = i18n[lang] || i18n.ar;
+      if (typeof App !== 'undefined' && App.showToast) {
+        App.showToast((t.map_pick_location_saved || 'تم تحديد نقطة البداية قرب {name} (موقع تقريبي).').replace('{name}', loc.name), '📍');
+      }
+      return;
+    }
+
     if (shouldScroll) {
       this.scrollToMap();
     }
@@ -1275,9 +1390,10 @@ const MapEngine = {
   // 1. My Location GPS Beacon
   guestLocation: null,
 
-  setGuestLocation(coords, name) {
+  setGuestLocation(coords, name, poiId = null) {
     if (typeof App !== 'undefined' && App.playBeep) App.playBeep(900);
     this.guestLocation = { coords, name };
+    this.guestLocationPoiId = poiId;
 
     let marker = document.getElementById('myLocationMarker');
     if (!marker) {
@@ -1309,8 +1425,26 @@ const MapEngine = {
 
   clearGuestLocation() {
     this.guestLocation = null;
+    this.guestLocationPoiId = null;
     const marker = document.getElementById('myLocationMarker');
     if (marker) marker.remove();
+  },
+
+  beginLocationPick() {
+    this.isPickingLocation = !this.isPickingLocation;
+    const button = document.getElementById('mapPickLocationBtn');
+    if (button) {
+      button.classList.toggle('active-mode', this.isPickingLocation);
+      button.setAttribute('aria-pressed', String(this.isPickingLocation));
+    }
+
+    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    const t = i18n[lang] || i18n.ar;
+    if (this.isPickingLocation) this.closePopover();
+    if (typeof App !== 'undefined' && App.showToast) {
+      const message = this.isPickingLocation ? t.map_pick_location_hint : t.map_pick_location_cancel;
+      App.showToast(message || (this.isPickingLocation ? 'اختر أقرب معلم على الخريطة لموقعك.' : 'تم إلغاء اختيار الموقع.'), '📍');
+    }
   },
 
   // 2. Live What's Open Now Radar
@@ -1358,9 +1492,7 @@ const MapEngine = {
     }
     if (!targetPoi) return;
 
-    if (typeof generateTurnByTurnSteps !== 'function') return;
-
-    const steps = generateTurnByTurnSteps(originPoi, targetPoi, lang, isAccessible);
+    const steps = this.buildWalkwaySteps(originPoi, targetPoi, lang, isAccessible);
     
     // Draw route path and retrieve calculated metrics
     const routeInfo = this.drawRoute(originPoi.coords, targetPoi.coords, originPoi.nameAr, targetPoi.nameAr, isAccessible);
@@ -1374,6 +1506,7 @@ const MapEngine = {
       meters: routeInfo ? routeInfo.meters : 120,
       minutes: routeInfo ? routeInfo.minutes : 2
     };
+    document.body.classList.add('turn-navigation-active');
 
     this.walkProgress = 0;
     this.isSimulatingWalk = false;
@@ -1699,7 +1832,7 @@ const MapEngine = {
     if (typeof App !== 'undefined' && App.playBeep) App.playBeep(800);
     this.activeNavigation.isAccessible = !this.activeNavigation.isAccessible;
     const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    this.activeNavigation.steps = generateTurnByTurnSteps(
+    this.activeNavigation.steps = this.buildWalkwaySteps(
       this.activeNavigation.originPoi,
       this.activeNavigation.targetPoi,
       lang,
@@ -1720,6 +1853,7 @@ const MapEngine = {
     this.pauseLiveWalkSimulation();
     this.activeNavigation = null;
     this.walkProgress = 0;
+    document.body.classList.remove('turn-navigation-active');
 
     const hud = document.getElementById('turnNavHud');
     if (hud) hud.classList.add('hidden');

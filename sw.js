@@ -3,14 +3,14 @@
  * Network-First Strategy with Offline Cache Fallback
  */
 
-const CACHE_NAME = 'moreno-guide-v25';
+const CACHE_NAME = 'moreno-guide-v29';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './moreno_horizon_resort_interactive_guest_guide.html',
   './moreno_resort_map.jpg',
   './assets/images/moreno_earth_day.jpg',
   './assets/images/moreno_earth_night.jpg',
+  './assets/images/moreno_earth_satellite.jpg',
   './manifest.json',
   './assets/icons/apple-touch-icon.png',
   './assets/icons/apple-touch-icon-180x180.png',
@@ -23,6 +23,7 @@ const ASSETS_TO_CACHE = [
   './css/style.css?v=25.0',
   './js/data.js?v=25.0',
   './js/map-engine.js?v=25.0',
+  './js/virtual-resort-map.js?v=25.0',
   './js/wayfinder.js?v=25.0',
   './js/app.js?v=25.0',
   './assets/images/hero_resort.jpg',
@@ -50,7 +51,11 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch(() => {});
+      return Promise.all(ASSETS_TO_CACHE.map((asset) => {
+        return cache.add(asset).catch((error) => {
+          console.warn(`Offline asset unavailable: ${asset}`, error);
+        });
+      }));
     })
   );
 });
@@ -76,6 +81,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
+        if (!networkResponse || !networkResponse.ok) {
+          return caches.match(event.request).then((cachedResponse) => cachedResponse || networkResponse);
+        }
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {

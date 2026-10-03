@@ -56,15 +56,16 @@ const Wayfinder = {
       MapEngine.closePopover(); // keep popover closed so room beacon & map remain completely clear
 
       // Draw animated SVG route from Main Lobby (M) to Matched Building
-      const lobbyPoi = resortPois.find(p => p.id === 'M') || { coords: { x: 31.55, y: 68.36 } };
-      const locLobby = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(lobbyPoi, lang) : { name: 'Main Lobby' };
-      const routeInfo = MapEngine.drawRoute(lobbyPoi.coords, matchedBuilding.coords, locLobby.name, locBuilding.name);
+      const currentPoi = resortPois.find(p => p.id === MapEngine.guestLocationPoiId);
+      const originPoi = currentPoi || resortPois.find(p => p.id === 'M') || { coords: { x: 31.55, y: 68.36 } };
+      const locOrigin = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(originPoi, lang) : { name: originPoi.nameAr || 'Main Lobby' };
+      const routeInfo = MapEngine.drawRoute(originPoi.coords, matchedBuilding.coords, locOrigin.name, locBuilding.name);
 
       // 1. Drop prominent bouncing golden room beacon right on the matched building coordinate
       MapEngine.dropRoomBeacon(matchedBuilding.coords, roomNum, locBuilding.name, locFloor);
 
       // 2. Start turn-by-turn navigation HUD outside the map, but DON'T recenter camera on lobby
-      MapEngine.startTurnByTurn(lobbyPoi, matchedBuilding, false, false);
+      MapEngine.startTurnByTurn(originPoi, matchedBuilding, false, false);
 
       // 3. Laser-focus camera directly onto the guest's room building with clear zoom (1.85x)
       MapEngine.focusCoordinate(matchedBuilding.coords.x, matchedBuilding.coords.y, 1.85, true);
