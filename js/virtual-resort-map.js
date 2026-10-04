@@ -22,8 +22,8 @@ const VirtualResortMap = {
   // Navigation Selection State
   nav: {
     selectionMode: 'start', // 'start' | 'dest' | 'idle'
-    startPoint: { x: 282, y: 780, name: 'المبنى الرئيسي (Lobby M)', id: 'M' },
-    destPoint: { x: 390, y: 340, name: 'منطقة الشاطئ والمارينا', id: '1' },
+    startPoint: { x: 251, y: 768, name: 'المبنى الرئيسي (Lobby M)', id: 'M' },
+    destPoint: { x: 388, y: 353, name: 'منطقة الشاطئ والمارينا', id: '1' },
     activeRoutePath: [],
     distMeters: 0,
     walkMinutes: 0
@@ -31,8 +31,8 @@ const VirtualResortMap = {
 
   // Player Avatar State
   player: {
-    x: 282,
-    y: 780,
+    x: 251,
+    y: 768,
     targetX: null,
     targetY: null,
     isWalking: false,
@@ -44,76 +44,149 @@ const VirtualResortMap = {
     onArrival: null
   },
 
-  // Walkway Graph Network (Traces the exact paths and shapes from the resort map)
+  // Walkway Graph Network (Precision 74-node graph tracing exact paved walkways, bypassing pools & buildings)
   nodes: {
-    // 1. Sea & Pier
-    'poi_pier_tip': { x: 390, y: 110, name: 'رصيف المارينا (نهاية الرصيف)', neighbors: ['hub_pier_mid'] },
-    'hub_pier_mid': { x: 390, y: 220, name: 'ممشى المارينا الخشبي', neighbors: ['poi_pier_tip', 'hub_beach_shore'] },
-    'hub_beach_shore': { x: 390, y: 340, name: 'شاطئ البحر والمارينا (1)', neighbors: ['hub_pier_mid', 'poi_beach_bar', 'poi_oriental', 'hub_kids_area'] },
-    'poi_beach_area': { x: 390, y: 340, name: 'شاطئ البحر والمارينا (1)', neighbors: ['hub_beach_shore'] },
+    // 1. Pier & Beach
+    'p_pier_tip': { x: 388, y: 104, name: 'رصيف المارينا (نهاية الرصيف)', neighbors: ['p_pier_mid'] },
+    'p_pier_mid': { x: 388, y: 228, name: 'ممشى المارينا الخشبي', neighbors: ['p_pier_tip', 'poi_1_beach'] },
+    'poi_1_beach': { x: 388, y: 353, name: 'شاطئ البحر والمارينا (1)', neighbors: ['p_pier_mid', 'p_beach_w', 'p_beach_e', 'p_promenade_center'] },
+    'p_beach_w': { x: 260, y: 353, name: 'ممشى الشاطئ الغربي', neighbors: ['poi_1_beach', 'poi_4_kids', 'poi_5_beach_bar'] },
+    'p_beach_e': { x: 505, y: 353, name: 'ممشى الشاطئ الشرقي', neighbors: ['poi_1_beach', 'poi_6_oriental', 'p_east_shore'] },
+    'p_east_shore': { x: 565, y: 360, name: 'ممشى الشاطئ أقصى الشرق', neighbors: ['p_beach_e', 'poi_8_lamama'] },
 
-    // Northern Promenade (Diving, Aqua Park, Kids, Bars, La Mama)
-    'poi_diving': { x: 140, y: 290, name: 'مركز الغوص (2)', neighbors: ['poi_aquapark', 'hub_kids_area'] },
-    'poi_aquapark': { x: 140, y: 380, name: 'أكوا بارك مورينو (3)', neighbors: ['poi_diving', 'hub_kids_area', 'hub_wing_n_north'] },
-    'hub_kids_area': { x: 250, y: 380, name: 'منطقة ألعاب الأطفال (4)', neighbors: ['poi_aquapark', 'poi_diving', 'hub_beach_shore', 'poi_beach_bar', 'hub_garden_north'] },
-    'poi_beach_bar': { x: 320, y: 390, name: 'بار الشاطئ (5)', neighbors: ['hub_kids_area', 'hub_beach_shore', 'hub_garden_north', 'poi_oriental'] },
-    'poi_oriental': { x: 440, y: 390, name: 'المطعم الشرقي وسناك بار (6)', neighbors: ['hub_beach_shore', 'poi_beach_bar', 'hub_garden_north', 'poi_lamama'] },
-    'poi_lamama': { x: 530, y: 440, name: 'مطعم لا ماما الإيطالي (8)', neighbors: ['poi_oriental', 'hub_garden_east', 'poi_sirena'] },
+    // 2. Northern Strip (Diving, Aqua Park, Kids, Beach Bar, Oriental, La Mama)
+    'poi_2_diving': { x: 125, y: 300, name: 'مركز الغوص (2)', neighbors: ['poi_3_aquapark', 'p_diving_access'] },
+    'p_diving_access': { x: 157, y: 340, name: 'مدخل مركز الغوص', neighbors: ['poi_2_diving', 'poi_3_aquapark', 'p_aqua_promenade'] },
+    'poi_3_aquapark': { x: 125, y: 408, name: 'أكوا بارك مورينو (3)', neighbors: ['poi_2_diving', 'p_diving_access', 'p_aqua_promenade', 'p_wing_n_outer_north'] },
+    'p_aqua_promenade': { x: 200, y: 384, name: 'ممشى الأكوا بارك الشرقي', neighbors: ['p_diving_access', 'poi_3_aquapark', 'poi_4_kids', 'p_north_junction'] },
+    'poi_4_kids': { x: 242, y: 384, name: 'منطقة ألعاب الأطفال (4)', neighbors: ['p_beach_w', 'p_aqua_promenade', 'poi_5_beach_bar', 'p_north_junction'] },
+    'poi_5_beach_bar': { x: 323, y: 396, name: 'بار الشاطئ (5)', neighbors: ['p_beach_w', 'poi_4_kids', 'p_promenade_center'] },
+    'p_promenade_center': { x: 388, y: 400, name: 'ملتقى الكورنيش الشمالي', neighbors: ['poi_1_beach', 'poi_5_beach_bar', 'poi_6_oriental', 'p_north_center_plaza'] },
+    'poi_6_oriental': { x: 448, y: 396, name: 'المطعم الشرقي وسناك بار (6)', neighbors: ['p_beach_e', 'p_promenade_center', 'p_east_promenade', 'p_north_center_plaza'] },
+    'p_east_promenade': { x: 520, y: 410, name: 'ممشى المطاعم الشرقية', neighbors: ['poi_6_oriental', 'p_east_shore', 'poi_8_lamama'] },
+    'poi_8_lamama': { x: 546, y: 444, name: 'مطعم لا ماما الإيطالي (8)', neighbors: ['p_east_promenade', 'p_east_shore', 'p_wing_s_north_terrace', 'p_circle_ne_3'] },
 
-    // Central Garden Paths around the Central Circular Pool
-    'hub_garden_north': { x: 390, y: 490, name: 'ممشى الحديقة الشمالي', neighbors: ['hub_kids_area', 'poi_beach_bar', 'poi_oriental', 'hub_garden_west', 'hub_garden_east'] },
-    'poi_sirena': { x: 385, y: 770, name: 'مطعم سيرينا الرئيسي (12)', neighbors: ['hub_garden_south', 'poi_lobby_m', 'hub_entrance_plaza', 'hub_garden_east'] },
-    'hub_garden_west': { x: 290, y: 600, name: 'ممشى الحديقة الغربي (مسبح)', neighbors: ['hub_garden_north', 'poi_wing_n', 'hub_garden_south', 'poi_lobby_m'] },
-    'hub_garden_east': { x: 490, y: 600, name: 'ممشى الحديقة الشرقي (مسبح)', neighbors: ['hub_garden_north', 'poi_lamama', 'hub_garden_south', 'poi_wing_s', 'poi_sirena'] },
-    'hub_garden_south': { x: 390, y: 690, name: 'ممشى الحديقة الجنوبي', neighbors: ['hub_garden_west', 'hub_garden_east', 'poi_lobby_m', 'poi_sirena', 'hub_entrance_plaza'] },
+    // 3. Central Promenade & Upper Garden Junctions
+    'p_north_junction': { x: 242, y: 432, name: 'تقاطع حديقة الأطفال الشمالي', neighbors: ['p_aqua_promenade', 'poi_4_kids', 'p_wing_n_north_entry', 'p_circle_nw_1'] },
+    'p_north_center_plaza': { x: 388, y: 456, name: 'ساحة مدخل الحديقة الشمالية', neighbors: ['p_promenade_center', 'poi_6_oriental', 'p_circle_n_arc'] },
 
-    // Wing N (North Wing)
-    'hub_wing_n_north': { x: 190, y: 490, name: 'ممر الجناح الشمالي', neighbors: ['poi_aquapark', 'poi_wing_n', 'hub_parking_1'] },
-    'poi_wing_n': { x: 190, y: 610, name: 'المبنى الشمالي (Wing N)', neighbors: ['hub_wing_n_north', 'hub_garden_west', 'poi_lobby_m', 'hub_parking_1'] },
-    'hub_parking_1': { x: 60, y: 670, name: 'موقف السيارات 1 (13)', neighbors: ['hub_wing_n_north', 'poi_wing_n', 'poi_mls', 'poi_side_gate'] },
+    // 4. Central Circular Pool Perimeter Walkway (Paved Ring bypassing water)
+    'p_circle_n_arc': { x: 388, y: 486, name: 'ممشى المسبح المركزي (شمال)', neighbors: ['p_north_center_plaza', 'p_circle_nw_1', 'p_circle_ne_1'] },
+    'p_circle_nw_1': { x: 310, y: 504, name: 'ممشى المسبح (شمال غرب 1)', neighbors: ['p_north_junction', 'p_circle_n_arc', 'p_circle_nw_2'] },
+    'p_circle_nw_2': { x: 280, y: 540, name: 'ممشى المسبح (شمال غرب 2)', neighbors: ['p_circle_nw_1', 'p_circle_w_mid'] },
+    'p_circle_w_mid': { x: 265, y: 590, name: 'ممشى المسبح (غرب المنتصف)', neighbors: ['p_circle_nw_2', 'p_wing_n_veranda_mid', 'p_circle_sw_1'] },
+    'p_circle_sw_1': { x: 280, y: 648, name: 'ممشى المسبح (جنوب غرب 1)', neighbors: ['p_circle_w_mid', 'p_circle_sw_2', 'p_garden_south_west'] },
+    'p_circle_sw_2': { x: 315, y: 684, name: 'ممشى المسبح (جنوب غرب 2)', neighbors: ['p_circle_sw_1', 'p_circle_s_arc'] },
 
-    // Wing S (South Wing) & Lotus Pool
-    'poi_wing_s': { x: 550, y: 610, name: 'المبنى الجنوبي (Wing S)', neighbors: ['hub_garden_east', 'poi_tennis', 'hub_parking_2'] },
-    'poi_tennis': { x: 610, y: 690, name: 'ملاعب التنس (10)', neighbors: ['poi_wing_s', 'poi_lotus_pool', 'hub_parking_2'] },
-    'poi_lotus_pool': { x: 610, y: 800, name: 'مسبح لوتس (11)', neighbors: ['poi_tennis', 'hub_parking_2', 'poi_main_gate'] },
+    'p_circle_ne_1': { x: 466, y: 504, name: 'ممشى المسبح (شمال شرق 1)', neighbors: ['p_circle_n_arc', 'p_circle_ne_2', 'poi_8_lamama'] },
+    'p_circle_ne_2': { x: 495, y: 540, name: 'ممشى المسبح (شمال شرق 2)', neighbors: ['p_circle_ne_1', 'p_circle_ne_3'] },
+    'p_circle_ne_3': { x: 511, y: 570, name: 'ممشى المسبح (شرق 1)', neighbors: ['poi_8_lamama', 'p_circle_ne_2', 'p_circle_e_mid'] },
+    'p_circle_e_mid': { x: 511, y: 612, name: 'ممشى المسبح (شرق المنتصف)', neighbors: ['p_circle_ne_3', 'poi_9_spa', 'p_wing_s_veranda_mid', 'p_circle_se_1'] },
+    'p_circle_se_1': { x: 495, y: 660, name: 'ممشى المسبح (جنوب شرق 1)', neighbors: ['p_circle_e_mid', 'p_circle_se_2', 'p_garden_south_east'] },
+    'p_circle_se_2': { x: 466, y: 696, name: 'ممشى المسبح (جنوب شرق 2)', neighbors: ['p_circle_se_1', 'p_circle_s_arc'] },
 
-    // Lobby M (Central Palace)
-    'poi_lobby_m': { x: 282, y: 780, name: 'المبنى الرئيسي واللوبي (Lobby M)', neighbors: ['hub_garden_west', 'hub_garden_south', 'poi_wing_n', 'hub_entrance_plaza'] },
-    'hub_entrance_plaza': { x: 340, y: 840, name: 'ساحة الاستقبال الرئيسية', neighbors: ['poi_lobby_m', 'hub_garden_south', 'poi_clinic', 'poi_mosque', 'hub_avenue_mid'] },
+    'p_circle_s_arc': { x: 388, y: 708, name: 'ممشى المسبح المركزي (جنوب)', neighbors: ['p_circle_sw_2', 'p_circle_se_2', 'p_garden_sirena_plaza'] },
 
-    // Southern Entrances, Mosque, Clinic & MLS
-    'hub_avenue_mid': { x: 470, y: 920, name: 'طريق المنتجع الداخلي', neighbors: ['hub_entrance_plaza', 'poi_mosque', 'hub_parking_2', 'poi_main_gate'] },
-    'hub_parking_2': { x: 580, y: 910, name: 'موقف السيارات 2 (17)', neighbors: ['poi_wing_s', 'poi_tennis', 'poi_lotus_pool', 'hub_avenue_mid', 'poi_main_gate'] },
-    'poi_main_gate': { x: 610, y: 1020, name: 'البوابة الرئيسية (18)', neighbors: ['hub_parking_2', 'hub_avenue_mid', 'poi_mosque'] },
-    'poi_mosque': { x: 420, y: 1000, name: 'مسجد المنتجع (16)', neighbors: ['hub_entrance_plaza', 'hub_avenue_mid', 'poi_main_gate', 'poi_clinic'] },
-    'poi_clinic': { x: 360, y: 1000, name: 'العيادة والصيدلية (15)', neighbors: ['hub_entrance_plaza', 'poi_mosque', 'poi_mls'] },
-    'poi_mls': { x: 160, y: 980, name: 'المبنى التجاري (MLS Mall)', neighbors: ['hub_parking_1', 'poi_clinic', 'poi_side_gate'] },
-    'poi_side_gate': { x: 50, y: 990, name: 'البوابة الجانبية (14)', neighbors: ['poi_mls', 'hub_parking_1'] }
+    // 5. Wing N (North Wing Rooms & Corridors)
+    'p_wing_n_outer_north': { x: 116, y: 474, name: 'الممشى الخارجي للجناح N (شمال)', neighbors: ['poi_3_aquapark', 'p_wing_n_outer_mid'] },
+    'p_wing_n_outer_mid': { x: 116, y: 600, name: 'الممشى الخارجي للجناح N (وسط)', neighbors: ['p_wing_n_outer_north', 'p_wing_n_outer_south', 'poi_13_parking1'] },
+    'p_wing_n_outer_south': { x: 116, y: 690, name: 'الممشى الخارجي للجناح N (جنوب)', neighbors: ['p_wing_n_outer_mid', 'poi_13_parking1', 'p_west_service_road'] },
+
+    'p_wing_n_north_entry': { x: 188, y: 468, name: 'مدخل غرف الجناح الشمالي (شمال)', neighbors: ['p_north_junction', 'poi_n_wing', 'p_wing_n_veranda_north'] },
+    'p_wing_n_veranda_north': { x: 215, y: 520, name: 'رواق الجناح الشمالي 1', neighbors: ['p_wing_n_north_entry', 'p_circle_nw_1', 'poi_n_wing'] },
+    'poi_n_wing': { x: 179, y: 588, name: 'المبنى الشمالي (Wing N)', neighbors: ['p_wing_n_north_entry', 'p_wing_n_veranda_north', 'p_wing_n_veranda_mid', 'p_wing_n_south_exit', 'p_wing_n_outer_mid'] },
+    'p_wing_n_veranda_mid': { x: 224, y: 590, name: 'رواق الجناح الشمالي 2', neighbors: ['poi_n_wing', 'p_circle_w_mid', 'p_wing_n_veranda_south'] },
+    'p_wing_n_veranda_south': { x: 224, y: 660, name: 'رواق الجناح الشمالي 3', neighbors: ['p_wing_n_veranda_mid', 'p_garden_south_west', 'p_wing_n_south_exit'] },
+    'p_wing_n_south_exit': { x: 188, y: 696, name: 'مخرج غرف الجناح الشمالي (جنوب)', neighbors: ['poi_n_wing', 'p_wing_n_veranda_south', 'p_west_service_road', 'p_lobby_north_walk'] },
+
+    // 6. Wing S (South Wing Rooms, Terrace & Spa)
+    'p_wing_s_north_terrace': { x: 573, y: 480, name: 'تراس الجناح الجنوبي (شمال)', neighbors: ['poi_8_lamama', 'poi_s_wing', 'p_wing_s_veranda_north'] },
+    'p_wing_s_veranda_north': { x: 546, y: 528, name: 'رواق الجناح الجنوبي 1', neighbors: ['p_wing_s_north_terrace', 'poi_9_spa', 'poi_s_wing'] },
+    'poi_9_spa': { x: 511, y: 552, name: 'النادي الصحي والسبا والجيم (9)', neighbors: ['p_circle_e_mid', 'p_wing_s_veranda_north', 'p_wing_s_veranda_mid'] },
+    'poi_s_wing': { x: 573, y: 600, name: 'المبنى الجنوبي (Wing S)', neighbors: ['p_wing_s_north_terrace', 'p_wing_s_veranda_north', 'p_wing_s_veranda_mid', 'p_wing_s_south_exit', 'p_wing_s_outer_mid'] },
+    'p_wing_s_veranda_mid': { x: 546, y: 612, name: 'رواق الجناح الجنوبي 2', neighbors: ['poi_s_wing', 'poi_9_spa', 'p_circle_e_mid', 'p_wing_s_veranda_south'] },
+    'p_wing_s_veranda_south': { x: 546, y: 672, name: 'رواق الجناح الجنوبي 3', neighbors: ['p_wing_s_veranda_mid', 'p_garden_south_east', 'p_wing_s_south_exit', 'p_tennis_entry'] },
+    'p_wing_s_south_exit': { x: 573, y: 696, name: 'مخرج غرف الجناح الجنوبي (جنوب)', neighbors: ['poi_s_wing', 'p_wing_s_veranda_south', 'p_wing_s_outer_south', 'p_tennis_entry'] },
+
+    'p_wing_s_outer_mid': { x: 636, y: 600, name: 'الممشى الخارجي للجناح S (وسط)', neighbors: ['poi_s_wing', 'p_wing_s_outer_south'] },
+    'p_wing_s_outer_south': { x: 636, y: 684, name: 'الممشى الخارجي للجناح S (جنوب)', neighbors: ['p_wing_s_outer_mid', 'p_wing_s_south_exit', 'poi_10_tennis'] },
+
+    // 7. South Garden, Sirena Restaurant & Central Lobby Walkways
+    'p_garden_south_west': { x: 260, y: 696, name: 'ممشى الحديقة الجنوبي الغربي', neighbors: ['p_circle_sw_1', 'p_wing_n_veranda_south', 'p_lobby_north_walk', 'p_garden_sirena_plaza'] },
+    'p_garden_south_east': { x: 511, y: 708, name: 'ممشى الحديقة الجنوبي الشرقي', neighbors: ['p_circle_se_1', 'p_wing_s_veranda_south', 'p_garden_sirena_plaza', 'p_sirena_east_walk'] },
+    'p_garden_sirena_plaza': { x: 388, y: 732, name: 'ساحة مطعم سيرينا الشمالية', neighbors: ['p_circle_s_arc', 'p_garden_south_west', 'p_garden_south_east', 'poi_12_sirena'] },
+    'poi_12_sirena': { x: 388, y: 768, name: 'مطعم سيرينا الرئيسي (12)', neighbors: ['p_garden_sirena_plaza', 'p_lobby_terrace_east', 'p_sirena_east_walk'] },
+    'p_sirena_east_walk': { x: 448, y: 768, name: 'ممر سيرينا الشرقي', neighbors: ['p_garden_south_east', 'poi_12_sirena', 'p_sirena_terrace_south'] },
+    'p_sirena_terrace_south': { x: 430, y: 816, name: 'تراس سيرينا الجنوبي', neighbors: ['p_sirena_east_walk', 'poi_12_sirena', 'p_lobby_terrace_east', 'p_lobby_south_porte'] },
+
+    // 8. Main Lobby Complex (Lobby M, Terraces, Porte-Cochere)
+    'p_lobby_north_walk': { x: 224, y: 732, name: 'ممشى مدخل اللوبي الشمالي', neighbors: ['p_wing_n_south_exit', 'p_garden_south_west', 'poi_m_lobby'] },
+    'poi_m_lobby': { x: 251, y: 768, name: 'المبنى الرئيسي (Lobby M)', neighbors: ['p_lobby_north_walk', 'p_lobby_terrace_east', 'p_lobby_west_exit', 'p_lobby_south_porte'] },
+    'p_lobby_terrace_east': { x: 331, y: 768, name: 'تراس اللوبي الشرقي المطل على المسبح', neighbors: ['poi_m_lobby', 'poi_12_sirena', 'p_sirena_terrace_south', 'p_lobby_south_porte'] },
+    'p_lobby_west_exit': { x: 206, y: 804, name: 'مخرج اللوبي الغربي', neighbors: ['poi_m_lobby', 'p_west_service_road', 'p_lobby_south_porte'] },
+    'p_lobby_south_porte': { x: 287, y: 840, name: 'بهو الاستقبال ومدخل السيارات (Porte-Cochère)', neighbors: ['poi_m_lobby', 'p_lobby_terrace_east', 'p_lobby_west_exit', 'p_sirena_terrace_south', 'p_entrance_plaza_main'] },
+
+    // 9. Tennis, Lotus Pool & Southeastern Area
+    'p_tennis_entry': { x: 573, y: 720, name: 'مدخل ملاعب التنس', neighbors: ['p_wing_s_south_exit', 'p_wing_s_veranda_south', 'poi_10_tennis', 'p_lotus_north_walk'] },
+    'poi_10_tennis': { x: 618, y: 708, name: 'ملاعب التنس (10)', neighbors: ['p_wing_s_outer_south', 'p_tennis_entry', 'p_lotus_north_walk'] },
+    'p_lotus_north_walk': { x: 590, y: 756, name: 'ممشى مسبح لوتس الشمالي', neighbors: ['p_tennis_entry', 'poi_10_tennis', 'poi_11_lotus_pool'] },
+    'poi_11_lotus_pool': { x: 591, y: 804, name: 'مسبح لوتس (11)', neighbors: ['p_lotus_north_walk', 'p_lotus_south_deck'] },
+    'p_lotus_south_deck': { x: 591, y: 852, name: 'رصيف مسبح لوتس الجنوبي', neighbors: ['poi_11_lotus_pool', 'p_parking2_access', 'p_avenue_east_junction'] },
+
+    // 10. South Grand Avenue & Plazas (Mosque, Clinic, MLS, Gates)
+    'p_entrance_plaza_main': { x: 331, y: 876, name: 'ساحة الاستقبال والمدخل الداخلي', neighbors: ['p_lobby_south_porte', 'p_grand_avenue_west', 'p_clinic_north_walk', 'p_grand_avenue_center'] },
+    'p_grand_avenue_west': { x: 242, y: 876, name: 'طريق المنتجع الداخلي (غرب)', neighbors: ['p_entrance_plaza_main', 'p_west_service_road', 'p_mls_north_walk'] },
+    'p_grand_avenue_center': { x: 421, y: 888, name: 'طريق المنتجع الداخلي (وسط)', neighbors: ['p_entrance_plaza_main', 'p_mosque_north_walk', 'p_avenue_east_junction'] },
+    'p_avenue_east_junction': { x: 520, y: 888, name: 'طريق المنتجع الداخلي (شرق)', neighbors: ['p_grand_avenue_center', 'p_lotus_south_deck', 'p_parking2_access', 'p_main_gate_approach'] },
+
+    'p_parking2_access': { x: 573, y: 912, name: 'طريق موقف السيارات 2', neighbors: ['p_lotus_south_deck', 'p_avenue_east_junction', 'poi_17_parking2'] },
+    'poi_17_parking2': { x: 564, y: 936, name: 'موقف السيارات 2 (17)', neighbors: ['p_parking2_access', 'p_main_gate_approach'] },
+
+    'p_main_gate_approach': { x: 573, y: 984, name: 'طريق البوابة الرئيسية', neighbors: ['p_avenue_east_junction', 'poi_17_parking2', 'poi_18_main_gate', 'p_mosque_east_walk'] },
+    'poi_18_main_gate': { x: 573, y: 1044, name: 'البوابة الرئيسية (18)', neighbors: ['p_main_gate_approach', 'poi_16_mosque'] },
+
+    'p_mosque_north_walk': { x: 421, y: 936, name: 'ممشى المسجد الشمالي', neighbors: ['p_grand_avenue_center', 'poi_16_mosque', 'p_clinic_east_walk'] },
+    'p_mosque_east_walk': { x: 475, y: 996, name: 'ممشى المسجد الشرقي', neighbors: ['p_mosque_north_walk', 'poi_16_mosque', 'p_main_gate_approach'] },
+    'poi_16_mosque': { x: 421, y: 1008, name: 'مسجد المنتجع (16)', neighbors: ['p_mosque_north_walk', 'p_mosque_east_walk', 'poi_18_main_gate', 'poi_15_clinic'] },
+
+    'p_clinic_north_walk': { x: 349, y: 936, name: 'ممشى العيادة الشمالي', neighbors: ['p_entrance_plaza_main', 'poi_15_clinic', 'p_clinic_east_walk'] },
+    'p_clinic_east_walk': { x: 385, y: 984, name: 'الممشى بين المسجد والعيادة', neighbors: ['p_clinic_north_walk', 'p_mosque_north_walk', 'poi_15_clinic'] },
+    'poi_15_clinic': { x: 349, y: 1008, name: 'العيادة والصيدلية (15)', neighbors: ['p_clinic_north_walk', 'p_clinic_east_walk', 'poi_16_mosque', 'p_clinic_west_walk'] },
+    'p_clinic_west_walk': { x: 287, y: 1008, name: 'الممشى بين العيادة والمول', neighbors: ['poi_15_clinic', 'poi_mls_mall', 'p_mls_north_walk'] },
+
+    'p_mls_north_walk': { x: 179, y: 936, name: 'ممشى مول MLS الشمالي', neighbors: ['p_grand_avenue_west', 'p_clinic_west_walk', 'poi_mls_mall'] },
+    'poi_mls_mall': { x: 179, y: 1008, name: 'المبنى التجاري (MLS Mall)', neighbors: ['p_mls_north_walk', 'p_clinic_west_walk', 'p_side_gate_access', 'poi_14_side_gate'] },
+
+    'p_west_service_road': { x: 116, y: 804, name: 'طريق الخدمة الغربي', neighbors: ['p_wing_n_outer_south', 'p_wing_n_south_exit', 'p_lobby_west_exit', 'p_grand_avenue_west', 'poi_13_parking1', 'p_side_gate_access'] },
+    'poi_13_parking1': { x: 54, y: 684, name: 'موقف السيارات 1 (13)', neighbors: ['p_wing_n_outer_mid', 'p_wing_n_outer_south', 'p_west_service_road', 'p_side_gate_access'] },
+
+    'p_side_gate_access': { x: 54, y: 936, name: 'طريق البوابة الجانبية', neighbors: ['p_west_service_road', 'poi_13_parking1', 'poi_mls_mall', 'poi_14_side_gate'] },
+    'poi_14_side_gate': { x: 45, y: 1008, name: 'البوابة الجانبية (14)', neighbors: ['p_side_gate_access', 'poi_mls_mall'] }
   },
 
   // POI Key to Node Key
   poiToNodeMap: {
-    '1': 'poi_beach_area',
-    '2': 'poi_diving',
-    '3': 'poi_aquapark',
-    '4': 'hub_kids_area',
-    '5': 'poi_beach_bar',
-    '6': 'poi_oriental',
-    '8': 'poi_lamama',
-    '9': 'hub_garden_east',
-    '10': 'poi_tennis',
-    '11': 'poi_lotus_pool',
-    '12': 'poi_sirena',
-    '13': 'hub_parking_1',
-    '14': 'poi_side_gate',
-    '15': 'poi_clinic',
-    '16': 'poi_mosque',
-    '17': 'hub_parking_2',
-    '18': 'poi_main_gate',
-    'N': 'poi_wing_n',
-    'S': 'poi_wing_s',
-    'M': 'poi_lobby_m',
-    'MLS': 'poi_mls'
+    '1': 'poi_1_beach',
+    '2': 'poi_2_diving',
+    '3': 'poi_3_aquapark',
+    '4': 'poi_4_kids',
+    '5': 'poi_5_beach_bar',
+    '6': 'poi_6_oriental',
+    '8': 'poi_8_lamama',
+    '9': 'poi_9_spa',
+    '10': 'poi_10_tennis',
+    '11': 'poi_11_lotus_pool',
+    '12': 'poi_12_sirena',
+    '13': 'poi_13_parking1',
+    '14': 'poi_14_side_gate',
+    '15': 'poi_15_clinic',
+    '16': 'poi_16_mosque',
+    '17': 'poi_17_parking2',
+    '18': 'poi_18_main_gate',
+    'N': 'poi_n_wing',
+    'S': 'poi_s_wing',
+    'M': 'poi_m_lobby',
+    'MLS': 'poi_mls_mall'
   },
 
   // Audio Context
@@ -474,16 +547,25 @@ const VirtualResortMap = {
     const startKey = this.getNearestNodeKey(this.nav.startPoint.x, this.nav.startPoint.y);
     const destKey = this.getNearestNodeKey(this.nav.destPoint.x, this.nav.destPoint.y);
 
-    const path = this.findPath(startKey, destKey);
-    path.push({ x: this.nav.destPoint.x, y: this.nav.destPoint.y });
+    const graphPath = this.findPath(startKey, destKey) || [];
+    const waypoints = [{ x: this.nav.startPoint.x, y: this.nav.startPoint.y }];
+    for (const node of graphPath) {
+      if (node && typeof node.x === 'number' && typeof node.y === 'number') {
+        waypoints.push({ x: node.x, y: node.y });
+      }
+    }
+    waypoints.push({ x: this.nav.destPoint.x, y: this.nav.destPoint.y });
 
-    this.nav.activeRoutePath = path;
-    this.drawDynamicRoute(path);
+    // Clean out redundant or close adjacent points
+    const cleanPath = waypoints.filter((pt, idx) => idx === 0 || Math.hypot(pt.x - waypoints[idx - 1].x, pt.y - waypoints[idx - 1].y) > 2.5);
+
+    this.nav.activeRoutePath = cleanPath;
+    this.drawDynamicRoute(cleanPath);
 
     // Calculate distance & time
     let meters = 0;
-    for (let i = 1; i < path.length; i++) {
-      meters += Math.hypot(path[i].x - path[i-1].x, path[i].y - path[i-1].y);
+    for (let i = 1; i < cleanPath.length; i++) {
+      meters += Math.hypot(cleanPath[i].x - cleanPath[i-1].x, cleanPath[i].y - cleanPath[i-1].y);
     }
     this.nav.distMeters = Math.round(meters * 0.38);
     this.nav.walkMinutes = Math.max(1, Math.round(this.nav.distMeters / (this.moveSpeed > 1.5 ? 95 : 60)));
@@ -591,7 +673,12 @@ const VirtualResortMap = {
 
   findPath(startKey, targetKey) {
     if (!this.nodes[startKey] || !this.nodes[targetKey]) {
-      return [this.nodes[startKey] || this.nodes[targetKey]];
+      const fallback = this.nodes[startKey] || this.nodes[targetKey];
+      return fallback ? [fallback] : [];
+    }
+
+    if (startKey === targetKey) {
+      return [this.nodes[startKey]];
     }
 
     const distances = {};
@@ -621,7 +708,7 @@ const VirtualResortMap = {
 
       const neighbors = this.nodes[current].neighbors || [];
       for (const nKey of neighbors) {
-        if (!unvisited.has(nKey)) continue;
+        if (!unvisited.has(nKey) || !this.nodes[nKey]) continue;
 
         const currNode = this.nodes[current];
         const nextNode = this.nodes[nKey];
@@ -641,11 +728,16 @@ const VirtualResortMap = {
       path.unshift(this.nodes[u]);
       u = previous[u];
     }
+
+    if (path.length > 0 && path[0] !== this.nodes[startKey]) {
+      return [this.nodes[startKey], this.nodes[targetKey]];
+    }
+
     return path;
   },
 
   getNearestNodeKey(x, y) {
-    let nearestKey = 'poi_lobby_m';
+    let nearestKey = 'poi_m_lobby';
     let minDistance = Infinity;
 
     for (const [key, node] of Object.entries(this.nodes)) {
@@ -676,6 +768,8 @@ const VirtualResortMap = {
 
     glow.setAttribute('d', d);
     bg.setAttribute('d', d);
+    glow.setAttribute('stroke-linejoin', 'round');
+    bg.setAttribute('stroke-linejoin', 'round');
   },
 
   startAnimationLoop() {

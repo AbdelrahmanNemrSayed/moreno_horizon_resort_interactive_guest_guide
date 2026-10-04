@@ -591,10 +591,10 @@ const MapEngine = {
       </defs>
 
       <!-- Background shadow path for 3D depth -->
-      <path d="${pathD}" fill="none" stroke="#000000" stroke-width="9" stroke-opacity="0.55" stroke-linecap="round" />
+      <path d="${pathD}" fill="none" stroke="#000000" stroke-width="9" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round" />
 
       <!-- Glowing animated route line with traveling dash animation -->
-      <path id="liveRouteSvgPath" d="${pathD}" fill="none" stroke="${strokeUrl}" stroke-width="5.5" stroke-linecap="round" class="${lineClass}" filter="url(#routeGlow)" />
+      <path id="liveRouteSvgPath" d="${pathD}" fill="none" stroke="${strokeUrl}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" class="${lineClass}" filter="url(#routeGlow)" />
 
       <!-- Traveling Leader Particle (Golden Orb with Light Trail) -->
       <circle r="7.5" fill="#fbbf24" stroke="#ffffff" stroke-width="1.5" class="route-particle-glow">
@@ -650,40 +650,49 @@ const MapEngine = {
     const destination = toPixels(destCoords);
     const network = window.VirtualResortMap;
 
-    if (!network || !network.nodes || !network.poiToNodeMap || typeof network.findPath !== 'function') {
+    if (!network || !network.nodes || typeof network.findPath !== 'function') {
       return [origin, destination];
     }
 
-    const xOffsets = [];
-    const yOffsets = [];
-    resortPois.forEach(poi => {
-      const node = network.nodes[network.poiToNodeMap[poi.id]];
-      if (!node) return;
-      xOffsets.push((poi.coords.x / 100) * this.CANVAS_WIDTH - node.x);
-      yOffsets.push((poi.coords.y / 100) * this.CANVAS_HEIGHT - node.y);
-    });
-    const median = values => {
-      values.sort((a, b) => a - b);
-      return values[Math.floor(values.length / 2)] || 0;
+    // Direct closest node lookup on the precision 74-node network
+    const nearestNodeKey = point => {
+      let bestKey = null;
+      let minDistance = Infinity;
+      for (const [key, node] of Object.entries(network.nodes)) {
+        const d = Math.hypot(node.x - point.x, node.y - point.y);
+        if (d < minDistance) {
+          minDistance = d;
+          bestKey = key;
+        }
+      }
+      return bestKey;
     };
-    const offsetX = median(xOffsets);
-    const offsetY = median(yOffsets);
-    const alignedNode = node => ({ x: node.x + offsetX, y: node.y + offsetY });
-    const nearestNodeKey = point => Object.keys(network.nodes).reduce((nearest, key) => {
-      const node = alignedNode(network.nodes[key]);
-      const currentDistance = Math.hypot(node.x - point.x, node.y - point.y);
-      return currentDistance < nearest.distance ? { key, distance: currentDistance } : nearest;
-    }, { key: null, distance: Infinity }).key;
 
     const startKey = nearestNodeKey(origin);
     const destinationKey = nearestNodeKey(destination);
-    const graphPath = network.findPath(startKey, destinationKey);
-    if (!graphPath.length || (startKey !== destinationKey && graphPath[0] !== network.nodes[startKey])) {
+
+    if (!startKey || !destinationKey) {
       return [origin, destination];
     }
 
-    const points = [origin, ...graphPath.map(alignedNode), destination];
-    return points.filter((point, index) => index === 0 || Math.hypot(point.x - points[index - 1].x, point.y - points[index - 1].y) > 1);
+    const graphPath = network.findPath(startKey, destinationKey) || [];
+    const waypoints = [origin];
+
+    for (const node of graphPath) {
+      if (node && typeof node.x === 'number' && typeof node.y === 'number') {
+        waypoints.push({ x: node.x, y: node.y });
+      }
+    }
+
+    waypoints.push(destination);
+
+    // Filter out redundant points within 2.5px
+    const filtered = waypoints.filter((point, index) => {
+      if (index === 0) return true;
+      return Math.hypot(point.x - waypoints[index - 1].x, point.y - waypoints[index - 1].y) > 2.5;
+    });
+
+    return filtered.length >= 2 ? filtered : [origin, destination];
   },
 
   buildWalkwaySteps(originPoi, targetPoi, lang, isAccessible = false) {
