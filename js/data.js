@@ -20,8 +20,45 @@ const i18n = {
     nav_feedback_title: "تقييم الإقامة",
     nav_beach_mode_title: "وضع الشاطئ عالي التباين تحت الشمس",
     nav_audio_title: "كتم / تشغيل المؤثرات الصوتية",
+    nav_audio: "الصوت",
+    wf_live_walk_btn: "بدء محاكاة السير 🚶‍♂️",
+    srv_room: "رقم الغرفة:",
     nav_dark_mode_title: "تبديل المظهر الداكن / الفاتح",
     nav_lang_title: "اختيار لغة العرض",
+
+    // Audio Concierge
+    audio_concierge_title: "المرشد الصوتي الذكي",
+    audio_concierge_listen: "استمع للمرشد الصوتي 🎙️",
+    audio_concierge_speaking: "جارٍ التحدث 🎙️",
+    audio_concierge_mute: "كتم المرشد الصوتي",
+
+    // Live Walk Simulation
+    wf_start_simulation: "بدء محاكاة السير الحي 🚶‍♂️",
+    wf_stop_simulation: "إنهاء المحاكاة ✕",
+    wf_sim_arrived: "لقد وصلت إلى وجهتك بنجاح 🎉",
+    wf_sim_speed: "السرعة",
+
+    // Sun & Shade Live Radar
+    sun_shade_title: "رادار التشميس والظل الذكي",
+    sun_shade_btn: "رادار الشمس والظل ☀️",
+    sun_shade_subtitle: "تتبّع مسار الشمس ومناطق الظل لحظة بلحظة في منتجع مورينو هورايزون",
+    sun_state_morning: "شروق شمس هادئ • أجواء منعشة 🌅",
+    sun_state_peak: "ذروة التشميس • مثالي للسباحة والتان ☀️",
+    sun_state_afternoon: "شمس دافئة مع ظلال ممتدة 🌴",
+    sun_state_golden: "ساعة الغروب الذهبية على المارينا 🌇",
+    sun_state_night: "أجواء ليلية ساحرة ونسيم البحر 🌙",
+    sun_top_sunny: "أفضل أماكن التشميس الآن ☀️",
+    sun_top_shady: "أفضل أماكن الظل والانتعاش الآن 🌴",
+
+    // Voice Wayfinder
+    voice_nav_btn: "🎙️ إلى أين تريد الذهاب؟",
+    voice_nav_title: "المرشد الصوتي الذكي للمسارات والوجهات",
+    voice_nav_sub: "تحدث بحرية وقل إلى أين تريد الذهاب وسأرسم لك الطريق فوراً",
+    voice_nav_listening: "أنا أستمع إليك الآن... تحدث بوجهتك",
+    voice_nav_tap: "اضغط على الميكروفون وتحدث بوجهتك 🎙️",
+    voice_nav_chips_lbl: "أو اختر وجهة سريعة بلمسة واحدة:",
+    voice_nav_ph: "اكتب وجهتك (مثلاً: المسبح، الشاطئ، غرفة 1520)...",
+    voice_nav_search_btn: "إرشاد 🗺️",
 
     // Status & Clock
     resort_time: "🕒 توقيت الغردقة:",
@@ -29,6 +66,37 @@ const i18n = {
     greeting_afternoon: "طاب يومك الساحر 🏖️ استمتع بأجواء البحر الأحمر",
     greeting_sunset: "مساء الخير والغروب 🌅 وقت مثالي لجلسة الشاطئ",
     greeting_night: "سهرة ممتعة وليلة سعيدة 🌙 استمتع بأجواء المنتجع",
+    guest_welcome: "مرحباً بك في منتجع مورينو هورايزون",
+    guest_greeting_name: "أهلاً بك، أ/ {name}",
+    guest_room_sample: "غرفة 2015",
+    guest_room_label: "غرفة {room}",
+    guest_building_prompt: "سجل غرفتك واستمتع بخدمات النزلاء الحصرية والملاحة الذكية فورياً",
+    guest_building_info: "📍 إقامتك في: {building} ({floor}) • اختر وجهتك لعرض المسار على الخريطة",
+    guest_building_general: "✨ استمتع بإقامتك الفاخرة وخدمات الضيافة المتاحة على مدار 24 ساعة",
+    guest_edit_room: "تعديل بياناتي ✏️",
+    guest_register_room: "تسجيل الغرفة 🚪",
+    guest_meal_header: "مواعيد وجبات اليوم (بوفيهات المنتجع):",
+    guest_meal_checking: "جارِ فحص التوقيت...",
+    guest_meal_breakfast: "🍳 الإفطار",
+    guest_meal_lunch: "🥗 الغداء",
+    guest_meal_snacks: "☕ سناك وشاي",
+    guest_meal_dinner: "🍽️ العشاء",
+    guest_venue_main: "المطعم الرئيسي",
+    guest_venue_horizon: "بوفيه هورايزون",
+    guest_venue_lotus_bar: "بار مسبح لوتس",
+    guest_venue_restaurants: "المطاعم الرئيسية",
+    guest_quick_services: "خدمات غرفتي السريعة:",
+    guest_room_service: "خدمة الغرف",
+    guest_room_route: "مسار غرفتي",
+    guest_meal_available: "متاح الآن 🟢",
+    guest_meal_upcoming: "القادمة ⏳",
+    guest_meal_ended: "انتهى ✓",
+    guest_meal_active: "بوفيه {meal} مفتوح الآن في {venue} 🍽️",
+    guest_meal_next: "الوجبة القادمة: {meal} (تبدأ خلال {time}) ⏳",
+    guest_meal_closed: "انتهت بوفيهات اليوم • خدمة الغرف متاحة 24/7 🛎️",
+    guest_time_hours: "{hours} س و {minutes} د",
+    guest_time_minutes: "{minutes} دقيقة",
+    map_pin_interaction_hint: "انقر على أي رقم أو مبنى في الخريطة لمعرفة التفاصيل",
 
     // Weather Bar
     wlblTemp: "طقس الغردقة اليوم",
@@ -333,10 +401,7 @@ const i18n = {
     // Gallery
     gallery_title: "معرض لقطات منتجع مورينو هورايزون",
     gallery_sub: "جولة بصرية في أرجاء المنتجع الفاخر",
-    gallery_cap1: "إطلالة جوية بانورامية على الشاطئ والمسبح",
-    gallery_cap2: "مطعم لا ماما الإيطالي والمخبوزات",
-    gallery_cap3: "النادي الصحي والسبا وجلسات الاسترخاء",
-    gallery_cap4: "المخطط الجوي الثلاثي الأبعاد المعتمد",
+    gallery_photo_caption: "لقطة من المنتجع • {number}",
     gallery_close: "إغلاق المعرض",
 
     // Tour HUD
@@ -425,8 +490,45 @@ const i18n = {
     nav_feedback_title: "Guest Experience Feedback",
     nav_beach_mode_title: "High-Contrast Outdoor Beach Mode",
     nav_audio_title: "Mute / Unmute Audio FX",
+    nav_audio: "Sound",
+    wf_live_walk_btn: "Start Walk Simulation 🚶‍♂️",
+    srv_room: "Room number:",
     nav_dark_mode_title: "Toggle Dark / Light Mode",
     nav_lang_title: "Select display language",
+
+    // Audio Concierge
+    audio_concierge_title: "AI Concierge Audio Guide",
+    audio_concierge_listen: "Listen to Concierge 🎙️",
+    audio_concierge_speaking: "Speaking 🎙️",
+    audio_concierge_mute: "Mute Audio Guide",
+
+    // Live Walk Simulation
+    wf_start_simulation: "Start Live Walkthrough 🚶‍♂️",
+    wf_stop_simulation: "Stop Walkthrough ✕",
+    wf_sim_arrived: "You have arrived at your destination 🎉",
+    wf_sim_speed: "Speed",
+
+    // Sun & Shade Live Radar
+    sun_shade_title: "Smart Sun & Shade Radar",
+    sun_shade_btn: "Sun & Shade Radar ☀️",
+    sun_shade_subtitle: "Live real-time solar tracking and shaded lounge zones at Moreno Horizon",
+    sun_state_morning: "Gentle Morning Sun • Fresh Sea Breeze 🌅",
+    sun_state_peak: "Peak Sunbathing • Perfect for Pool & Tanning ☀️",
+    sun_state_afternoon: "Warm Sun with Expanding Shaded Lounges 🌴",
+    sun_state_golden: "Golden Hour Sunset at the Marina Pier 🌇",
+    sun_state_night: "Enchanting Night Sky & Evening Breeze 🌙",
+    sun_top_sunny: "Top Sunny Sunbathing Spots Right Now ☀️",
+    sun_top_shady: "Top Shaded & Cool Lounges Right Now 🌴",
+
+    // Voice Wayfinder
+    voice_nav_btn: "🎙️ Where do you want to go?",
+    voice_nav_title: "AI Voice Wayfinder & Concierge",
+    voice_nav_sub: "Speak freely and tell me where you want to go in the resort, and I will guide you instantly",
+    voice_nav_listening: "I'm listening... Speak your destination",
+    voice_nav_tap: "Tap the microphone to speak your destination 🎙️",
+    voice_nav_chips_lbl: "Or select a quick destination:",
+    voice_nav_ph: "Type destination (e.g. pool, beach, room 1520)...",
+    voice_nav_search_btn: "Guide 🗺️",
 
     // Status & Clock
     resort_time: "🕒 Hurghada Time:",
@@ -434,6 +536,37 @@ const i18n = {
     greeting_afternoon: "Good afternoon 🏖️ Enjoy the coastal Red Sea breeze",
     greeting_sunset: "Good evening 🌅 Perfect time for a marina stroll",
     greeting_night: "Have a wonderful night 🌙 Enjoy your resort stay",
+    guest_welcome: "Welcome to Moreno Horizon Resort",
+    guest_greeting_name: "Welcome, {name}",
+    guest_room_sample: "Room 2015",
+    guest_room_label: "Room {room}",
+    guest_building_prompt: "Add your room number to personalize guest services and navigation.",
+    guest_building_info: "📍 Staying in {building} ({floor}) • Choose a destination to view its map route",
+    guest_building_general: "✨ Enjoy your stay and our 24-hour hospitality services.",
+    guest_edit_room: "Edit my details ✏️",
+    guest_register_room: "Set room number 🚪",
+    guest_meal_header: "Today's resort meal schedule:",
+    guest_meal_checking: "Checking current meal times...",
+    guest_meal_breakfast: "🍳 Breakfast",
+    guest_meal_lunch: "🥗 Lunch",
+    guest_meal_snacks: "☕ Snacks & tea",
+    guest_meal_dinner: "🍽️ Dinner",
+    guest_venue_main: "Main restaurant",
+    guest_venue_horizon: "Horizon Buffet",
+    guest_venue_lotus_bar: "Lotus Pool Bar",
+    guest_venue_restaurants: "Main restaurants",
+    guest_quick_services: "My room quick services:",
+    guest_room_service: "Room service",
+    guest_room_route: "Route to my room",
+    guest_meal_available: "Open now 🟢",
+    guest_meal_upcoming: "Upcoming ⏳",
+    guest_meal_ended: "Ended ✓",
+    guest_meal_active: "The {meal} buffet is now open at {venue} 🍽️",
+    guest_meal_next: "Next meal: {meal} starts in {time} ⏳",
+    guest_meal_closed: "Today's buffets have ended • Room service is available 24/7 🛎️",
+    guest_time_hours: "{hours}h {minutes}m",
+    guest_time_minutes: "{minutes} minutes",
+    map_pin_interaction_hint: "Tap any map pin or building to see details",
 
     // Weather Bar
     wlblTemp: "Hurghada Weather",
@@ -738,10 +871,7 @@ const i18n = {
     // Gallery
     gallery_title: "Moreno Horizon Resort Gallery",
     gallery_sub: "A visual tour across our coastal sanctuary",
-    gallery_cap1: "Panoramic aerial view of beach and main pool",
-    gallery_cap2: "La Mama Italian Restaurant and artisanal bakery",
-    gallery_cap3: "Wellness Gym & Spa relaxing therapy suites",
-    gallery_cap4: "Official verified 3D aerial resort masterplan",
+    gallery_photo_caption: "Resort moment • {number}",
     gallery_close: "Close Gallery",
 
     // Tour HUD
@@ -830,8 +960,45 @@ const i18n = {
     nav_feedback_title: "Оценка качества отдыха",
     nav_beach_mode_title: "Контрастный режим для яркого солнца",
     nav_audio_title: "Звуковые эффекты",
+    nav_audio: "Звук",
+    wf_live_walk_btn: "Начать симуляцию маршрута 🚶‍♂️",
+    srv_room: "Номер комнаты:",
     nav_dark_mode_title: "Переключить темную / светлую тему",
     nav_lang_title: "Выбор языка интерфейса",
+
+    // Audio Concierge
+    audio_concierge_title: "Голосовой гид-консьерж",
+    audio_concierge_listen: "Слушать аудиогида 🎙️",
+    audio_concierge_speaking: "Воспроизведение 🎙️",
+    audio_concierge_mute: "Отключить аудиогида",
+
+    // Live Walk Simulation
+    wf_start_simulation: "Начать живую симуляцию 🚶‍♂️",
+    wf_stop_simulation: "Остановить симуляцию ✕",
+    wf_sim_arrived: "Вы прибыли в пункт назначения 🎉",
+    wf_sim_speed: "Скорость",
+
+    // Sun & Shade Live Radar
+    sun_shade_title: "Радар солнца и тени",
+    sun_shade_btn: "Радар солнца и тени ☀️",
+    sun_shade_subtitle: "Солнечные лучи и зоны комфортной тени в реальном времени",
+    sun_state_morning: "Мягкое утреннее солнце • Свежий бриз 🌅",
+    sun_state_peak: "Пик солнца • Идеально для загара и купания ☀️",
+    sun_state_afternoon: "Теплое дневное солнце и приятная тень 🌴",
+    sun_state_golden: "Золотой час заката на пирсе марины 🌇",
+    sun_state_night: "Очаровательная ночь и морской бриз 🌙",
+    sun_top_sunny: "Лучшие солнечные места для загара ☀️",
+    sun_top_shady: "Лучшие прохладные места в тени 🌴",
+
+    // Voice Wayfinder
+    voice_nav_btn: "🎙️ Куда вы хотите пойти?",
+    voice_nav_title: "Голосовой гид по курорту",
+    voice_nav_sub: "Скажите мне, куда вы хотите пойти, и я сразу проложу для вас маршрут",
+    voice_nav_listening: "Слушаю вас... Назовите место назначения",
+    voice_nav_tap: "Нажмите на микрофон и назовите цель 🎙️",
+    voice_nav_chips_lbl: "Или выберите популярное место:",
+    voice_nav_ph: "Введите место (например: бассейн, пляж, номер 1520)...",
+    voice_nav_search_btn: "Вести 🗺️",
 
     // Status & Clock
     resort_time: "🕒 Время в Хургаде:",
@@ -839,6 +1006,37 @@ const i18n = {
     greeting_afternoon: "Добрый день 🏖️ Наслаждайтесь бризом Красного моря",
     greeting_sunset: "Добрый вечер 🌅 Идеальное время для прогулки у марины",
     greeting_night: "Приятного вечера и спокойной ночи 🌙 Отдыхайте с комфортом",
+    guest_welcome: "Добро пожаловать в Moreno Horizon Resort",
+    guest_greeting_name: "Добро пожаловать, {name}",
+    guest_room_sample: "Номер 2015",
+    guest_room_label: "Номер {room}",
+    guest_building_prompt: "Укажите номер комнаты, чтобы настроить услуги и навигацию.",
+    guest_building_info: "📍 Вы остановились в корпусе {building} ({floor}) • Выберите пункт, чтобы увидеть маршрут",
+    guest_building_general: "✨ Приятного отдыха! Гостевые услуги доступны круглосуточно.",
+    guest_edit_room: "Изменить данные ✏️",
+    guest_register_room: "Указать номер 🚪",
+    guest_meal_header: "Расписание питания на сегодня:",
+    guest_meal_checking: "Проверяем расписание...",
+    guest_meal_breakfast: "🍳 Завтрак",
+    guest_meal_lunch: "🥗 Обед",
+    guest_meal_snacks: "☕ Закуски и чай",
+    guest_meal_dinner: "🍽️ Ужин",
+    guest_venue_main: "Главный ресторан",
+    guest_venue_horizon: "Буфет Horizon",
+    guest_venue_lotus_bar: "Бар у бассейна Lotus",
+    guest_venue_restaurants: "Главные рестораны",
+    guest_quick_services: "Быстрые услуги для номера:",
+    guest_room_service: "Обслуживание номера",
+    guest_room_route: "Маршрут к номеру",
+    guest_meal_available: "Открыто сейчас 🟢",
+    guest_meal_upcoming: "Скоро ⏳",
+    guest_meal_ended: "Завершено ✓",
+    guest_meal_active: "Буфет «{meal}» открыт в заведении «{venue}» 🍽️",
+    guest_meal_next: "Следующий приём пищи: {meal}, через {time} ⏳",
+    guest_meal_closed: "Буфеты на сегодня закрыты • Обслуживание номера доступно 24/7 🛎️",
+    guest_time_hours: "{hours} ч {minutes} мин",
+    guest_time_minutes: "{minutes} мин",
+    map_pin_interaction_hint: "Нажмите на объект или здание на карте, чтобы увидеть подробности",
 
     // Weather Bar
     wlblTemp: "Погода в Хургаде",
@@ -1143,10 +1341,7 @@ const i18n = {
     // Gallery
     gallery_title: "Фотогалерея Moreno Horizon Resort",
     gallery_sub: "Визуальная прогулка по курортному комплексу",
-    gallery_cap1: "Панорамный вид с высоты птичьего полета на пляж и бассейн",
-    gallery_cap2: "Итальянский ресторан La Mama и свежая выпечка",
-    gallery_cap3: "Оздоровительный СПА-центр и зоны релаксации",
-    gallery_cap4: "Официальный 3D-план территории отеля",
+    gallery_photo_caption: "Моменты отдыха • {number}",
     gallery_close: "Закрыть галерею",
 
     // Tour HUD
@@ -1235,8 +1430,45 @@ const i18n = {
     nav_feedback_title: "Gästezufriedenheit & Feedback",
     nav_beach_mode_title: "Kontrastreicher Sonnen-Strandmodus",
     nav_audio_title: "Soundeffekte ein/ausschalten",
+    nav_audio: "Ton",
+    wf_live_walk_btn: "Gehsimulation starten 🚶‍♂️",
+    srv_room: "Zimmernummer:",
     nav_dark_mode_title: "Dunkel-/Hellmodus umschalten",
     nav_lang_title: "Sprache auswählen",
+
+    // Audio Concierge
+    audio_concierge_title: "KI-Concierge Audio-Guide",
+    audio_concierge_listen: "Audio-Guide anhören 🎙️",
+    audio_concierge_speaking: "Wiedergabe 🎙️",
+    audio_concierge_mute: "Audio-Guide stumm",
+
+    // Live Walk Simulation
+    wf_start_simulation: "Live-Gehsimulation starten 🚶‍♂️",
+    wf_stop_simulation: "Simulation beenden ✕",
+    wf_sim_arrived: "Sie haben Ihr Ziel erreicht 🎉",
+    wf_sim_speed: "Geschwindigkeit",
+
+    // Sun & Shade Live Radar
+    sun_shade_title: "Sonne- & Schatten-Radar",
+    sun_shade_btn: "Sonne- & Schatten-Radar ☀️",
+    sun_shade_subtitle: "Echtzeit-Sonneneinstrahlung & schattige Ruhebereiche im Moreno Horizon",
+    sun_state_morning: "Sanfte Morgensonne • Frische Meeresbrise 🌅",
+    sun_state_peak: "Optimale Sonnenzeit • Perfekt zum Bräunen ☀️",
+    sun_state_afternoon: "Warme Nachmittagssonne mit Schattenoasen 🌴",
+    sun_state_golden: "Goldene Stunde Sonnenuntergang am Marina-Steg 🌇",
+    sun_state_night: "Zauberhafte Nacht & erfrischende Brise 🌙",
+    sun_top_sunny: "Beste Sonnenplätze jetzt ☀️",
+    sun_top_shady: "Beste schattige Ruheplätze jetzt 🌴",
+
+    // Voice Wayfinder
+    voice_nav_btn: "🎙️ Wohin möchten Sie?",
+    voice_nav_title: "KI-Sprachnavigation & Wegweiser",
+    voice_nav_sub: "Sagen Sie mir, wohin Sie möchten, und ich zeige Ihnen sofort den Weg",
+    voice_nav_listening: "Ich höre zu... Nennen Sie Ihr Ziel",
+    voice_nav_tap: "Tippen Sie auf das Mikrofon, um zu sprechen 🎙️",
+    voice_nav_chips_lbl: "Oder wählen Sie ein Schnellziel:",
+    voice_nav_ph: "Ziel eingeben (z. B. Pool, Strand, Zimmer 1520)...",
+    voice_nav_search_btn: "Führen 🗺️",
 
     // Status & Clock
     resort_time: "🕒 Hurghada Zeit:",
@@ -1244,6 +1476,37 @@ const i18n = {
     greeting_afternoon: "Guten Tag 🏖️ Genießen Sie die Meeresbrise des Roten Meeres",
     greeting_sunset: "Guten Abend 🌅 Perfekte Zeit für einen Spaziergang an der Marina",
     greeting_night: "Angenehmen Abend und gute Nacht 🌙 Genießen Sie Ihren Aufenthalt",
+    guest_welcome: "Willkommen im Moreno Horizon Resort",
+    guest_greeting_name: "Willkommen, {name}",
+    guest_room_sample: "Zimmer 2015",
+    guest_room_label: "Zimmer {room}",
+    guest_building_prompt: "Geben Sie Ihre Zimmernummer ein, um Services und Navigation anzupassen.",
+    guest_building_info: "📍 Ihr Zimmer befindet sich in {building} ({floor}) • Wählen Sie ein Ziel für die Route",
+    guest_building_general: "✨ Genießen Sie Ihren Aufenthalt. Unser Gästeservice ist rund um die Uhr verfügbar.",
+    guest_edit_room: "Daten bearbeiten ✏️",
+    guest_register_room: "Zimmernummer eingeben 🚪",
+    guest_meal_header: "Heutige Essenszeiten im Resort:",
+    guest_meal_checking: "Essenszeiten werden geprüft...",
+    guest_meal_breakfast: "🍳 Frühstück",
+    guest_meal_lunch: "🥗 Mittagessen",
+    guest_meal_snacks: "☕ Snacks & Tee",
+    guest_meal_dinner: "🍽️ Abendessen",
+    guest_venue_main: "Hauptrestaurant",
+    guest_venue_horizon: "Horizon-Buffet",
+    guest_venue_lotus_bar: "Lotus-Poolbar",
+    guest_venue_restaurants: "Hauptrestaurants",
+    guest_quick_services: "Schnelle Services für mein Zimmer:",
+    guest_room_service: "Zimmerservice",
+    guest_room_route: "Route zu meinem Zimmer",
+    guest_meal_available: "Jetzt geöffnet 🟢",
+    guest_meal_upcoming: "Demnächst ⏳",
+    guest_meal_ended: "Beendet ✓",
+    guest_meal_active: "Das {meal}-Buffet ist jetzt bei {venue} geöffnet 🍽️",
+    guest_meal_next: "Nächste Mahlzeit: {meal} in {time} ⏳",
+    guest_meal_closed: "Die Buffets für heute sind beendet • Zimmerservice ist rund um die Uhr verfügbar 🛎️",
+    guest_time_hours: "{hours} Std. {minutes} Min.",
+    guest_time_minutes: "{minutes} Min.",
+    map_pin_interaction_hint: "Tippen Sie auf eine Markierung oder ein Gebäude für Details",
 
     // Weather Bar
     wlblTemp: "Hurghada Wetter",
@@ -1548,10 +1811,7 @@ const i18n = {
     // Gallery
     gallery_title: "Fotogalerie Moreno Horizon Resort",
     gallery_sub: "Ein visueller Rundgang durch unser Luxusresort",
-    gallery_cap1: "Panoramablick aus der Luft auf Strand und Hauptpool",
-    gallery_cap2: "Italienisches Restaurant La Mama und Holzofen-Spezialitäten",
-    gallery_cap3: "Wellness-Gym & Spa Entspannungsbereiche",
-    gallery_cap4: "Offizieller 3D-Lageplan des Resorts",
+    gallery_photo_caption: "Einblick ins Resort • {number}",
     gallery_close: "Galerie schließen",
 
     // Tour HUD
@@ -1769,6 +2029,31 @@ function getLocalizedFloor(floorStr, lang = 'ar') {
   return floorStr;
 }
 
+function getLocalizedPoiHours(hours, lang = 'ar') {
+  if (!hours || lang === 'ar') return hours;
+
+  const phrases = {
+    "مفتوح دائماً لجميع الصلوات": { en: "Always open for prayers", ru: "Открыто для молитв постоянно", de: "Für Gebete immer geöffnet" },
+    "متاح 24 ساعة (تحويلة داخلية 15)": { en: "Open 24 hours (internal extension 15)", ru: "Круглосуточно (внутренний номер 15)", de: "Rund um die Uhr (Durchwahl 15)" },
+    "الاستقبال والكونسيرج 24 ساعة": { en: "Reception & concierge: 24 hours", ru: "Ресепшен и консьерж: круглосуточно", de: "Rezeption & Concierge: rund um die Uhr" },
+    "خدمة الغرف 24 ساعة": { en: "Room service: 24 hours", ru: "Обслуживание номеров: круглосуточно", de: "Zimmerservice: rund um die Uhr" },
+    "متاح 24 ساعة": { en: "Open 24 hours", ru: "Открыто круглосуточно", de: "24 Stunden geöffnet" },
+    "حتى الغروب": { en: "until sunset", ru: "до заката", de: "bis Sonnenuntergang" },
+    "غروب الشمس": { en: "sunset", ru: "закат", de: "Sonnenuntergang" },
+    "حجز مسبق": { en: "reservation required", ru: "по предварительной записи", de: "Reservierung erforderlich" },
+    "سناكس": { en: "snacks", ru: "закуски", de: "Snacks" },
+    "إفطار": { en: "breakfast", ru: "завтрак", de: "Frühstück" },
+    "غداء": { en: "lunch", ru: "обед", de: "Mittagsessen" },
+    "عشاء": { en: "dinner", ru: "ужин", de: "Abendessen" }
+  };
+
+  let localized = hours;
+  Object.entries(phrases).forEach(([arabic, translations]) => {
+    localized = localized.split(arabic).join(translations[lang] || arabic);
+  });
+  return localized;
+}
+
 function getLocalizedPoi(poi, lang = 'ar') {
   const cat = getLocalizedCategory(poi.category, lang);
   if (lang === 'ar' || !lang) {
@@ -1778,7 +2063,7 @@ function getLocalizedPoi(poi, lang = 'ar') {
       tag: poi.tagAr,
       desc: poi.descriptionAr,
       category: cat || poi.categoryNameAr,
-      hours: poi.hours
+      hours: getLocalizedPoiHours(poi.hours, lang)
     };
   }
   const trans = poiTranslations[poi.id] && poiTranslations[poi.id][lang];
@@ -1789,7 +2074,7 @@ function getLocalizedPoi(poi, lang = 'ar') {
       tag: trans.tag,
       desc: trans.desc,
       category: cat || poi.categoryNameAr,
-      hours: poi.hours
+      hours: getLocalizedPoiHours(poi.hours, lang)
     };
   }
   const enTrans = poiTranslations[poi.id] && poiTranslations[poi.id]['en'];
@@ -1799,7 +2084,7 @@ function getLocalizedPoi(poi, lang = 'ar') {
     tag: (enTrans && enTrans.tag) || poi.tagAr,
     desc: (enTrans && enTrans.desc) || poi.descriptionAr,
     category: cat || poi.categoryNameAr,
-    hours: poi.hours
+    hours: getLocalizedPoiHours(poi.hours, lang)
   };
 }
 
@@ -1984,7 +2269,7 @@ const resortPois = [
     hours: "08:00 - 20:00",
     locAr: "مبنى الخدمات الملاصق للحدائق الوسطى",
     descriptionAr: "جلسات استرخاء ومساج تايلاندي وسويدي، حمام بخار وجاكوزي، وصالة تدريب بدني حديثة بإطلالة خضراء.",
-    coords: { x: 57.5, y: 46.5 },
+    coords: { x: 64.8, y: 49.0 },
     badgeColor: "bg-teal-700",
     image: "assets/images/spa_wellness.jpg",
     menuItems: [
@@ -2034,7 +2319,7 @@ const resortPois = [
     hours: "07:00-10:30 (إفطار) | 13:00-15:00 (غداء) | 19:00-22:00 (عشاء)",
     locAr: "المبنى الرئيسي مطل على حدائق اللوتس",
     descriptionAr: "المطعم الرئيسي للمنتجع يقدم أشهى الأطباق العالمية والمصرية مع محطات شواء حية وركن خاص للأطفال.",
-    coords: { x: 52.79, y: 46.39 },
+    coords: { x: 47.86, y: 69.96 },
     badgeColor: "bg-emerald-600",
     image: "assets/images/sirena_buffet.jpg"
   },
@@ -2326,43 +2611,177 @@ const resortSpaTreatments = [
   }
 ];
 
-// Cinematic Auto-Tour Route Stops
+// Ultra-HD 3D Cinematic Auto-Tour Route Stops (10 Signature Landmark Destinations)
 const cinematicTourSteps = [
   {
-    poiId: "1",
-    titleAr: "منطقة الشاطئ والمارينا الخاصة",
-    descAr: "شاطئ رملي ناعم برصيف يخوت ممتد داخل البحر الأحمر، مياه فيروزية صافية مثالية للسباحة والسنوركلينج.",
-    zoom: 1.55
+    poiId: "M",
+    icon: "🏛️",
+    image: "assets/images/resort_lobby.jpg",
+    zoom: 1.70,
+    pitch: 48,
+    bearing: 6,
+    action: "explore",
+    titleAr: "بهو الاستقبال واللوبي الملكي",
+    titleEn: "Grand Reception Lobby & Concierge",
+    titleRu: "Королевское лобби и служба консьержа",
+    titleDe: "Königliche Empfangshalle & Concierge",
+    descAr: "بهو الاستقبال الفاخر، صالونات الضيافة، مكاتب الكونسيرج 24 ساعة، وبوابتك لبدء إقامة استثنائية على ساحل البحر الأحمر.",
+    descEn: "Majestic arrival foyer, 24/7 personalized concierge, executive hospitality lounge, and your gateway to luxury on the Red Sea.",
+    descRu: "Роскошный холл отеля, круглосуточная стойка консьержа, зона отдыха и начало вашего незабываемого отдыха на Красном море.",
+    descDe: "Prachtvolle Empfangshalle, 24/7 persönlicher Concierge-Service und Ihr exklusiver Einstieg in den Traumurlaub am Roten Meer."
   },
   {
-    poiId: "3",
-    titleAr: "أكوا بارك مورينو للألعاب المائية",
-    descAr: "مجمع الزلاجات والألعاب المائية الشيقة المخصصة لجميع أفراد الأسرة مع برك سباحة آمنة ومراقبة.",
-    zoom: 1.55
-  },
-  {
-    poiId: "8",
-    titleAr: "مطعم لا ماما الإيطالي الفاخر",
-    descAr: "أشهى أطباق البيتزا النابوليتان من أفران الحطب، الباستا الطازجة، وتجربة طعام راقية على ضوء الشموع.",
-    zoom: 1.55
-  },
-  {
-    poiId: "9",
-    titleAr: "النادي الصحي والسبا الملكي",
-    descAr: "ملاذك الخاص للاسترخاء التام؛ حمام تركي، غرف ساونا، جلسات مساج تايلاندي وسويدي، وجيم متطور.",
-    zoom: 1.55
+    poiId: "12",
+    icon: "🍽️",
+    image: "assets/images/sirena_buffet.jpg",
+    zoom: 1.75,
+    pitch: 50,
+    bearing: 8,
+    action: "book_table",
+    titleAr: "مطعم سيرينا البوفيه المفتوح",
+    titleEn: "Sirena International Buffet",
+    titleRu: "Главный ресторан Serena (Шведский стол)",
+    titleDe: "Hauptbuffet-Restaurant Serena",
+    descAr: "تشكيلة أطباق عالمية ومصرية غنية، محطات طهي وشواء حية، ومخبوزات طازجة يومياً على الإفطار والغداء والعشاء.",
+    descEn: "Lavish international & Oriental buffet, live show-cooking stations, and artisan bakery served fresh for breakfast, lunch, and dinner.",
+    descRu: "Богатый интернациональный шведский стол, открытые кулинарные станции с грилем и свежая выпечка три раза в день.",
+    descDe: "Reichhaltiges internationales Buffet, Live-Cooking-Stationen und täglich ofenfrisches Gebäck zu allen Hauptmahlzeiten."
   },
   {
     poiId: "11",
+    icon: "🏊",
+    image: "assets/images/lotus_pool.jpg",
+    zoom: 1.68,
+    pitch: 50,
+    bearing: 10,
+    action: "route",
     titleAr: "مسبح لوتس والبحيرة المركزية",
-    descAr: "أكبر بحيرات المسبح الهادئة في قلب المنتجع، محاطة بالنخيل وأسرّة الاستلقاء الفاخرة ومحطة المناشف.",
-    zoom: 1.55
+    titleEn: "Lotus Central Pool & Swim-up Bar",
+    titleRu: "Центральный бассейн Lotus и бар в воде",
+    titleDe: "Zentraler Lotus-Pool & Swim-up-Bar",
+    descAr: "أكبر بحيرات المسبح الهادئة في قلب المنتجع بمياه كريستالية متدرجة العمق، محاطة بالنخيل وأسرّة الاستلقاء الفاخرة وبار الكوكتيل المائي.",
+    descEn: "The resort's crown crystal lagoon with gentle graduated depths, palm tree islands, premium sun loungers, and in-water cocktail bar.",
+    descRu: "Самый большой живописный бассейн курорта с плавной глубиной, пальмовыми островками, шезлонгами и баром прямо в воде.",
+    descDe: "Die weitläufige Lagune im Herzen der Anlage mit bequemen Sonnenliegen, Palmeninseln und erfrischender Cocktailbar im Pool."
   },
   {
-    poiId: "M",
-    titleAr: "المبنى الرئيسي واللوبي الفاخر",
-    descAr: "بهو الاستقبال الملكي، مكاتب الكونسيرج 24/7، مطعم سيرينا البوفيه المفتوح، وبوابتك لبدء إقامة استثنائية.",
-    zoom: 1.55
+    poiId: "8",
+    icon: "🍕",
+    image: "assets/images/la_mama.jpg",
+    zoom: 1.72,
+    pitch: 48,
+    bearing: 8,
+    action: "book_table",
+    titleAr: "مطعم لا ماما الإيطالي الفاخر",
+    titleEn: "La Mama Italian Gourmet Restaurant",
+    titleRu: "Итальянский ресторан высокой кухни La Mama",
+    titleDe: "Italienisches Gourmet-Restaurant La Mama",
+    descAr: "بيتزا نابوليتان من أفران الحطب، باستا إيطالية طازجة محضرة يدوياً، وأمسيات رومانسية ساحرة على ضوء الشموع.",
+    descEn: "Wood-fired artisan Neapolitan pizza, fresh handmade pasta, and romantic candlelit dinners overlooking the gardens.",
+    descRu: "Пицца из дровяной печи, свежая домашняя паста и романтическая вечерняя атмосфера при свечах с видом на сады.",
+    descDe: "Steinofen-Pizza nach traditioneller Rezeptur, handgemachte Pasta und romantische Candle-Light-Dinner mit Gartenblick."
+  },
+  {
+    poiId: "1",
+    icon: "🌊",
+    image: "assets/images/beach_marina.jpg",
+    zoom: 1.62,
+    pitch: 52,
+    bearing: 355,
+    action: "route",
+    titleAr: "شاطئ البحر الأحمر ورصيف المارينا",
+    titleEn: "Private Sandy Beach & Marina Pier",
+    titleRu: "Собственный песчаный пляж и пирс марины",
+    titleDe: "Privater Sandstrand & Marina-Steg",
+    descAr: "شاطئ رملي خاص برصيف يخوت ممتد داخل مياه البحر الأحمر الفيروزية الصافية، مثالي للسباحة والاسترخاء ومشاهدة الغروب.",
+    descEn: "Private golden sand shoreline with an extended yacht pier into crystal turquoise waters, perfect for swimming, lounging, and sunsets.",
+    descRu: "Широкий песчаный пляж с собственным пирсом для яхт, прозрачной бирюзовой водой и прекрасными закатами.",
+    descDe: "Privater feinsandiger Strand mit weit ins Rote Meer reichendem Pier für Boote, Schwimmen und spektakuläre Sonnenuntergänge."
+  },
+  {
+    poiId: "2",
+    icon: "🤿",
+    image: "assets/images/diving_center.jpg",
+    zoom: 1.70,
+    pitch: 48,
+    bearing: 352,
+    action: "book_excursion",
+    titleAr: "مركز الغوص وسفاري اليخوت",
+    titleEn: "PADI Diving & Watersports Center",
+    titleRu: "Дайвинг-центр PADI и морские экскурсии",
+    titleDe: "PADI Tauch- & Wassersportzentrum",
+    descAr: "رحلات يومية إلى جزيرة الجفتون ومحميات الشعاب المرجانية النادرة، دورات غطس معتمدة، وأنشطة الإبحار والباراسيلينج.",
+    descEn: "Daily boat excursions to Giftun Island coral reserves, certified PADI dive courses, snorkeling safaris, and parasailing.",
+    descRu: "Ежедневные морские прогулки на остров Гифтун, коралловые рифы, обучение дайвингу PADI и водные виды спорта.",
+    descDe: "Tägliche Bootsausflüge zur Giftun-Insel, zertifizierte PADI-Tauchkurse, Schnorcheltouren und Parasailing am Riff."
+  },
+  {
+    poiId: "3",
+    icon: "🛝",
+    image: "assets/images/aquapark_pool.jpg",
+    zoom: 1.70,
+    pitch: 50,
+    bearing: 350,
+    action: "route",
+    titleAr: "أكوا بارك مورينو للألعاب المائية",
+    titleEn: "Moreno Aqua Park Splash Slides",
+    titleRu: "Аквапарк Moreno с водными горками",
+    titleDe: "Moreno Aquapark & Wasserrutschen",
+    descAr: "مجمع زلاجات وألعاب مائية عائلية متعددة المسارات مع مسابح آمنة مجهزة بمراقبة وإشراف منقذين معتمدين طوال اليوم.",
+    descEn: "Exciting multi-lane waterslide complex and family splash pools with certified lifeguard surveillance all day.",
+    descRu: "Комплекс скоростных водных горок для всей семьи с безопасными бассейнами под присмотром дежурных спасателей.",
+    descDe: "Spannender Rutschenpark für die ganze Familie mit mehreren Bahnen, Erlebnisbecken und ständiger Rettungsschwimmer-Aufsicht."
+  },
+  {
+    poiId: "9",
+    icon: "💆",
+    image: "assets/images/spa_wellness.jpg",
+    zoom: 1.75,
+    pitch: 48,
+    bearing: 10,
+    action: "book_spa",
+    titleAr: "النادي الصحي والسبا الملكي",
+    titleEn: "Royal Spa & Luxury Hammam",
+    titleRu: "Королевский спа-центр и турецкий хаммам",
+    titleDe: "Königliches Spa & Luxus-Hammam",
+    descAr: "ملاذك الخاص للاسترخاء التام؛ حمام تركي تراثي، غرف بخار وساونا، مساج بالأحجار الساخنة، وجاكوزي مائي خاص بالأعشاب الطبيعية.",
+    descEn: "Your private sanctuary of rejuvenation; authentic Turkish hammam, herbal jacuzzi, sauna, and hot basalt stone massages.",
+    descRu: "Оазис релаксации: традиционный турецкий хаммам, гидромассажные ванны с травами, сауна и массаж горячими камнями.",
+    descDe: "Ihre Oase der vollkommenen Entspannung: traditioneller türkischer Hammam, Kräuter-Whirlpool, Sauna und Hot-Stone-Massagen."
+  },
+  {
+    poiId: "10",
+    icon: "🎾",
+    image: "assets/images/tennis_courts.jpg",
+    zoom: 1.70,
+    pitch: 48,
+    bearing: 6,
+    action: "route",
+    titleAr: "ملاعب التنس والأنشطة الرياضية",
+    titleEn: "Floodlit Tennis & Sports Courts",
+    titleRu: "Теннисные корты с вечерним освещением",
+    titleDe: "Flutlicht-Tennisplätze & Sportarena",
+    descAr: "ملاعب احترافية مجهزة بإضاءة مسائية متطورة، تأجير مضارب وكرات مجاناً للنزلاء، وإمكانية حجز جلسات تدريب فردية.",
+    descEn: "Championship-grade tennis courts with evening floodlights, complimentary racket rental, and private coaching sessions.",
+    descRu: "Профессиональные корты с ярким вечерним освещением, бесплатный прокат ракеток и возможность занятий с тренером.",
+    descDe: "Erstklassige Tennisplätze mit abendlicher Flutlichtanlage, kostenlosem Schlägerverleih und buchbaren Trainerstunden."
+  },
+  {
+    poiId: "MLS",
+    icon: "🛍️",
+    image: "assets/images/resort_mall.jpg",
+    zoom: 1.68,
+    pitch: 46,
+    bearing: 352,
+    action: "route",
+    titleAr: "المجمع التجاري والبازار المصري",
+    titleEn: "MLS Commercial Complex & Bazaar",
+    titleRu: "Торговый комплекс MLS и восточный базар",
+    titleDe: "Einkaufszentrum MLS & Orientalischer Basar",
+    descAr: "المبنى الدائري الأيقوني الذي يضم البازار الشرقي، محمص القهوة الإيطالية، محلات الهدايا التذكارية، وخدمات الليموزين وتأجير السيارات.",
+    descEn: "Iconic circular complex featuring the Oriental souvenir bazaar, Italian espresso roastery, gift boutiques, and car rental.",
+    descRu: "Круглый торговый комплекс с восточным базаром, кофейней, сувенирными магазинами и прокатом автомобилей.",
+    descDe: "Der markante Rundbau mit orientalischem Basar, Kaffeerösterei, Souvenirläden und Autovermietung."
   }
 ];
 

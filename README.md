@@ -58,7 +58,7 @@ node server.js
 ├── manifest.json                  # إعدادات تطبيق الويب PWA
 ├── sw.js                          # Service Worker لإدارة الكاش والعمل بدون إنترنت
 ├── server.js                      # خادم محلي خفيف
-├── moreno_resort_map.jpg          # الخريطة الأساسية المصورة للمنتجع
+├── moreno_resort_map_new.png      # الخريطة الأساسية المصورة للمنتجع
 ├── css/
 │   └── style.css                  # التنسيقات ونظام التصميم المخصص
 ├── js/

@@ -3,14 +3,11 @@
  * Network-First Strategy with Offline Cache Fallback
  */
 
-const CACHE_NAME = 'moreno-guide-v29';
+const CACHE_NAME = 'moreno-guide-v40';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './moreno_resort_map.jpg',
-  './assets/images/moreno_earth_day.jpg',
-  './assets/images/moreno_earth_night.jpg',
-  './assets/images/moreno_earth_satellite.jpg',
+  './moreno_resort_map_new.png',
   './manifest.json',
   './assets/icons/apple-touch-icon.png',
   './assets/icons/apple-touch-icon-180x180.png',
@@ -20,12 +17,12 @@ const ASSETS_TO_CACHE = [
   './assets/icons/favicon-32x32.png',
   './assets/icons/favicon-16x16.png',
   './css/style.css',
-  './css/style.css?v=25.0',
-  './js/data.js?v=25.0',
-  './js/map-engine.js?v=25.0',
-  './js/virtual-resort-map.js?v=25.0',
-  './js/wayfinder.js?v=25.0',
-  './js/app.js?v=25.0',
+  './css/style.css?v=33.0',
+  './js/data.js?v=33.0',
+  './js/map-engine.js?v=33.0',
+  './js/virtual-resort-map.js?v=33.0',
+  './js/wayfinder.js?v=33.0',
+  './js/app.js?v=33.0',
   './assets/images/hero_resort.jpg',
   './assets/images/beach_marina.jpg',
   './assets/images/sirena_buffet.jpg',
@@ -44,7 +41,8 @@ const ASSETS_TO_CACHE = [
   './assets/images/resort_clinic.jpg',
   './assets/images/resort_gate.jpg',
   './assets/images/luxury_room.jpg',
-  './assets/images/giftun_island.jpg'
+  './assets/images/giftun_island.jpg',
+  ...Array.from({ length: 35 }, (_, index) => `./assets/images/gallery/gallery-${String(index + 1).padStart(2, '0')}.jpg`)
 ];
 
 self.addEventListener('install', (event) => {

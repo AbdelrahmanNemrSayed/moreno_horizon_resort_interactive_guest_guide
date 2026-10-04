@@ -23,6 +23,10 @@ const App = {
     this.setupPwaInstall();
     this.refreshWeather();
     this._weatherInterval = setInterval(() => this.refreshWeather(), 15 * 60 * 1000);
+    ConciergeAudioGuide.init();
+    this.updateSunShadeWidget();
+    this._sunShadeInterval = setInterval(() => this.updateSunShadeWidget(), 5 * 60 * 1000);
+    VoiceNavigator.init();
   },
 
   readWeatherCache() {
@@ -182,6 +186,8 @@ const App = {
   },
 
   updateGuestDashboardUI(name, room) {
+    const lang = this.currentLang || 'ar';
+    const t = i18n[lang] || i18n.ar;
     const nameEl = document.getElementById('guestDashName');
     const badgeEl = document.getElementById('guestDashRoomBadge');
     const roomTextEl = document.getElementById('guestDashRoomText');
@@ -191,10 +197,10 @@ const App = {
     if (!nameEl) return;
 
     if (room) {
-      nameEl.innerText = name ? `أهلاً بك، أ/ ${name}` : `أهلاً بك في منتجع مورينو هورايزون`;
+      nameEl.textContent = name ? t.guest_greeting_name.replace('{name}', name) : t.guest_welcome;
       if (badgeEl) badgeEl.classList.remove('hidden');
-      if (roomTextEl) roomTextEl.innerText = `غرفة ${room}`;
-      if (editBtnText) editBtnText.innerText = 'تعديل بياناتي ✏️';
+      if (roomTextEl) roomTextEl.textContent = t.guest_room_label.replace('{room}', room);
+      if (editBtnText) editBtnText.textContent = t.guest_edit_room;
 
       // Pre-fill across forms
       const roomSearch = document.getElementById('roomSearchInput');
@@ -227,28 +233,26 @@ const App = {
       }
 
       if (matchedBuilding) {
-        const floorText = matchedFloor === 'ground' ? 'الطابق الأرضي' : (matchedFloor === 'first' ? 'الطابق الأول' : matchedFloor);
-        if (buildingTextEl) {
-          buildingTextEl.innerHTML = `📍 أنت مقيم في: <strong>${matchedBuilding.nameAr}</strong> (${floorText}) • المسار متاح فورياً بالخريطة التفاعلية`;
-        }
+        const building = getLocalizedPoi(matchedBuilding, lang).name;
+        const floor = getLocalizedFloor(matchedFloor, lang);
+        if (buildingTextEl) buildingTextEl.textContent = t.guest_building_info
+          .replace('{building}', building)
+          .replace('{floor}', floor);
       } else {
-        if (buildingTextEl) {
-          buildingTextEl.innerText = '✨ استمتع بإقامتك الفاخرة وخدمات الضيافة المتاحة على مدار 24 ساعة';
-        }
+        if (buildingTextEl) buildingTextEl.textContent = t.guest_building_general;
       }
     } else {
-      nameEl.innerText = 'مرحباً بك في منتجع مورينو هورايزون';
+      nameEl.textContent = t.guest_welcome;
       if (badgeEl) badgeEl.classList.add('hidden');
-      if (buildingTextEl) {
-        buildingTextEl.innerText = 'سجل رقم غرفتك لتخصيص خدمات المنتجع والملاحة الذكية فورياً';
-      }
-      if (editBtnText) editBtnText.innerText = 'تسجيل الغرفة 🚪';
+      if (buildingTextEl) buildingTextEl.textContent = t.guest_building_prompt;
+      if (editBtnText) editBtnText.textContent = t.guest_register_room;
     }
   },
 
   updateMealTimesStatus() {
+    const lang = this.currentLang || 'ar';
+    const t = i18n[lang] || i18n.ar;
     const now = new Date();
-    // Cairo/Hurghada Time (UTC+3)
     const cairoDateStr = now.toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
     const cairoNow = new Date(cairoDateStr);
     const hours = cairoNow.getHours();
@@ -256,10 +260,10 @@ const App = {
     const curTime = hours * 60 + minutes;
 
     const meals = [
-      { id: 'mealSlotBreakfast', name: 'الإفطار', start: 7 * 60, end: 10 * 60 + 30, venue: 'المطعم الرئيسي' },
-      { id: 'mealSlotLunch', name: 'الغداء', start: 12 * 60 + 30, end: 15 * 60, venue: 'بوفيه هورايزون' },
-      { id: 'mealSlotSnacks', name: 'سناك وشاي', start: 16 * 60, end: 17 * 60 + 30, venue: 'بار مسبح لوتس' },
-      { id: 'mealSlotDinner', name: 'العشاء', start: 18 * 60 + 30, end: 21 * 60 + 30, venue: 'المطاعم الرئيسية' },
+      { id: 'mealSlotBreakfast', name: t.guest_meal_breakfast, start: 7 * 60, end: 10 * 60 + 30, venue: t.guest_venue_main },
+      { id: 'mealSlotLunch', name: t.guest_meal_lunch, start: 12 * 60 + 30, end: 15 * 60, venue: t.guest_venue_horizon },
+      { id: 'mealSlotSnacks', name: t.guest_meal_snacks, start: 16 * 60, end: 17 * 60 + 30, venue: t.guest_venue_lotus_bar },
+      { id: 'mealSlotDinner', name: t.guest_meal_dinner, start: 18 * 60 + 30, end: 21 * 60 + 30, venue: t.guest_venue_restaurants },
     ];
 
     let activeMeal = null;
@@ -275,20 +279,20 @@ const App = {
         slotEl.className = 'p-2.5 rounded-xl bg-emerald-500/15 border-2 border-emerald-400/60 shadow-lg shadow-emerald-500/10 transition scale-[1.02]';
         if (badge) {
           badge.className = 'meal-badge text-[9px] px-1.5 py-0.5 rounded font-black bg-emerald-500 text-white animate-pulse';
-          badge.innerText = 'متاح الآن 🟢';
+          badge.innerText = t.guest_meal_available;
         }
       } else if (curTime < m.start && (!nextMeal || m.start < nextMeal.start)) {
         if (!nextMeal) nextMeal = m;
         slotEl.className = 'p-2.5 rounded-xl bg-amber-500/10 border border-amber-400/30 transition';
         if (badge) {
           badge.className = 'meal-badge text-[9px] px-1.5 py-0.5 rounded font-bold bg-amber-500/20 text-amber-300';
-          badge.innerText = 'القادمة ⏳';
+          badge.innerText = t.guest_meal_upcoming;
         }
       } else {
         slotEl.className = 'p-2.5 rounded-xl bg-white/5 border border-white/10 opacity-70 transition';
         if (badge) {
           badge.className = 'meal-badge text-[9px] px-1.5 py-0.5 rounded font-bold bg-white/10 text-slate-400';
-          badge.innerText = 'انتهى ✓';
+          badge.innerText = t.guest_meal_ended;
         }
       }
     });
@@ -297,17 +301,19 @@ const App = {
     if (statusBanner) {
       if (activeMeal) {
         statusBanner.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-400/40 flex items-center gap-1';
-        statusBanner.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> بوفيه ${activeMeal.name} مفتوح الآن في ${activeMeal.venue} 🍽️`;
+        statusBanner.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ${t.guest_meal_active.replace('{meal}', activeMeal.name).replace('{venue}', activeMeal.venue)}`;
       } else if (nextMeal) {
         const diffMins = nextMeal.start - curTime;
         const diffHours = Math.floor(diffMins / 60);
         const remMins = diffMins % 60;
-        const timeStr = diffHours > 0 ? `${diffHours} س و ${remMins} د` : `${remMins} دقيقة`;
+        const timeStr = diffHours > 0
+          ? t.guest_time_hours.replace('{hours}', diffHours).replace('{minutes}', remMins)
+          : t.guest_time_minutes.replace('{minutes}', remMins);
         statusBanner.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30';
-        statusBanner.innerText = `الوجبة القادمة: ${nextMeal.name} (تبدأ خلال ${timeStr}) ⏳`;
+        statusBanner.innerText = t.guest_meal_next.replace('{meal}', nextMeal.name).replace('{time}', timeStr);
       } else {
         statusBanner.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700';
-        statusBanner.innerText = 'انتهت بوفيهات اليوم • خدمة الغرف متاحة 24/7 🛎️';
+        statusBanner.innerText = t.guest_meal_closed;
       }
     }
   },
@@ -801,7 +807,6 @@ const App = {
     const content = document.getElementById('modalContent');
     const lang = this.currentLang || 'ar';
     const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
-
     content.innerHTML = `
       <div>
         <div class="flex items-center gap-3 mb-4">
@@ -904,6 +909,12 @@ const App = {
             </ul>
           </div>
         ` : ''}
+
+        <!-- Audio Concierge Speak Button -->
+        <button onclick="App.speakPoiNarration('${poi.id}')" id="btnSpeakPoi_${poi.id}" class="w-full py-2.5 px-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-2 transition mb-3 shadow-sm tap-effect">
+          <span class="text-sm">🎙️</span>
+          <span>${t.audio_concierge_listen || 'استمع للمرشد الصوتي'}</span>
+        </button>
 
         <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
           ${poi.menuItems ? `
@@ -1179,6 +1190,17 @@ const App = {
     const content = document.getElementById('modalContent');
     const lang = this.currentLang || 'ar';
     const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
+    const galleryItems = Array.from({ length: 35 }, (_, index) => {
+      const number = String(index + 1).padStart(2, '0');
+      const caption = (t.gallery_photo_caption || 'Resort photo {number}').replace('{number}', number);
+      return `
+        <figure class="relative rounded-2xl overflow-hidden h-40 shadow-sm group bg-slate-200 dark:bg-slate-800">
+          <img src="assets/images/gallery/gallery-${number}.jpg" alt="${caption}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          <figcaption class="absolute bottom-2.5 right-3 text-xs font-black text-white">${caption}</figcaption>
+        </figure>
+      `;
+    }).join('');
 
     content.innerHTML = `
       <div>
@@ -1191,29 +1213,7 @@ const App = {
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
-          <div class="relative rounded-2xl overflow-hidden h-40 shadow-sm group">
-            <img src="assets/images/hero_resort.jpg" alt="Aerial View" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-            <span class="absolute bottom-2.5 right-3 text-xs font-black text-white">${t.gallery_cap1}</span>
-          </div>
-
-          <div class="relative rounded-2xl overflow-hidden h-40 shadow-sm group">
-            <img src="assets/images/la_mama.jpg" alt="La Mama" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-            <span class="absolute bottom-2.5 right-3 text-xs font-black text-white">${t.gallery_cap2}</span>
-          </div>
-
-          <div class="relative rounded-2xl overflow-hidden h-40 shadow-sm group">
-            <img src="assets/images/spa_wellness.jpg" alt="Spa" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-            <span class="absolute bottom-2.5 right-3 text-xs font-black text-white">${t.gallery_cap3}</span>
-          </div>
-
-          <div class="relative rounded-2xl overflow-hidden h-40 shadow-sm group">
-            <img src="moreno_resort_map.jpg" alt="3D Map" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-            <span class="absolute bottom-2.5 right-3 text-xs font-black text-white">${t.gallery_cap4}</span>
-          </div>
+          ${galleryItems}
         </div>
 
         <button onclick="App.closeModal('detailModal')" class="w-full mt-4 py-3 rounded-2xl bg-brand-navy text-white text-xs font-bold">
@@ -1512,6 +1512,7 @@ const App = {
     setTxt('wlblUv', t.wlblUv);
     setTxt('wlblSunset', t.wlblSunset);
     this.renderWeather();
+    this.updateSunShadeWidget();
     setTxt('heroBadge', t.heroBadge);
     setTxt('heroTitle', t.heroTitle);
     setTxt('heroSubtitle', t.heroSubtitle);
@@ -1555,6 +1556,11 @@ const App = {
 
     // 10. Update clock and greeting
     this.startResortClock();
+    this.updateGuestDashboardUI(
+      localStorage.getItem('moreno_guest_name') || '',
+      localStorage.getItem('moreno_guest_room') || ''
+    );
+    this.updateMealTimesStatus();
 
     // 11. Re-render dynamic components
     if (typeof MapEngine !== 'undefined' && MapEngine.renderPins) {
@@ -1608,6 +1614,14 @@ const App = {
     });
     selDest.innerHTML = destHtml;
     selDest.value = destVal || '';
+
+    document.querySelectorAll('[data-preset-label]').forEach(label => {
+      const id = label.getAttribute('data-preset-label');
+      const poi = resortPois.find(item => String(item.id) === id);
+      if (!poi) return;
+      const localized = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr };
+      label.textContent = `${localized.name} (${id})`;
+    });
   },
 
   toggleDarkMode() {
@@ -1714,10 +1728,18 @@ const App = {
     window.open(`https://wa.me/?text=${text}`, '_blank');
   },
 
-  // 2. Cinematic Auto-Tour Mode
+  // 2. Ultra-HD 3D Cinematic Auto-Tour Mode
   tourIndex: 0,
   tourTimer: null,
+  tourProgressRaf: null,
+  tourStepStartTime: 0,
+  tourStepDuration: 7500,
+  tourElapsedBeforePause: 0,
   isTourPlaying: false,
+  isTourPaused: false,
+  isTourMuted: false,
+  isTourAudioNarratorActive: true,
+  _tourKeyHandler: null,
 
   openCinematicPromoVideo() {
     this.playBeep(880);
@@ -1727,85 +1749,600 @@ const App = {
   startCinematicTour() {
     this.playBeep(900);
     this.isTourPlaying = true;
+    this.isTourPaused = false;
     this.tourIndex = 0;
+    this.tourElapsedBeforePause = 0;
 
-    // Scroll to map
+    // Scroll smoothly to map
     MapEngine.scrollToMap();
-    this.showToast('بدأت جولة المنتجع السينمائية الاستكشافية 🎬', '✨');
 
-    // Create or show Tour HUD above map
-    let hud = document.getElementById('cinematicTourHud');
-    if (!hud) {
-      hud = document.createElement('div');
-      hud.id = 'cinematicTourHud';
-      hud.className = 'cinematic-hud absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2.5 rounded-2xl flex items-center gap-3 text-white shadow-2xl max-w-[90%] sm:max-w-md';
-      const mapViewport = document.getElementById('mapViewport');
-      if (mapViewport) mapViewport.appendChild(hud);
+    // Start background atmospheric audio
+    try {
+      if (typeof PromoAudioEngine !== 'undefined') {
+        PromoAudioEngine.start();
+        if (this.isTourMuted) {
+          PromoAudioEngine.isMuted = true;
+        }
+      }
+    } catch (e) {
+      console.warn('Atmospheric audio init:', e);
     }
-    hud.classList.remove('hidden');
+
+    const lang = this.currentLang || 'ar';
+    const welcomeMsg = lang === 'ar' ? 'بدأت جولة المنتجع السينمائية ثلاثية الأبعاد 🎬' :
+      (lang === 'ru' ? 'Запущен 3D-тур по курорту 🎬' :
+      (lang === 'de' ? '3D-Resort-Panoramatour gestartet 🎬' :
+      '3D Cinematic Resort Tour Started 🎬'));
+    this.showToast(welcomeMsg, '✨');
+
+    // Create or unhide Tour HUD container inside viewport
+    this.ensureCinematicHud();
+
+    // Keyboard navigation (Escape = exit, Left/Right = prev/next, Space = pause)
+    if (this._tourKeyHandler) window.removeEventListener('keydown', this._tourKeyHandler);
+    this._tourKeyHandler = (e) => {
+      if (!this.isTourPlaying) return;
+      if (e.key === 'Escape') {
+        this.stopCinematicTour();
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        if (lang === 'ar') this.prevTourStep(); else this.nextTourStep();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        if (lang === 'ar') this.nextTourStep(); else this.prevTourStep();
+      } else if (e.code === 'Space') {
+        e.preventDefault();
+        this.toggleTourPause();
+      }
+    };
+    window.addEventListener('keydown', this._tourKeyHandler);
 
     this.playTourStep();
   },
 
+  ensureCinematicHud() {
+    let hud = document.getElementById('cinematicTourHud');
+    const mapViewport = document.getElementById('mapViewport');
+    if (!mapViewport) return;
+
+    if (!hud) {
+      hud = document.createElement('div');
+      hud.id = 'cinematicTourHud';
+      hud.className = 'cinematic-hud absolute inset-0 z-35 overflow-hidden select-none pointer-events-none';
+      mapViewport.appendChild(hud);
+    }
+    hud.classList.remove('hidden');
+    hud.style.display = 'block';
+  },
+
   playTourStep() {
     if (!this.isTourPlaying) return;
+    clearTimeout(this.tourTimer);
+    if (this.tourProgressRaf) cancelAnimationFrame(this.tourProgressRaf);
 
     const step = cinematicTourSteps[this.tourIndex];
     if (!step) {
-      this.stopCinematicTour();
-      this.showToast('اكتملت جولة المنتجع بنجاح! مرحباً بك 🌴', '🌟');
+      this.stopCinematicTour(true);
       return;
     }
 
-    const poi = resortPois.find(p => p.id === step.poiId);
-    if (poi) {
-      MapEngine.focusCoordinate(poi.coords.x, poi.coords.y, step.zoom || 1.5);
-      document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active-pin'));
-      const pinEl = document.getElementById(`pin-${poi.id}`);
-      if (pinEl) pinEl.classList.add('active-pin');
+    const poi = resortPois.find(p => String(p.id).trim().toUpperCase() === String(step.poiId).trim().toUpperCase());
+    if (!poi) return;
 
-      // Update HUD
-      const hud = document.getElementById('cinematicTourHud');
-      if (hud) {
-        hud.innerHTML = `
-          <div class="flex items-center gap-2.5 flex-1 min-w-0">
-            <span class="w-8 h-8 rounded-xl bg-brand-gold text-slate-950 font-black text-xs flex items-center justify-center shadow">
-              ${this.tourIndex + 1}/${cinematicTourSteps.length}
-            </span>
-            <div class="min-w-0">
-              <h4 class="font-black text-xs text-white truncate">${step.titleAr}</h4>
-              <p class="text-[10px] text-amber-200/90 truncate">${step.descAr}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="App.nextTourStep()" title="المحطة التالية" class="px-2.5 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-xs font-bold">التالي ➔</button>
-            <button onclick="App.stopCinematicTour()" title="إنهاء الجولة" class="p-1 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-xs font-bold">✕</button>
-          </div>
-        `;
+    // 1. Ultra-smooth 3D camera swoop with exact trigonometric target framing
+    const zoom = step.zoom || 1.65;
+    const pitch = (step.pitch !== undefined) ? step.pitch : 48;
+    const bearing = (step.bearing !== undefined) ? step.bearing : 0;
+    MapEngine.flyToCinematic(poi.coords.x, poi.coords.y, zoom, pitch, bearing, 1700);
+
+    // 2. High-visibility 3D Ground Beacon & Floating Landmark Callout
+    MapEngine.showTourSpotlight(poi, this.tourIndex, cinematicTourSteps.length);
+
+    // 3. Audio transition chime & Concierge speech narration
+    try {
+      if (!this.isTourMuted && typeof PromoAudioEngine !== 'undefined') {
+        PromoAudioEngine.playTransitionChime();
       }
-    }
+    } catch (e) {}
+
+    try {
+      if (this.isTourAudioNarratorActive && typeof ConciergeAudioGuide !== 'undefined' && !ConciergeAudioGuide.isMuted) {
+        const narrationText = title + '. ' + desc;
+        ConciergeAudioGuide.speak(narrationText, lang);
+      }
+    } catch (e) {}
+
+    // 4. Update HUD presentation
+    this.renderCinematicHudContent(step, poi);
+
+    // 5. Timer & Progress Bar
+    this.tourStepStartTime = performance.now();
+    this.tourElapsedBeforePause = 0;
+    this.isTourPaused = false;
+    this.startStepProgressAnimation();
 
     this.tourTimer = setTimeout(() => {
       this.nextTourStep();
-    }, 5500);
+    }, this.tourStepDuration);
+  },
+
+  renderCinematicHudContent(step, poi) {
+    const hud = document.getElementById('cinematicTourHud');
+    if (!hud) return;
+
+    const lang = this.currentLang || 'ar';
+    const langKey = lang.charAt(0).toUpperCase() + lang.slice(1);
+    const title = step['title' + langKey] || step.titleAr;
+    const desc = step['desc' + langKey] || step.descAr;
+    const total = cinematicTourSteps.length;
+    const currentNum = this.tourIndex + 1;
+
+    // Action button setup
+    let actionBtnHtml = '';
+    if (step.action === 'book_table') {
+      const actText = lang === 'ar' ? '🍽️ حجز طاولة بالعشاء' :
+        (lang === 'ru' ? '🍽️ Забронировать столик' :
+        (lang === 'de' ? '🍽️ Tisch reservieren' : '🍽️ Book Dining Table'));
+      const restName = poi.id === '12' ? 'مطعم سيرينا الرئيسي' : 'مطعم لا ماما الإيطالي';
+      actionBtnHtml = `<button onclick="App.stopCinematicTour(); App.openTableBookingModal('${encodeURIComponent(restName)}')" class="tap-effect px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow-md whitespace-nowrap">${actText}</button>`;
+    } else if (step.action === 'book_spa') {
+      const actText = lang === 'ar' ? '💆 حجز جلسة بالسبا' :
+        (lang === 'ru' ? '💆 Записаться в СПА' :
+        (lang === 'de' ? '💆 Spa-Behandlung buchen' : '💆 Reserve Spa Session'));
+      actionBtnHtml = `<button onclick="App.stopCinematicTour(); App.openSpaBookingModal()" class="tap-effect px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-black text-xs shadow-md whitespace-nowrap">${actText}</button>`;
+    } else if (step.action === 'book_excursion') {
+      const actText = lang === 'ar' ? '🤿 استكشاف الرحلات' :
+        (lang === 'ru' ? '🤿 Морские экскурсии' :
+        (lang === 'de' ? '🤿 Ausflüge ansehen' : '🤿 View Sea Excursions'));
+      actionBtnHtml = `<button onclick="App.stopCinematicTour(); App.openCompendiumModal()" class="tap-effect px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black text-xs shadow-md whitespace-nowrap">${actText}</button>`;
+    } else {
+      const actText = lang === 'ar' ? '🧭 رسم مسار الوصول' :
+        (lang === 'ru' ? '🧭 Маршрут сюда' :
+        (lang === 'de' ? '🧭 Route hierher' : '🧭 Navigate Here'));
+      actionBtnHtml = `<button onclick="App.stopCinematicTour(); MapEngine.selectPoi('${poi.id}')" class="tap-effect px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-black text-xs border border-white/20 shadow-md whitespace-nowrap">${actText}</button>`;
+    }
+
+    const soundIcon = this.isTourMuted ? '🔇' : '🔊';
+    const pauseIcon = this.isTourPaused ? '▶️' : '⏸️';
+    const stationLabel = lang === 'ar' ? `المحطة ${currentNum} من ${total}` :
+      (lang === 'ru' ? `Пункт ${currentNum} из ${total}` :
+      (lang === 'de' ? `Station ${currentNum} von ${total}` :
+      `Station ${currentNum} of ${total}`));
+
+    const prevDisabled = this.tourIndex === 0 ? 'opacity-40 pointer-events-none' : '';
+
+    hud.innerHTML = `
+      <!-- 1. Top Segmented Progress Bar -->
+      <div class="cinematic-top-tracker absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 w-[94%] sm:w-[560px] max-w-xl px-3.5 py-2.5 rounded-2xl flex flex-col gap-2">
+        <div class="flex items-center gap-1.5 w-full">
+          ${cinematicTourSteps.map((s, idx) => {
+            const isCompleted = idx < this.tourIndex;
+            const isActive = idx === this.tourIndex;
+            return `
+              <div class="cinematic-step-segment ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                <div id="tourProgBar_${idx}" class="cinematic-step-progress" style="width: ${isCompleted ? '100%' : '0%'}"></div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 font-black text-[10px] border border-amber-400/30">
+              ${stationLabel}
+            </span>
+            <span class="text-white/80 font-bold text-xs truncate max-w-[200px] sm:max-w-xs">${step.icon || '📍'} ${title}</span>
+          </div>
+          <button onclick="App.stopCinematicTour()" class="w-6 h-6 rounded-lg bg-white/10 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center transition tap-effect" title="Close Tour">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Ultra-Crisp Screen-Space Landmark Target Pinpoint (100% Sharp Typography, Never Distorted in 3D) -->
+      <div class="cinematic-landmark-tag absolute left-1/2 -translate-x-1/2 pointer-events-none select-none z-30" style="top: 29%;">
+        <div class="flex flex-col items-center animate-subtle-float">
+          <div class="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-slate-950/95 border-2 border-amber-400 text-white shadow-2xl flex items-center gap-2 backdrop-blur-xl">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="px-2 py-0.5 rounded-lg bg-amber-500/25 text-amber-300 font-black text-[10px] sm:text-[11px] border border-amber-400/40">
+              ${stationLabel}
+            </span>
+            <span class="text-xs sm:text-sm font-black text-white drop-shadow flex items-center gap-1.5">
+              <span>${step.icon || poi.icon || '📍'}</span>
+              <span>${title}</span>
+            </span>
+          </div>
+          <div class="w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-amber-400 -mt-0.5"></div>
+        </div>
+      </div>
+
+      <!-- 3. Bottom Floating Presentation Theater Card -->
+      <div class="cinematic-bottom-theater absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 w-[94%] sm:w-[560px] max-w-xl p-3 sm:p-4 rounded-3xl text-white">
+        <div class="flex items-center gap-3">
+          <!-- Thumbnail with Icon Badge -->
+          <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-800 shrink-0 shadow-xl border border-white/20">
+            <img src="${step.image || poi.image || 'assets/images/hero_resort.jpg'}" alt="${title}" class="w-full h-full object-cover">
+            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded-lg bg-slate-900/85 backdrop-blur-md text-amber-300 font-black text-[10px] border border-white/15">
+              ${step.icon || poi.icon || '📍'} #${poi.num}
+            </span>
+          </div>
+
+          <!-- Information -->
+          <div class="flex-1 min-w-0">
+            <h3 class="font-black text-sm sm:text-base text-amber-300 truncate leading-snug mb-1">${title}</h3>
+            <p class="text-[11px] sm:text-xs text-slate-300 line-clamp-2 leading-relaxed mb-2.5">${desc}</p>
+            
+            <!-- Controls & Action Button Row -->
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <button onclick="App.prevTourStep()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition tap-effect ${prevDisabled}" title="Previous">
+                  ⏮️
+                </button>
+                <button id="cinematicPlayPauseBtn" onclick="App.toggleTourPause()" class="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center transition shadow tap-effect" title="Pause / Resume">
+                  ${pauseIcon}
+                </button>
+                <button onclick="App.nextTourStep()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition tap-effect" title="Next">
+                  ⏭️
+                </button>
+                <button onclick="App.toggleTourMute()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center transition tap-effect" title="Mute / Unmute">
+                  ${soundIcon}
+                </button>
+                <button id="cinematicAudioGuideBtn" onclick="App.toggleTourAudioGuide()" class="px-2.5 h-8 rounded-xl ${this.isTourAudioNarratorActive ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40' : 'bg-white/10 hover:bg-white/20 text-white'} font-bold text-xs flex items-center gap-1.5 transition tap-effect" title="Audio Concierge">
+                  <span>🎙️</span>
+                  <div class="flex items-end gap-0.5 h-3">
+                    <span class="audio-narration-wave w-0.5 h-1.5 bg-amber-400 rounded-full ${this.isTourAudioNarratorActive && typeof ConciergeAudioGuide !== 'undefined' && ConciergeAudioGuide.isSpeaking ? 'animate-wave' : ''}"></span>
+                    <span class="audio-narration-wave w-0.5 h-3 bg-amber-400 rounded-full ${this.isTourAudioNarratorActive && typeof ConciergeAudioGuide !== 'undefined' && ConciergeAudioGuide.isSpeaking ? 'animate-wave' : ''}"></span>
+                    <span class="audio-narration-wave w-0.5 h-2 bg-amber-400 rounded-full ${this.isTourAudioNarratorActive && typeof ConciergeAudioGuide !== 'undefined' && ConciergeAudioGuide.isSpeaking ? 'animate-wave' : ''}"></span>
+                  </div>
+                </button>
+              </div>
+
+              ${actionBtnHtml}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  startStepProgressAnimation() {
+    const progBar = document.getElementById(`tourProgBar_${this.tourIndex}`);
+    if (!progBar) return;
+
+    const animate = (now) => {
+      if (!this.isTourPlaying || this.isTourPaused) return;
+      const elapsed = (now - this.tourStepStartTime) + this.tourElapsedBeforePause;
+      const pct = Math.min(100, (elapsed / this.tourStepDuration) * 100);
+      progBar.style.width = `${pct}%`;
+
+      if (elapsed < this.tourStepDuration) {
+        this.tourProgressRaf = requestAnimationFrame(animate);
+      }
+    };
+    this.tourProgressRaf = requestAnimationFrame(animate);
+  },
+
+  toggleTourPause() {
+    this.isTourPaused = !this.isTourPaused;
+    const btn = document.getElementById('cinematicPlayPauseBtn');
+    if (btn) btn.innerHTML = this.isTourPaused ? '▶️' : '⏸️';
+
+    if (this.isTourPaused) {
+      clearTimeout(this.tourTimer);
+      if (this.tourProgressRaf) cancelAnimationFrame(this.tourProgressRaf);
+      const now = performance.now();
+      this.tourElapsedBeforePause += (now - this.tourStepStartTime);
+    } else {
+      const remainingTime = Math.max(800, this.tourStepDuration - this.tourElapsedBeforePause);
+      this.tourStepStartTime = performance.now();
+      this.startStepProgressAnimation();
+      this.tourTimer = setTimeout(() => {
+        this.nextTourStep();
+      }, remainingTime);
+    }
+  },
+
+  toggleTourMute() {
+    this.isTourMuted = !this.isTourMuted;
+    try {
+      if (typeof PromoAudioEngine !== 'undefined') {
+        PromoAudioEngine.isMuted = this.isTourMuted;
+        if (PromoAudioEngine.waveGain && PromoAudioEngine.ctx) {
+          PromoAudioEngine.waveGain.gain.setValueAtTime(this.isTourMuted ? 0 : 0.12, PromoAudioEngine.ctx.currentTime);
+        }
+      }
+    } catch (e) {}
+
+    const step = cinematicTourSteps[this.tourIndex];
+    const poi = resortPois.find(p => p.id === step?.poiId);
+    if (step && poi) {
+      this.renderCinematicHudContent(step, poi);
+    }
+  },
+
+  prevTourStep() {
+    if (this.tourIndex <= 0) return;
+    clearTimeout(this.tourTimer);
+    if (this.tourProgressRaf) cancelAnimationFrame(this.tourProgressRaf);
+    this.tourIndex--;
+    this.playTourStep();
   },
 
   nextTourStep() {
     clearTimeout(this.tourTimer);
+    if (this.tourProgressRaf) cancelAnimationFrame(this.tourProgressRaf);
     this.tourIndex++;
     if (this.tourIndex < cinematicTourSteps.length) {
       this.playTourStep();
     } else {
-      this.stopCinematicTour();
+      this.stopCinematicTour(true);
     }
   },
 
-  stopCinematicTour() {
+  stopCinematicTour(isCompleted = false) {
     this.isTourPlaying = false;
+    this.isTourPaused = false;
     clearTimeout(this.tourTimer);
+    if (this.tourProgressRaf) cancelAnimationFrame(this.tourProgressRaf);
+
+    // Stop atmospheric background sound
+    try {
+      if (typeof PromoAudioEngine !== 'undefined') {
+        PromoAudioEngine.stop();
+      }
+    } catch (e) {}
+
+    // Stop concierge audio narration
+    if (typeof ConciergeAudioGuide !== 'undefined') {
+      ConciergeAudioGuide.stop();
+    }
+
+    if (this._tourKeyHandler) {
+      window.removeEventListener('keydown', this._tourKeyHandler);
+      this._tourKeyHandler = null;
+    }
+
     const hud = document.getElementById('cinematicTourHud');
-    if (hud) hud.classList.add('hidden');
+    if (hud) {
+      hud.classList.add('hidden');
+      hud.style.display = 'none';
+      hud.innerHTML = '';
+    }
+
+    // Restore pins and remove spotlight beacon & callout
+    if (typeof MapEngine !== 'undefined' && MapEngine.clearTourSpotlight) {
+      MapEngine.clearTourSpotlight();
+    } else {
+      document.querySelectorAll('.map-pin').forEach(p => {
+        p.classList.remove('active-pin', 'active-tour-pin', 'tour-dimmed-pin');
+        p.style.opacity = '1';
+      });
+    }
+
     MapEngine.resetTransform();
+
+    if (isCompleted) {
+      const lang = this.currentLang || 'ar';
+      const msg = lang === 'ar' ? 'اكتملت جولة منتجع مورينو هورايزون بنجاح! نتمنى لك إقامة رائعة 🌴' :
+        (lang === 'ru' ? '3D-тур успешно завершен! Приятного отдыха в Moreno Horizon 🌴' :
+        (lang === 'de' ? 'Resort-Tour erfolgreich abgeschlossen! Wir wünschen einen traumhaften Aufenthalt 🌴' :
+        'Moreno Horizon 3D Tour completed! Enjoy your luxury stay 🌴'));
+      this.showToast(msg, '🌟');
+    }
+  },
+
+  toggleTourAudioGuide() {
+    this.isTourAudioNarratorActive = !this.isTourAudioNarratorActive;
+    if (!this.isTourAudioNarratorActive) {
+      if (typeof ConciergeAudioGuide !== 'undefined') ConciergeAudioGuide.stop();
+    } else {
+      const step = cinematicTourSteps[this.tourIndex];
+      if (step) {
+        const lang = this.currentLang || 'ar';
+        const langKey = lang.charAt(0).toUpperCase() + lang.slice(1);
+        const title = step['title' + langKey] || step.titleAr;
+        const desc = step['desc' + langKey] || step.descAr;
+        if (typeof ConciergeAudioGuide !== 'undefined') {
+          ConciergeAudioGuide.speak(title + '. ' + desc, lang);
+        }
+      }
+    }
+    const step = cinematicTourSteps[this.tourIndex];
+    const poi = resortPois.find(p => p.id === step?.poiId);
+    if (step && poi) {
+      this.renderCinematicHudContent(step, poi);
+    }
+  },
+
+  speakPoiNarration(poiId) {
+    const poi = resortPois.find(p => String(p.id).trim().toUpperCase() === String(poiId).trim().toUpperCase());
+    if (!poi) return;
+
+    if (typeof ConciergeAudioGuide !== 'undefined') {
+      if (ConciergeAudioGuide.isSpeaking) {
+        ConciergeAudioGuide.stop();
+        const btn = document.getElementById(`btnSpeakPoi_${poi.id}`);
+        if (btn) {
+          const t = (typeof i18n !== 'undefined' && i18n[this.currentLang]) || {};
+          btn.innerHTML = `<span class="text-sm">🎙️</span><span>${t.audio_concierge_listen || 'استمع للمرشد الصوتي'}</span>`;
+        }
+        return;
+      }
+
+      const lang = this.currentLang || 'ar';
+      const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, desc: poi.descriptionAr };
+      const fullText = `${loc.name}. ${loc.desc}`;
+      
+      const btn = document.getElementById(`btnSpeakPoi_${poi.id}`);
+      if (btn) {
+        const t = (typeof i18n !== 'undefined' && i18n[this.currentLang]) || {};
+        btn.innerHTML = `<span class="text-sm animate-pulse">🔊</span><span>${t.audio_concierge_speaking || 'جارٍ التحدث...'}</span>`;
+      }
+
+      ConciergeAudioGuide.speak(fullText, lang, () => {
+        if (btn) {
+          const t = (typeof i18n !== 'undefined' && i18n[this.currentLang]) || {};
+          btn.innerHTML = `<span class="text-sm">🎙️</span><span>${t.audio_concierge_listen || 'استمع للمرشد الصوتي'}</span>`;
+        }
+      });
+    }
+  },
+
+  updateSunShadeWidget() {
+    const bannerText = document.getElementById('sunShadeSummaryText');
+    if (!bannerText || typeof SunShadeTracker === 'undefined') return;
+
+    const telemetry = SunShadeTracker.getSolarTelemetry();
+    const lang = this.currentLang || 'ar';
+    const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
+    const stateDesc = t[telemetry.statusKey] || 'أجواء مشمسة ممتازة';
+
+    if (telemetry.isDaylight) {
+      bannerText.innerHTML = `${stateDesc} • <span class="font-bold text-amber-500 dark:text-amber-400">UV ${telemetry.uvIndex}</span> • زاوية الشمس ${Math.round(telemetry.elevation)}°`;
+    } else {
+      bannerText.innerHTML = `${stateDesc} • نسيم البحر الأحمر وممشى مارينا هادئ`;
+    }
+  },
+
+  openSunShadeModal() {
+    const modal = document.getElementById('sunShadeModal');
+    const content = document.getElementById('sunShadeModalContent');
+    if (!modal || !content || typeof SunShadeTracker === 'undefined') return;
+
+    const telemetry = SunShadeTracker.getSolarTelemetry();
+    const zoneAnalysis = SunShadeTracker.getResortZoneAnalysis(telemetry);
+    const lang = this.currentLang || 'ar';
+    const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
+    const stateDesc = t[telemetry.statusKey] || '';
+
+    const sunAngle = Math.round(telemetry.azimuth);
+    const shadowAngle = Math.round(telemetry.shadowAzimuth);
+
+    content.innerHTML = `
+      <!-- Solar Compass & Live Telemetry Gauge -->
+      <div class="p-4 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-center relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <!-- Compass Visual -->
+          <div class="sun-radar-dial shrink-0">
+            <span class="absolute top-1 text-[9px] font-black text-amber-500">N (البحر)</span>
+            <span class="absolute bottom-1 text-[9px] font-black text-slate-400">S (المدخل)</span>
+            <span class="absolute left-1.5 text-[9px] font-black text-slate-400">W</span>
+            <span class="absolute right-1.5 text-[9px] font-black text-slate-400">E</span>
+            
+            <!-- Sun direction arm -->
+            <div class="sun-pointer-arm" style="transform: translate(-50%, -100%) rotate(${sunAngle}deg);">
+              <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-sm">☀️</span>
+            </div>
+            <!-- Shadow projection arm -->
+            <div class="shadow-pointer-arm" style="transform: translate(-50%, -100%) rotate(${shadowAngle}deg);">
+              <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs">⛱️</span>
+            </div>
+            
+            <div class="w-7 h-7 rounded-full bg-slate-900/90 text-amber-400 font-black text-[10px] flex items-center justify-center border border-amber-500/40 z-10">
+              ${Math.round(telemetry.elevation)}°
+            </div>
+          </div>
+
+          <!-- Solar Stats Details -->
+          <div class="flex-1 text-right sm:text-start">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-black mb-2 border border-amber-500/30">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+              <span>${stateDesc}</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+              <div class="p-2.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60">
+                <span class="block text-[10px] text-slate-400 font-bold">ارتفاع الشمس</span>
+                <span class="text-sm font-black text-amber-500">${Math.round(telemetry.elevation)}° فوق الأفق</span>
+              </div>
+              <div class="p-2.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60">
+                <span class="block text-[10px] text-slate-400 font-bold">مؤشر الأشعة (UV)</span>
+                <span class="text-sm font-black ${telemetry.uvIndex > 7 ? 'text-rose-500' : 'text-emerald-500'}">${telemetry.uvIndex} / 11</span>
+              </div>
+              <div class="p-2.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 col-span-2 sm:col-span-1">
+                <span class="block text-[10px] text-slate-400 font-bold">اتجاه حركة الظلال</span>
+                <span class="text-sm font-black text-sky-500">${Math.round(telemetry.shadowAzimuth)}° (بحري جنوبي)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sunny Spots Section -->
+      ${zoneAnalysis.sunnySpots.length > 0 ? `
+        <div>
+          <h4 class="text-xs sm:text-sm font-black text-amber-700 dark:text-amber-400 flex items-center gap-2 mb-2.5">
+            <span>☀️</span>
+            <span>${t.sun_top_sunny || 'أفضل أماكن التشميس والتان المباشر الآن'}</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            ${zoneAnalysis.sunnySpots.map(s => `
+              <div class="sun-radar-card p-3 rounded-2xl bg-gradient-to-b from-amber-500/10 to-amber-500/5 border border-amber-500/25 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xl">${s.icon}</span>
+                    <h5 class="text-xs font-black text-slate-900 dark:text-white leading-tight">${lang === 'en' ? s.nameEn : s.nameAr}</h5>
+                  </div>
+                  <span class="inline-block text-[10px] font-bold text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-md bg-amber-500/15 mb-2.5">
+                    ${lang === 'en' ? s.badgeEn : s.badgeAr}
+                  </span>
+                </div>
+                <button onclick="App.focusRadarSpot('${s.nameAr}')" class="w-full py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] shadow-sm transition tap-effect">
+                  معاينة على الخريطة 🗺️
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Shaded Spots Section -->
+      <div>
+        <h4 class="text-xs sm:text-sm font-black text-sky-700 dark:text-sky-400 flex items-center gap-2 mb-2.5">
+          <span>🌴</span>
+          <span>${t.sun_top_shady || 'أفضل أماكن الظل والانتعاش الآن'}</span>
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          ${zoneAnalysis.shadedSpots.map(s => `
+            <div class="sun-radar-card p-3 rounded-2xl bg-gradient-to-b from-teal-500/10 to-teal-500/5 border border-teal-500/25 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="text-xl">${s.icon}</span>
+                  <h5 class="text-xs font-black text-slate-900 dark:text-white leading-tight">${lang === 'en' ? s.nameEn : s.nameAr}</h5>
+                </div>
+                <span class="inline-block text-[10px] font-bold text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded-md bg-teal-500/15 mb-2.5">
+                  ${lang === 'en' ? s.badgeEn : s.badgeAr}
+                </span>
+              </div>
+              <button onclick="App.focusRadarSpot('${s.nameAr}')" class="w-full py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-[11px] shadow-sm transition tap-effect">
+                معاينة على الخريطة 🗺️
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    this.openModal('sunShadeModal');
+  },
+
+  focusRadarSpot(spotName) {
+    this.closeModal('sunShadeModal');
+    const found = resortPois.find(p => 
+      spotName.includes(p.nameAr) || 
+      p.nameAr.includes(spotName) ||
+      (spotName.includes('لوتس') && p.nameAr.includes('لوتس')) ||
+      (spotName.includes('مارينا') && p.nameAr.includes('الشاطئ')) ||
+      (spotName.includes('أكوا') && p.nameAr.includes('أكوا')) ||
+      (spotName.includes('لا ماما') && p.nameAr.includes('لا ماما')) ||
+      (spotName.includes('سيرينا') && p.nameAr.includes('سيرينا'))
+    );
+
+    if (found) {
+      MapEngine.selectPoi(found.id, true);
+    } else {
+      MapEngine.resetTransform();
+    }
+  },
+
+  openVoiceNavigator() {
+    VoiceNavigator.openModal();
   },
 
   // 3. Luxury Spa Booking Engine
@@ -2068,14 +2605,6 @@ const App = {
     }
 
     this.showToast(this.isSunlightMode ? 'تم تفعيل وضع الشاطئ فائق التباين تحت الشمس ☀️' : 'تم العودة للوضع الافتراضي 🌓', '🏖️');
-  },
-
-  loadSavedRoom() {
-    const savedRoom = localStorage.getItem('moreno_guest_room');
-    if (savedRoom) {
-      const searchInput = document.getElementById('roomSearchInput');
-      if (searchInput) searchInput.value = savedRoom;
-    }
   },
 
   registerServiceWorker() {
@@ -2511,6 +3040,7 @@ function copyWifiPassword() { App.copyWifiPassword(); }
 function toggleAudio() { App.toggleAudio(); }
 function toggleDarkMode() { App.toggleDarkMode(); }
 function changeLanguage(lang) { App.changeLanguage(lang); }
+function openVoiceNavigator() { App.openVoiceNavigator(); }
 
 function openGuestServicesModal() { App.openGuestServicesModal(); }
 function requestOneTapService(item) { App.requestOneTapService(item); }
@@ -2734,6 +3264,640 @@ const PromoAudioEngine = {
       } catch (e) {}
     });
     this.activeNodes = [];
+  }
+};
+
+// ========================================================
+// AI CONCIERGE MULTILINGUAL AUDIO NARRATION ENGINE (ULTRA-NATURAL NEURAL HD)
+// ========================================================
+const ConciergeAudioGuide = {
+  synth: typeof window !== 'undefined' ? window.speechSynthesis : null,
+  currentUtterance: null,
+  isSpeaking: false,
+  isMuted: false,
+  availableVoices: [],
+
+  init() {
+    if (!this.synth) return;
+    const loadVoices = () => {
+      this.availableVoices = this.synth.getVoices();
+    };
+    loadVoices();
+    if (this.synth.onvoiceschanged !== undefined) {
+      this.synth.onvoiceschanged = loadVoices;
+    }
+  },
+
+  getBestNaturalVoice(langPrefix) {
+    const voices = this.availableVoices.length ? this.availableVoices : (this.synth.getVoices ? this.synth.getVoices() : []);
+    if (!voices || voices.length === 0) return null;
+
+    const langTargetMap = {
+      ar: ['ar-EG', 'ar-SA', 'ar-AE', 'ar'],
+      en: ['en-US', 'en-GB', 'en-AU', 'en'],
+      ru: ['ru-RU', 'ru'],
+      de: ['de-DE', 'de-AT', 'de']
+    };
+
+    const targetLocales = langTargetMap[langPrefix] || [langPrefix];
+
+    // Filter to candidates matching the language
+    const candidates = voices.filter(v => {
+      const vLang = (v.lang || '').toLowerCase().replace('_', '-');
+      return targetLocales.some(t => vLang.startsWith(t.toLowerCase())) || vLang.startsWith(langPrefix);
+    });
+
+    if (candidates.length === 0) return null;
+
+    // Score candidates: prioritize modern Natural & Neural voices
+    const scored = candidates.map(voice => {
+      const name = (voice.name || '').toLowerCase();
+      let score = 0;
+
+      // 1. Neural & Natural keywords (Microsoft Neural, Google Cloud, Apple Neural)
+      if (name.includes('natural')) score += 120;
+      if (name.includes('online')) score += 100;
+      if (name.includes('neural')) score += 110;
+      if (name.includes('enhanced')) score += 85;
+      if (name.includes('premium')) score += 75;
+      if (name.includes('google')) score += 65;
+      if (name.includes('siri')) score += 65;
+
+      // 2. Specific warm concierge voices
+      if (langPrefix === 'ar') {
+        if (name.includes('shakir') || name.includes('salma') || name.includes('hamed') || name.includes('zariyah')) score += 60;
+        if (name.includes('tarik') || name.includes('laila') || name.includes('maged')) score += 45;
+      } else if (langPrefix === 'en') {
+        if (name.includes('jenny') || name.includes('guy') || name.includes('aria') || name.includes('ryan')) score += 60;
+      } else if (langPrefix === 'ru') {
+        if (name.includes('svetlana') || name.includes('dmitry')) score += 60;
+      } else if (langPrefix === 'de') {
+        if (name.includes('katja') || name.includes('conrad')) score += 60;
+      }
+
+      // 3. Exact locale preference
+      const vLang = (voice.lang || '').toLowerCase().replace('_', '-');
+      if (vLang === targetLocales[0].toLowerCase()) score += 30;
+
+      // 4. Heavily penalize legacy robotic offline SAPI/desktop voices
+      if (name.includes('desktop')) score -= 90;
+      if (name.includes('espeak')) score -= 160;
+      if (name.includes('msss')) score -= 70;
+
+      return { voice, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored[0]?.voice || candidates[0];
+  },
+
+  humanizeTextForSpeech(text, langPrefix) {
+    if (!text) return '';
+    let cleaned = String(text);
+
+    // 1. Remove URLs, technical IDs
+    cleaned = cleaned.replace(/https?:\/\/\S+/gi, '');
+    cleaned = cleaned.replace(/#(\d+)/g, langPrefix === 'ar' ? 'رقم $1' : 'Number $1');
+    cleaned = cleaned.replace(/#\S+/g, '');
+
+    // 2. Remove emojis
+    cleaned = cleaned.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1FA70}-\u{1FAFF}]/gu, '');
+
+    // 3. Remove alternate language in parentheses (e.g. "مسبح لوتس (Lotus Pool)" -> "مسبح لوتس")
+    if (langPrefix === 'ar') {
+      cleaned = cleaned.replace(/\([A-Za-z\s&'-]+\)/g, '');
+    } else if (langPrefix === 'en') {
+      cleaned = cleaned.replace(/\([\u0600-\u06FF\s&'-]+\)/g, '');
+    }
+
+    // Clean remaining brackets
+    cleaned = cleaned.replace(/[()\[\]{}«»""]/g, ' ');
+
+    // 4. Punctuation for natural human breathing pauses
+    cleaned = cleaned.replace(/\s*•\s*/g, '، ');
+    cleaned = cleaned.replace(/\s*\|\s*/g, '، ');
+    cleaned = cleaned.replace(/\s*➔\s*/g, langPrefix === 'ar' ? ' إلى ' : ' to ');
+    cleaned = cleaned.replace(/[-_~]/g, ' ');
+
+    // 5. Clean whitespace & repeated commas
+    cleaned = cleaned.replace(/،+/g, '،');
+    cleaned = cleaned.replace(/\.+/g, '.');
+    cleaned = cleaned.replace(/\s{2,}/g, ' ').trim();
+
+    return cleaned;
+  },
+
+  speak(rawText, lang = 'ar', onEnd = null) {
+    if (!this.synth || this.isMuted || !rawText) return;
+    this.stop();
+
+    try {
+      if (this.synth.paused) {
+        this.synth.resume();
+      }
+    } catch (e) {}
+
+    const langPrefix = (lang || 'ar').toLowerCase().slice(0, 2);
+    const speechText = this.humanizeTextForSpeech(rawText, langPrefix);
+    if (!speechText) return;
+
+    const utterance = new SpeechSynthesisUtterance(speechText);
+
+    const langTargetMap = {
+      ar: 'ar-EG',
+      en: 'en-US',
+      ru: 'ru-RU',
+      de: 'de-DE'
+    };
+    utterance.lang = langTargetMap[langPrefix] || 'ar-EG';
+
+    // Select the best HD Natural Neural Voice
+    const naturalVoice = this.getBestNaturalVoice(langPrefix);
+    if (naturalVoice) {
+      utterance.voice = naturalVoice;
+    }
+
+    // Conversational, warm concierge pacing & pitch
+    utterance.rate = langPrefix === 'ar' ? 0.92 : (langPrefix === 'ru' ? 0.94 : 0.95);
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    utterance.onstart = () => {
+      this.isSpeaking = true;
+      this.updateWavebarsUI(true);
+    };
+
+    utterance.onend = () => {
+      this.isSpeaking = false;
+      this.updateWavebarsUI(false);
+      if (onEnd) onEnd();
+    };
+
+    utterance.onerror = (e) => {
+      this.isSpeaking = false;
+      this.updateWavebarsUI(false);
+      console.warn('Speech synthesis error:', e);
+    };
+
+    this.currentUtterance = utterance;
+    try {
+      this.synth.speak(utterance);
+    } catch (e) {
+      console.warn('SpeechSynthesis error:', e);
+    }
+  },
+
+  stop() {
+    if (this.synth) {
+      try {
+        this.synth.cancel();
+      } catch (e) {}
+    }
+    this.isSpeaking = false;
+    this.updateWavebarsUI(false);
+  },
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    if (this.isMuted) {
+      this.stop();
+    }
+    return this.isMuted;
+  },
+
+  updateWavebarsUI(speaking) {
+    const bars = document.querySelectorAll('.audio-narration-wave');
+    bars.forEach(b => {
+      if (speaking) b.classList.add('animate-wave');
+      else b.classList.remove('animate-wave');
+    });
+    const label = document.getElementById('tourAudioNarrationLabel');
+    if (label) {
+      const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+      const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
+      label.innerText = speaking ? (t.audio_concierge_speaking || 'جارٍ التحدث...') : (t.audio_concierge_listen || 'المرشد الصوتي');
+    }
+  }
+};
+
+// ========================================================
+// AI VOICE CONCIERGE & WAYFINDER NAVIGATOR (VOICE TO ROUTE)
+// ========================================================
+const VoiceNavigator = {
+  recognition: null,
+  isListening: false,
+
+  init() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = false;
+        this.recognition.interimResults = false;
+        this.recognition.maxAlternatives = 3;
+
+        this.recognition.onstart = () => {
+          this.isListening = true;
+          this.updateUiState(true);
+        };
+
+        this.recognition.onresult = (event) => {
+          this.isListening = false;
+          this.updateUiState(false);
+          if (event.results && event.results[0] && event.results[0][0]) {
+            const transcript = event.results[0][0].transcript;
+            this.processVoiceQuery(transcript);
+          }
+        };
+
+        this.recognition.onerror = (event) => {
+          this.isListening = false;
+          this.updateUiState(false);
+          console.warn('Voice recognition error:', event.error);
+          const statusEl = document.getElementById('voiceNavStatusText');
+          if (statusEl) {
+            const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+            statusEl.innerText = lang === 'ar' ? 'تعذر التقاط الصوت، يمكنك الكتابة في الحقل أدناه 👇' : 'Could not capture voice, please type below 👇';
+          }
+        };
+
+        this.recognition.onend = () => {
+          this.isListening = false;
+          this.updateUiState(false);
+        };
+      } catch (e) {
+        console.warn('SpeechRecognition init failed:', e);
+      }
+    }
+  },
+
+  openModal() {
+    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(850);
+    const modal = document.getElementById('voiceNavModal');
+    if (!modal) return;
+
+    if (typeof App !== 'undefined' && App.openModal) {
+      App.openModal('voiceNavModal');
+    } else {
+      modal.classList.remove('hidden');
+    }
+
+    const input = document.getElementById('voiceNavManualInput');
+    if (input) input.value = '';
+
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
+    const statusText = document.getElementById('voiceNavStatusText');
+    if (statusText) statusText.innerText = t.voice_nav_tap || 'اضغط على الميكروفون وتحدث بوجهتك 🎙️';
+
+    // Auto trigger listening if supported
+    setTimeout(() => {
+      this.startListening();
+    }, 350);
+  },
+
+  startListening() {
+    if (typeof ConciergeAudioGuide !== 'undefined') {
+      ConciergeAudioGuide.stop();
+    }
+
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const langMap = {
+      ar: 'ar-EG',
+      en: 'en-US',
+      ru: 'ru-RU',
+      de: 'de-DE'
+    };
+
+    if (this.recognition) {
+      try {
+        this.recognition.lang = langMap[lang] || 'ar-EG';
+        this.recognition.start();
+        return;
+      } catch (e) {
+        try {
+          this.recognition.stop();
+          setTimeout(() => {
+            try { this.recognition.start(); } catch(err) {}
+          }, 150);
+          return;
+        } catch (err) {}
+      }
+    }
+
+    this.updateUiState(false, true);
+  },
+
+  stopListening() {
+    if (this.recognition && this.isListening) {
+      try { this.recognition.stop(); } catch(e) {}
+    }
+    this.isListening = false;
+    this.updateUiState(false);
+  },
+
+  toggleListening() {
+    if (this.isListening) {
+      this.stopListening();
+    } else {
+      this.startListening();
+    }
+  },
+
+  updateUiState(isListening, isFallback = false) {
+    const micBtn = document.getElementById('voiceNavMicBtn');
+    const pulseRings = document.getElementById('voiceNavRings');
+    const statusText = document.getElementById('voiceNavStatusText');
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
+
+    if (pulseRings) {
+      if (isListening) pulseRings.classList.add('voice-rings-active');
+      else pulseRings.classList.remove('voice-rings-active');
+    }
+
+    if (micBtn) {
+      if (isListening) {
+        micBtn.classList.add('voice-mic-active');
+      } else {
+        micBtn.classList.remove('voice-mic-active');
+      }
+    }
+
+    if (statusText) {
+      if (isListening) {
+        statusText.innerText = t.voice_nav_listening || 'أنا أستمع إليك الآن... تحدث وسأدلك فوراً 🎙️';
+      } else if (isFallback) {
+        statusText.innerText = t.voice_nav_fallback || 'اكتب وجهتك أو اختر من الأماكن المقترحة أدناه 👇';
+      }
+    }
+  },
+
+  processVoiceQuery(rawQuery) {
+    if (!rawQuery || !rawQuery.trim()) return;
+    const query = rawQuery.trim();
+    const queryInput = document.getElementById('voiceNavManualInput');
+    if (queryInput) queryInput.value = query;
+
+    const statusText = document.getElementById('voiceNavStatusText');
+    if (statusText) statusText.innerText = `"${query}"...`;
+
+    // 1. Room numbers detection (e.g. 1520, 2015, رقم 1124)
+    const normalized = query.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+    const roomMatch = normalized.match(/\b\d{3,4}\b/);
+    if (roomMatch) {
+      const roomNum = parseInt(roomMatch[0]);
+      this.routeToRoom(roomNum);
+      return;
+    }
+
+    // 2. Check for "غرفتي" / "my room"
+    const lower = query.toLowerCase();
+    if (lower.includes('غرفتي') || lower.includes('أوضتي') || lower.includes('my room') || lower.includes('mein zimmer') || lower.includes('мой номер')) {
+      const savedRoom = localStorage.getItem('moreno_guest_room');
+      if (savedRoom) {
+        this.routeToRoom(parseInt(savedRoom));
+        return;
+      }
+    }
+
+    // 3. Match against known POIs and Facilities
+    const matchedPoi = this.resolvePoiFromText(query);
+    if (matchedPoi) {
+      this.routeToPoi(matchedPoi);
+      return;
+    }
+
+    // 4. Fallback search via MapEngine
+    if (typeof MapEngine !== 'undefined') {
+      const results = MapEngine.searchPois(query);
+      if (results && results.length > 0) {
+        this.routeToPoi(results[0]);
+        return;
+      }
+    }
+
+    // Unrecognized
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const notFoundMsg = lang === 'ar' 
+      ? `عفواً، لم أتعرف على "${query}". جرب قول "المسبح" أو "المطعم" أو "الشاطئ"`
+      : `Sorry, couldn't find "${query}". Try saying "pool", "beach", or "restaurant"`;
+    if (statusText) statusText.innerText = notFoundMsg;
+    if (typeof ConciergeAudioGuide !== 'undefined') {
+      ConciergeAudioGuide.speak(notFoundMsg, lang);
+    }
+  },
+
+  resolvePoiFromText(text) {
+    const t = text.toLowerCase();
+
+    const rules = [
+      { id: "1", keys: ["شاطئ", "بحر", "مارينا", "يخت", "سنوركلينج", "beach", "marina", "sea", "пляж", "strand"] },
+      { id: "3", keys: ["اكوا", "أكوا", "زحاليق", "زلاجات", "العاب مائية", "aqua", "water park", "aquapark", "аквапарк"] },
+      { id: "6", keys: ["مسبح", "حمام سباحة", "لوتس", "بحيرة", "تان", "pool", "lotus", "swimming", "бассейн"] },
+      { id: "8", keys: ["لا ماما", "ايطالي", "إيطالي", "بيتزا", "باستا", "la mama", "italian", "pizza", "итальянский"] },
+      { id: "12", keys: ["سيرينا", "مطعم", "بوفيه", "اكل", "أكل", "فطار", "افطار", "غداء", "عشاء", "restaurant", "buffet", "sirena", "breakfast", "dinner", "ресторан"] },
+      { id: "5", keys: ["بار الشاطئ", "عصير", "كوكتيل", "مشروبات الشاطئ", "beach bar"] },
+      { id: "7", keys: ["بار المسبح", "بار لوتس", "pool bar"] },
+      { id: "14", keys: ["سبا", "مساج", "جاكوزي", "ساونا", "حمام مغربي", "تدليك", "spa", "massage", "wellness", "спа"] },
+      { id: "15", keys: ["جيم", "رياضة", "لياقة", "gym", "fitness", "спортзал"] },
+      { id: "16", keys: ["تنس", "ملعب", "tennis", "корт"] },
+      { id: "2", keys: ["غوص", "غطس", "دايفينج", "diving", "дайвинг", "tauchen"] },
+      { id: "4", keys: ["كيدز", "اطفال", "أطفال", "العاب", "kids", "playground", "детский"] },
+      { id: "13", keys: ["استقبال", "لوبي", "ريسبشن", "ادارة", "lobby", "reception", "ресепшн", "empfang"] },
+      { id: "17", keys: ["محلات", "سوق", "شوبنج", "تسوق", "بازار", "shops", "mall", "shopping", "магазин"] },
+      { id: "19", keys: ["مسجد", "مصلى", "جامع", "صلاة", "mosque", "мечеть"] },
+      { id: "20", keys: ["عيادة", "دكتور", "طبيب", "صيدلية", "clinic", "doctor", "клиника", "arzt"] },
+      { id: "21", keys: ["مسرح", "انيميشن", "حفلة", "عروض", "theater", "show", "animation", "театр"] },
+      { id: "18", keys: ["بوابة", "خروج", "تاكسي", "شارع", "gate", "exit", "ворота"] }
+    ];
+
+    for (const rule of rules) {
+      if (rule.keys.some(k => t.includes(k))) {
+        return resortPois.find(p => p.id === rule.id);
+      }
+    }
+
+    return resortPois.find(p => 
+      t.includes(p.nameAr.toLowerCase()) || 
+      (p.nameEn && t.includes(p.nameEn.toLowerCase()))
+    );
+  },
+
+  routeToPoi(poi) {
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr };
+
+    const confirmMsg = lang === 'ar'
+      ? `حاضر! جاري توجيهك إلى ${loc.name} ورسم أسرع مسار للمشي 🗺️`
+      : (lang === 'ru' ? `Отлично! Прокладываю маршрут к ${loc.name}...`
+      : (lang === 'de' ? `Alles klar! Ich führe Sie zu ${loc.name}...`
+      : `Got it! Navigating you to ${loc.name}...`));
+
+    const statusText = document.getElementById('voiceNavStatusText');
+    if (statusText) statusText.innerText = confirmMsg;
+
+    if (typeof ConciergeAudioGuide !== 'undefined') {
+      ConciergeAudioGuide.speak(confirmMsg, lang);
+    }
+
+    setTimeout(() => {
+      App.closeModal('voiceNavModal');
+      const mapSection = document.getElementById('map-section') || document.getElementById('mapViewport');
+      if (mapSection) mapSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      App.setAsRouteDestination(poi.id);
+
+      if (typeof App.showToast === 'function') {
+        App.showToast(`تم توجيهك إلى: ${loc.name} 🗺️`, '🚶‍♂️');
+      }
+    }, 1400);
+  },
+
+  routeToRoom(roomNum) {
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const confirmMsg = lang === 'ar'
+      ? `حاضر! جاري تحديد مسار الغرفة رقم ${roomNum}...`
+      : `Navigating to room ${roomNum}...`;
+
+    const statusText = document.getElementById('voiceNavStatusText');
+    if (statusText) statusText.innerText = confirmMsg;
+
+    if (typeof ConciergeAudioGuide !== 'undefined') {
+      ConciergeAudioGuide.speak(confirmMsg, lang);
+    }
+
+    setTimeout(() => {
+      App.closeModal('voiceNavModal');
+      const input = document.getElementById('roomSearchInput');
+      if (input) input.value = roomNum;
+      if (typeof handleRoomLookup === 'function') handleRoomLookup();
+
+      const mapSection = document.getElementById('map-section') || document.getElementById('mapViewport');
+      if (mapSection) mapSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 1400);
+  }
+};
+
+// ========================================================
+// SMART SUN & SHADE LIVE RADAR ENGINE
+// ========================================================
+const SunShadeTracker = {
+  LATITUDE: 27.2579,
+  LONGITUDE: 33.8116,
+
+  getSolarTelemetry(date = new Date()) {
+    // Current Hurghada time (UTC+3)
+    const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+    const hurghadaHour = (utcHours + 3) % 24;
+
+    // Day of year
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+
+    // Approximate solar declination
+    const declination = 23.45 * Math.sin(((360 / 365) * (dayOfYear - 81) * Math.PI) / 180);
+
+    // Solar hour angle (degrees)
+    const solarTime = hurghadaHour - 0.25;
+    const hourAngle = (solarTime - 12) * 15;
+
+    // Solar elevation
+    const latRad = (this.LATITUDE * Math.PI) / 180;
+    const decRad = (declination * Math.PI) / 180;
+    const haRad = (hourAngle * Math.PI) / 180;
+
+    const sinElevation = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(haRad);
+    const elevation = (Math.asin(Math.max(-1, Math.min(1, sinElevation))) * 180) / Math.PI;
+
+    // Solar azimuth
+    const cosAzimuth = (Math.sin(decRad) - Math.sin(latRad) * sinElevation) / (Math.cos(latRad) * Math.cos((elevation * Math.PI) / 180));
+    let azimuth = (Math.acos(Math.max(-1, Math.min(1, cosAzimuth))) * 180) / Math.PI;
+    if (hourAngle > 0) azimuth = 360 - azimuth;
+
+    const shadowAzimuth = (azimuth + 180) % 360;
+
+    let statusKey = 'sun_state_night';
+    let uvIndex = 0;
+    if (elevation > 50) {
+      statusKey = 'sun_state_peak';
+      uvIndex = Math.min(11, Math.round(elevation / 7));
+    } else if (elevation > 22) {
+      statusKey = hourAngle < 0 ? 'sun_state_morning' : 'sun_state_afternoon';
+      uvIndex = Math.min(8, Math.round(elevation / 9));
+    } else if (elevation > 0) {
+      statusKey = 'sun_state_golden';
+      uvIndex = 2;
+    }
+
+    return {
+      hour: hurghadaHour,
+      elevation: Math.max(0, elevation),
+      azimuth,
+      shadowAzimuth,
+      statusKey,
+      uvIndex,
+      isDaylight: elevation > 0
+    };
+  },
+
+  getResortZoneAnalysis(telemetry) {
+    const { azimuth, isDaylight } = telemetry;
+    if (!isDaylight) {
+      return {
+        sunnySpots: [],
+        shadedSpots: [
+          { nameAr: "ممشى الشاطئ والمارينا الهادئ", nameEn: "Peaceful Beach & Marina Pier", icon: "🌊", badgeAr: "نسيم ليلي منعش", badgeEn: "Fresh Night Breeze" },
+          { nameAr: "تراس مطعم لا ماما الإيطالي", nameEn: "La Mama Italian Candlelit Terrace", icon: "🍕", badgeAr: "عشاء هادئ تحت النجوم", badgeEn: "Candlelit Under Stars" },
+          { nameAr: "حدائق مسبح لوتس المضاءة", nameEn: "Illuminated Lotus Pool Gardens", icon: "🏊‍♂️", badgeAr: "أجواء مسائية ساحرة", badgeEn: "Magical Night Ambience" }
+        ]
+      };
+    }
+
+    if (azimuth < 150) {
+      return {
+        sunnySpots: [
+          { nameAr: "رصيف مارينا الشاطئ الشرقي", nameEn: "Eastern Marina Pier Shoreline", icon: "🌊", badgeAr: "شمس صباحية مشرقة 100%", badgeEn: "100% Morning Sun" },
+          { nameAr: "أسرّة التشمس بمسبح لوتس", nameEn: "Lotus Central Pool Sunbeds", icon: "🏊‍♂️", badgeAr: "تشميس مباشر ممتاز", badgeEn: "Prime Direct Sun" },
+          { nameAr: "زلاجات الأكوا بارك ومسبح الأطفال", nameEn: "Aqua Park Slides & Pool", icon: "🛝", badgeAr: "مياه دافئة وأشعة مباشرة", badgeEn: "Warm Water & Sun" }
+        ],
+        shadedSpots: [
+          { nameAr: "مظلات كابانات الشاطئ الشمالية", nameEn: "North Beach Shaded Cabanas", icon: "🏖️", badgeAr: "ظل بحري منعش", badgeEn: "Cool Sea Breeze Shade" },
+          { nameAr: "الحدائق خلف المبنى الشمالي (N)", nameEn: "Gardens behind North Wing (N)", icon: "🌴", badgeAr: "ظل طبيعي بارد", badgeEn: "Cool Garden Shade" },
+          { nameAr: "برجولات مطعم سيرينا الخارجية", nameEn: "Sirena Pergola Terrace", icon: "🍽️", badgeAr: "إفطار في الظل اللطيف", badgeEn: "Shaded Breakfast" }
+        ]
+      };
+    }
+
+    if (azimuth < 220) {
+      return {
+        sunnySpots: [
+          { nameAr: "مسبح لوتس والبار المائي", nameEn: "Lotus Central Pool & Pool Bar", icon: "🏊‍♂️", badgeAr: "شمس عمودية كاملة (تان)", badgeEn: "Peak Vertical Sun" },
+          { nameAr: "شاطئ الرمال الذهبية المفتوح", nameEn: "Open Golden Sand Beach", icon: "🏖️", badgeAr: "تشميس شاطئي نقي 100%", badgeEn: "Pure Beach Sun" },
+          { nameAr: "ملاعب التنس والأنشطة الرياضية", nameEn: "Tennis Sports Arena", icon: "🎾", badgeAr: "شمس كاملة", badgeEn: "Full Daylight" }
+        ],
+        shadedSpots: [
+          { nameAr: "بار الشاطئ المسقوف بالأخشاب", nameEn: "Shaded Timber Beach Bar", icon: "🍹", badgeAr: "ظل واقي ومشروبات مثلجة", badgeEn: "Canopy Shade & Drinks" },
+          { nameAr: "أروقة بهو اللوبي الملكي المكيفة", nameEn: "Air-conditioned Lobby Lounges", icon: "🏛️", badgeAr: "راحة تامة بعيداً عن الحرارة", badgeEn: "Cool Air Comfort" },
+          { nameAr: "الممر المظلل للمبنى التجاري MLS", nameEn: "Covered Promenade to Wing MLS", icon: "🌴", badgeAr: "ظل دائم ومريح", badgeEn: "Continuous Shade" }
+        ]
+      };
+    }
+
+    return {
+      sunnySpots: [
+        { nameAr: "رصيف المارينا الممتد في البحر", nameEn: "Extended Marina Pier", icon: "🌅", badgeAr: "أجمل إطلالة لغروب الشمس", badgeEn: "Spectacular Sunset View" },
+        { nameAr: "بار الشاطئ والممشى الفيروزي", nameEn: "Beach Bar Front Deck", icon: "🍹", badgeAr: "شمس ذهبية دافئة وهادئة", badgeEn: "Golden Hour Glow" },
+        { nameAr: "تراس الجناح الجنوبي (S)", nameEn: "South Wing (S) Terraces", icon: "☀️", badgeAr: "دفء الأصيل المنعش", badgeEn: "Warm Sunset Terrace" }
+      ],
+      shadedSpots: [
+        { nameAr: "كراسي مسبح لوتس الغربية (ظل المباني)", nameEn: "Lotus Pool East Loungers", icon: "🏊‍♂️", badgeAr: "ظل واسع وهادئ للسباحة", badgeEn: "Building Shadow Shade" },
+        { nameAr: "تراس مطعم لا ماما الإيطالي", nameEn: "La Mama Italian Garden Terrace", icon: "🍕", badgeAr: "جلسة عصرية منعشة", badgeEn: "Breezy Evening Shade" },
+        { nameAr: "حدائق النادي الصحي والسبا", nameEn: "Spa Sanctuary Palm Gardens", icon: "💆", badgeAr: "استرخاء منعش في الظل", badgeEn: "Tranquil Oasis Shade" }
+      ]
+    };
   }
 };
 
@@ -3159,6 +4323,7 @@ if (typeof window !== 'undefined') {
   window.toggleDarkMode = toggleDarkMode;
   window.toggleAudio = toggleAudio;
   window.changeLanguage = changeLanguage;
+  window.openVoiceNavigator = openVoiceNavigator;
 }
 
 // Boot Application on DOM Ready

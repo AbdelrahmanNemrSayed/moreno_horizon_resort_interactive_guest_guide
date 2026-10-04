@@ -167,13 +167,15 @@ const MapEngine = {
     const currentPitch = this.is3D ? this.pitch : 0;
 
     pins.forEach(pin => {
+      const isTourActive = pin.classList.contains('active-tour-pin');
+      const scaleStr = isTourActive ? 'scale(1.4)' : '';
       if (this.is3D) {
         pin.classList.add('pin-3d');
         // Counter-rotate pin so it stands upright and faces viewer
-        pin.style.transform = `translate(-50%, -100%) rotateZ(${-this.bearing}deg) rotateX(${-currentPitch}deg)`;
+        pin.style.transform = `translate(-50%, -100%) rotateZ(${-this.bearing}deg) rotateX(${-currentPitch}deg) ${scaleStr}`;
       } else {
         pin.classList.remove('pin-3d');
-        pin.style.transform = `translate(-50%, -50%) rotateZ(${-this.bearing}deg)`;
+        pin.style.transform = `translate(-50%, -50%) rotateZ(${-this.bearing}deg) ${scaleStr}`;
       }
     });
 
@@ -221,14 +223,7 @@ const MapEngine = {
     this.stopOrbitTour();
     this.is3D = !this.is3D;
 
-    const btn = document.getElementById('btnToggle3D');
-    if (btn) {
-      if (this.is3D) {
-        btn.classList.add('active-mode');
-      } else {
-        btn.classList.remove('active-mode');
-      }
-    }
+    this.set3DButtonsActive(this.is3D);
 
     if (this.is3D && this.pitch === 0) {
       this.pitch = 52;
@@ -245,18 +240,24 @@ const MapEngine = {
     this.stopOrbitTour();
     if (!this.is3D) {
       this.is3D = true;
-      const btn = document.getElementById('btnToggle3D');
-      if (btn) btn.classList.add('active-mode');
+      this.set3DButtonsActive(true);
     }
 
     this.pitch = Math.min(74, Math.max(0, this.pitch + delta));
     if (this.pitch === 0) {
       this.is3D = false;
-      const btn = document.getElementById('btnToggle3D');
-      if (btn) btn.classList.remove('active-mode');
+      this.set3DButtonsActive(false);
     }
 
     this.applyTransform(true);
+  },
+
+  // Keep both 3D toggle buttons (map toolbar + Earth widget) in sync
+  set3DButtonsActive(active) {
+    ['btnToggle3D', 'btnToggle3DEarth'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('active-mode', !!active);
+    });
   },
 
   // 360° Compass Rotation Controls
@@ -284,14 +285,14 @@ const MapEngine = {
 
     // Update layer images visibility with crossfade
     const satImg = document.getElementById('resortMapSatellite');
-    const nightImg = document.getElementById('resortMapNight');
+    const nightWrapper = document.getElementById('resortMapNightWrapper') || document.getElementById('resortMapNight');
     const illusImg = document.getElementById('resortMapIllustrated');
 
     if (satImg) {
-      satImg.className = `earth-layer-img ${layerName === 'satellite' ? 'active' : 'inactive'}`;
+      satImg.className = `earth-layer-img map-layer-satellite ${layerName === 'satellite' ? 'active' : 'inactive'}`;
     }
-    if (nightImg) {
-      nightImg.className = `earth-layer-img ${layerName === 'night' ? 'active' : 'inactive'}`;
+    if (nightWrapper) {
+      nightWrapper.className = `earth-layer-img map-layer-night-wrapper ${layerName === 'night' ? 'active' : 'inactive'}`;
     }
     if (illusImg) {
       illusImg.className = `earth-layer-img ${layerName === 'illustrated' ? 'active' : 'inactive'}`;
@@ -327,8 +328,7 @@ const MapEngine = {
 
     const btn = document.getElementById('orbitTourBtn');
     if (btn) btn.classList.add('earth-orbit-running');
-    const btnToggle = document.getElementById('btnToggle3D');
-    if (btnToggle) btnToggle.classList.add('active-mode');
+    this.set3DButtonsActive(true);
 
     if (typeof App !== 'undefined' && App.showToast) {
       App.showToast('🚁 بدأت جولة الطيران الجوي الفضائي 360° حول المنتجع');
@@ -560,6 +560,10 @@ const MapEngine = {
     const endPoint = routePoints[routePoints.length - 1];
     const pathD = routePoints.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
 
+    this.lastRoutePoints = routePoints;
+    this.lastRouteOriginTitle = originTitle;
+    this.lastRouteDestTitle = destTitle;
+
     let distPx = 0;
     for (let index = 1; index < routePoints.length; index++) {
       distPx += Math.hypot(routePoints[index].x - routePoints[index - 1].x, routePoints[index].y - routePoints[index - 1].y);
@@ -758,8 +762,12 @@ const MapEngine = {
         </div>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
-        <button onclick="MapEngine.clearRoute()" class="tap-effect px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white text-xs font-bold transition">
-          ✕ مسح
+        <button onclick="MapEngine.startLiveWalkSimulation()" class="tap-effect px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow-md flex items-center gap-1">
+          <span>🚶‍♂️</span>
+          <span class="hidden sm:inline">محاكاة السير</span>
+        </button>
+        <button onclick="MapEngine.clearRoute()" class="tap-effect px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white text-xs font-bold transition">
+          ✕
         </button>
       </div>
     `;
@@ -767,6 +775,7 @@ const MapEngine = {
   },
 
   clearRoute() {
+    this.stopLiveWalkSimulation();
     this.endTurnByTurn();
     this.closePopover();
     this.removeRoomBeacon();
@@ -776,6 +785,262 @@ const MapEngine = {
     if (hud) hud.style.display = 'none';
     const banner = document.getElementById('routeResultBanner');
     if (banner) banner.classList.add('hidden');
+  },
+
+  // 3D Live Walkthrough Camera Simulation
+  startLiveWalkSimulation() {
+    this.stopLiveWalkSimulation();
+    this.stopOrbitTour();
+
+    const svgLayer = document.getElementById('routeSvgLayer');
+    if (!svgLayer || !this.lastRoutePoints || this.lastRoutePoints.length < 2) {
+      if (typeof App !== 'undefined' && App.showToast) {
+        App.showToast('يرجى تحديد مسار أولاً لبدء المحاكاة 🗺️', '📍');
+      }
+      return;
+    }
+
+    const points = this.lastRoutePoints;
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
+
+    this.isWalkingSimulating = true;
+    this.simSpeed = 1;
+    this.is3D = true;
+    this.set3DButtonsActive(true);
+
+    const viewport = document.getElementById('mapViewport');
+    if (viewport) viewport.classList.add('mode-3d');
+
+    // Create or show Simulation HUD
+    let simHud = document.getElementById('walkSimulationHud');
+    if (!simHud && viewport) {
+      simHud = document.createElement('div');
+      simHud.id = 'walkSimulationHud';
+      simHud.className = 'walk-simulation-hud absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 w-[94%] sm:w-[540px] max-w-lg z-40 rounded-2xl p-3 bg-slate-950/92 backdrop-blur-xl border border-amber-500/40 text-white shadow-2xl flex flex-col gap-2 select-none';
+      viewport.appendChild(simHud);
+    }
+    if (simHud) {
+      simHud.classList.remove('hidden');
+      simHud.style.display = 'flex';
+    }
+
+    // Create or show Sim Walker Avatar on pinsOverlay
+    const overlay = document.getElementById('pinsOverlay');
+    let walker = document.getElementById('simWalkerMarker');
+    if (!walker && overlay) {
+      walker = document.createElement('div');
+      walker.id = 'simWalkerMarker';
+      walker.className = 'sim-walker-marker absolute pointer-events-none z-50';
+      walker.innerHTML = `
+        <div class="sim-walker-aura"></div>
+        <div class="sim-walker-dot">🚶‍♂️</div>
+      `;
+      overlay.appendChild(walker);
+    }
+    if (walker) walker.style.display = 'block';
+
+    // Compute segment distances
+    const segmentDistances = [];
+    let totalDistPx = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      const d = Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+      segmentDistances.push(d);
+      totalDistPx += d;
+    }
+    const totalMeters = Math.round(totalDistPx * 0.42);
+
+    let progressPx = 0;
+    let lastTime = performance.now();
+    const speedPxPerSec = 75; // ~30m/s baseline pace
+
+    // Voice announcement of start
+    try {
+      if (typeof ConciergeAudioGuide !== 'undefined' && !ConciergeAudioGuide.isMuted) {
+        ConciergeAudioGuide.speak(t.wf_start_simulation || 'بدء محاكاة السير الحي', lang);
+      }
+    } catch (e) {}
+
+    const updateHud = (remainingMeters) => {
+      if (!simHud) return;
+      const pct = Math.min(100, (progressPx / totalDistPx) * 100);
+      const estMin = Math.max(1, Math.round(remainingMeters / 65));
+
+      simHud.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center animate-subtle-float">
+              🚶‍♂️
+            </span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black text-white">${t.wf_start_simulation || 'محاكاة السير الحي'}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">GPS Live</span>
+              </div>
+              <p class="text-[11px] text-amber-300 font-bold mt-0.5">
+                ${remainingMeters > 5 ? `${remainingMeters} ${t.wf_meters || 'متر متبقي'} • ${estMin} دقيقة` : (t.wf_sim_arrived || 'وصلت إلى وجهتك 🎉')}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="MapEngine.toggleSimSpeed()" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-bold transition tap-effect">
+              ⚡ ${this.simSpeed}x
+            </button>
+            <button onclick="MapEngine.stopLiveWalkSimulation()" class="w-7 h-7 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center transition tap-effect" title="${t.wf_stop_simulation || 'إنهاء'}">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="w-full bg-white/15 h-1.5 rounded-full overflow-hidden mt-0.5">
+          <div class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all duration-150" style="width: ${pct}%"></div>
+        </div>
+      `;
+    };
+
+    const animateWalk = (now) => {
+      if (!this.isWalkingSimulating) return;
+
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      progressPx += speedPxPerSec * this.simSpeed * dt;
+
+      if (progressPx >= totalDistPx) {
+        progressPx = totalDistPx;
+        const endPoint = points[points.length - 1];
+        if (walker) {
+          walker.style.left = `${(endPoint.x / this.CANVAS_WIDTH) * 100}%`;
+          walker.style.top = `${(endPoint.y / this.CANVAS_HEIGHT) * 100}%`;
+        }
+        updateHud(0);
+
+        if (typeof PromoAudioEngine !== 'undefined') {
+          PromoAudioEngine.playTransitionChime();
+        }
+        if (typeof ConciergeAudioGuide !== 'undefined' && !ConciergeAudioGuide.isMuted) {
+          ConciergeAudioGuide.speak(t.wf_sim_arrived || 'لقد وصلت إلى وجهتك بنجاح', lang);
+        }
+
+        setTimeout(() => {
+          this.stopLiveWalkSimulation();
+        }, 3500);
+        return;
+      }
+
+      let accumulated = 0;
+      let segIdx = 0;
+      for (let i = 0; i < segmentDistances.length; i++) {
+        if (accumulated + segmentDistances[i] >= progressPx) {
+          segIdx = i;
+          break;
+        }
+        accumulated += segmentDistances[i];
+      }
+
+      const p1 = points[segIdx];
+      const p2 = points[segIdx + 1];
+      const segLen = segmentDistances[segIdx] || 1;
+      const segProg = Math.max(0, Math.min(1, (progressPx - accumulated) / segLen));
+
+      const curX = p1.x + (p2.x - p1.x) * segProg;
+      const curY = p1.y + (p2.y - p1.y) * segProg;
+
+      const angleRad = Math.atan2(p2.x - p1.x, -(p2.y - p1.y));
+      const targetBearing = (angleRad * 180) / Math.PI;
+
+      const curPctX = (curX / this.CANVAS_WIDTH) * 100;
+      const curPctY = (curY / this.CANVAS_HEIGHT) * 100;
+      if (walker) {
+        walker.style.left = `${curPctX}%`;
+        walker.style.top = `${curPctY}%`;
+      }
+
+      this.flyToWalk(curPctX, curPctY, 1.85, 54, targetBearing);
+
+      const remainingMeters = Math.max(0, Math.round((totalDistPx - progressPx) * 0.42));
+      updateHud(remainingMeters);
+
+      this.simRafId = requestAnimationFrame(animateWalk);
+    };
+
+    updateHud(totalMeters);
+    this.simRafId = requestAnimationFrame(animateWalk);
+  },
+
+  flyToWalk(pctX, pctY, targetScale = 1.85, targetPitch = 54, targetBearing = 0) {
+    const viewport = document.getElementById('mapViewport');
+    const canvas = document.getElementById('mapCanvasWrapper');
+    if (!viewport || !canvas) return;
+
+    this.scale = targetScale;
+    this.pitch = targetPitch;
+    this.bearing = targetBearing;
+
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+
+    const cx = this.CANVAS_WIDTH / 2;
+    const cy = this.CANVAS_HEIGHT / 2;
+
+    const targetPixelX = (pctX / 100) * this.CANVAS_WIDTH;
+    const targetPixelY = (pctY / 100) * this.CANVAS_HEIGHT;
+
+    const dx = targetPixelX - cx;
+    const dy = targetPixelY - cy;
+
+    const radZ = (this.bearing * Math.PI) / 180;
+    const radX = (this.pitch * Math.PI) / 180;
+
+    const x1 = dx * Math.cos(radZ) - dy * Math.sin(radZ);
+    const y1 = dx * Math.sin(radZ) + dy * Math.cos(radZ);
+
+    const x2 = x1;
+    const y2 = y1 * Math.cos(radX);
+    const z2 = -y1 * Math.sin(radX);
+
+    const D = 1200;
+    const k = D / (D - z2);
+
+    const projX = x2 * k * this.scale;
+    const projY = y2 * k * this.scale;
+
+    const desiredScreenX = vw / 2;
+    const desiredScreenY = vh * 0.52;
+
+    this.panX = desiredScreenX - cx - projX;
+    this.panY = desiredScreenY - cy - projY;
+
+    canvas.style.transition = 'none';
+    canvas.style.transformOrigin = '50% 50%';
+    canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale}) rotateX(${this.pitch}deg) rotateZ(${this.bearing}deg)`;
+
+    this.updatePinBillboards();
+    this.updateCompassUI();
+  },
+
+  toggleSimSpeed() {
+    this.simSpeed = this.simSpeed === 1 ? 2 : (this.simSpeed === 2 ? 3 : 1);
+  },
+
+  stopLiveWalkSimulation() {
+    this.isWalkingSimulating = false;
+    if (this.simRafId) {
+      cancelAnimationFrame(this.simRafId);
+      this.simRafId = null;
+    }
+    const simHud = document.getElementById('walkSimulationHud');
+    if (simHud) {
+      simHud.classList.add('hidden');
+      simHud.style.display = 'none';
+    }
+    const walker = document.getElementById('simWalkerMarker');
+    if (walker) walker.remove();
+
+    if (typeof ConciergeAudioGuide !== 'undefined') {
+      ConciergeAudioGuide.stop();
+    }
   },
 
   bindEvents() {
@@ -970,7 +1235,7 @@ const MapEngine = {
   },
 
   searchPois(query) {
-    const dropdown = document.getElementById('mapPoiSearchResults') || document.getElementById('mapSearchDropdown');
+    const dropdown = document.getElementById('mapPoiSearchResults');
     const clearBtn = document.getElementById('mapPoiSearchClear');
     if (clearBtn) {
       if (query && query.trim().length > 0) {
@@ -1027,8 +1292,8 @@ const MapEngine = {
   },
 
   selectFromSearch(id) {
-    const dropdown = document.getElementById('mapPoiSearchResults') || document.getElementById('mapSearchDropdown');
-    const input = document.getElementById('mapPoiSearchInput') || document.getElementById('mapSearchInput');
+    const dropdown = document.getElementById('mapPoiSearchResults');
+    const input = document.getElementById('mapPoiSearchInput');
     const clearBtn = document.getElementById('mapPoiSearchClear');
     if (dropdown) dropdown.classList.add('hidden');
     if (input) input.value = '';
@@ -1070,8 +1335,7 @@ const MapEngine = {
     this.currentCategoryFilter = 'all';
     this.isOpenNowFilter = false;
 
-    const btnToggle = document.getElementById('btnToggle3D');
-    if (btnToggle) btnToggle.classList.remove('active-mode');
+    this.set3DButtonsActive(false);
 
     // Reset Category buttons
     document.querySelectorAll('.map-cat-btn').forEach(b => {
@@ -1145,6 +1409,137 @@ const MapEngine = {
 
     this.clampPan();
     this.applyTransform(smooth);
+  },
+
+  // Ultra-Smooth 3D Cinematic Fly-To Camera Transition with Exact Geometric Framing
+  flyToCinematic(pctX, pctY, targetScale = 1.65, targetPitch = 48, targetBearing = 0, durationMs = 1600) {
+    this.stopOrbitTour();
+    const viewport = document.getElementById('mapViewport');
+    const canvas = document.getElementById('mapCanvasWrapper');
+    if (!viewport || !canvas) return;
+
+    this.is3D = true;
+    this.set3DButtonsActive(true);
+    this.scale = targetScale;
+    this.pitch = targetPitch;
+    this.bearing = (targetBearing + 360) % 360;
+
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+
+    const cx = this.CANVAS_WIDTH / 2; // 448
+    const cy = this.CANVAS_HEIGHT / 2; // 600
+
+    const targetPixelX = (pctX / 100) * this.CANVAS_WIDTH;
+    const targetPixelY = (pctY / 100) * this.CANVAS_HEIGHT;
+
+    const dx = targetPixelX - cx;
+    const dy = targetPixelY - cy;
+
+    const radZ = (this.bearing * Math.PI) / 180;
+    const radX = (this.pitch * Math.PI) / 180;
+
+    // 1. Rotate around Z (bearing rotation)
+    const x1 = dx * Math.cos(radZ) - dy * Math.sin(radZ);
+    const y1 = dx * Math.sin(radZ) + dy * Math.cos(radZ);
+
+    // 2. Rotate around X (pitch tilt)
+    const x2 = x1;
+    const y2 = y1 * Math.cos(radX);
+    const z2 = -y1 * Math.sin(radX);
+
+    // 3. Perspective projection divide (CSS perspective = 1200px)
+    const D = 1200;
+    const k = D / (D - z2);
+
+    const projX = x2 * k * this.scale;
+    const projY = y2 * k * this.scale;
+
+    // 4. Center landmark in the visible sweet spot:
+    // Horizontally: center of screen (vw / 2)
+    // Vertically: upper-middle (35% to 38% from top of viewport, leaving room for bottom theater card)
+    const targetYRatio = vw < 640 ? 0.35 : 0.38;
+    const desiredScreenX = vw / 2;
+    const desiredScreenY = vh * targetYRatio;
+
+    // Invert: screenX = panX + cx + projX  ==>  panX = desiredScreenX - cx - projX
+    this.panX = desiredScreenX - cx - projX;
+    this.panY = desiredScreenY - cy - projY;
+
+    if (viewport) viewport.classList.add('mode-3d');
+    canvas.style.transition = `transform ${durationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+    canvas.style.transformOrigin = '50% 50%';
+
+    const currentPitch = this.pitch;
+    canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale}) rotateX(${currentPitch}deg) rotateZ(${this.bearing}deg)`;
+
+    this.updatePinBillboards();
+    this.updateCompassUI();
+    this.updateEarthHud();
+    this.updateMiniMap();
+  },
+
+  // 3D Sonar Radar Spotlight & Overhead Tag on Active POI
+  showTourSpotlight(poi, tourIndex, totalSteps) {
+    const overlay = document.getElementById('pinsOverlay');
+    if (!overlay || !poi || !poi.coords) return;
+
+    // 1. Spotlight the active pin & dim background pins
+    const pins = document.querySelectorAll('.map-pin');
+    pins.forEach(pin => {
+      const isTarget = String(pin.id).replace('pin-', '').trim().toUpperCase() === String(poi.id).trim().toUpperCase();
+      if (isTarget) {
+        pin.classList.remove('tour-dimmed-pin');
+        pin.classList.add('active-pin', 'active-tour-pin');
+        pin.style.opacity = '1';
+        pin.style.zIndex = '60';
+      } else {
+        pin.classList.remove('active-pin', 'active-tour-pin');
+        pin.classList.add('tour-dimmed-pin');
+        pin.style.opacity = '0.32';
+        pin.style.zIndex = '10';
+      }
+    });
+
+    // 2. 3D Sonar Beacon (ripples expanding across resort ground)
+    let beacon = document.getElementById('tourSpotlightBeacon');
+    if (!beacon) {
+      beacon = document.createElement('div');
+      beacon.id = 'tourSpotlightBeacon';
+      beacon.className = 'tour-spotlight-beacon pointer-events-none absolute';
+      overlay.appendChild(beacon);
+    }
+    beacon.style.left = `${poi.coords.x}%`;
+    beacon.style.top = `${poi.coords.y}%`;
+    beacon.innerHTML = `
+      <div class="beacon-ripple-ring beacon-ring-1"></div>
+      <div class="beacon-ripple-ring beacon-ring-2"></div>
+      <div class="beacon-ripple-ring beacon-ring-3"></div>
+      <div class="beacon-central-glow"></div>
+      <div class="beacon-vertical-beam"></div>
+    `;
+
+    // Remove old 3D canvas callout if present (now rendered crisp in 2D HUD)
+    const oldCallout = document.getElementById('tourSpotlightCallout');
+    if (oldCallout) oldCallout.remove();
+
+    this.updatePinBillboards();
+  },
+
+  clearTourSpotlight() {
+    const beacon = document.getElementById('tourSpotlightBeacon');
+    if (beacon) beacon.remove();
+    const oldCallout = document.getElementById('tourSpotlightCallout');
+    if (oldCallout) oldCallout.remove();
+
+    const pins = document.querySelectorAll('.map-pin');
+    pins.forEach(pin => {
+      pin.classList.remove('active-pin', 'active-tour-pin', 'tour-dimmed-pin');
+      pin.style.opacity = '1';
+      pin.style.zIndex = '';
+    });
+
+    this.updatePinBillboards();
   },
 
   selectPoi(id, shouldScroll = false) {
@@ -1623,14 +2018,14 @@ const MapEngine = {
 
   // Interactive Live Walk Simulation Methods
   toggleLiveWalkSimulation() {
-    if (this.isSimulatingWalk) {
-      this.pauseLiveWalkSimulation();
+    if (this.isWalkingSimulating) {
+      this.stopLiveWalkSimulation();
     } else {
       this.startLiveWalkSimulation();
     }
   },
 
-  startLiveWalkSimulation() {
+  startTurnByTurnSimulation() {
     if (!this.activeNavigation) return;
     const pathEl = document.getElementById('liveRouteSvgPath');
     if (!pathEl) {
@@ -1649,14 +2044,22 @@ const MapEngine = {
 
     const totalLength = targetPath.getTotalLength();
     const durationMs = Math.max(7000, (this.activeNavigation.meters || 120) * 75);
-    let lastTime = performance.now();
+    let lastTime = null;
 
     const loop = (now) => {
       if (!this.isSimulatingWalk) return;
-      const dt = now - lastTime;
+      if (lastTime === null) {
+        lastTime = now;
+        this.walkAnimFrame = requestAnimationFrame(loop);
+        return;
+      }
+
+      const dt = Math.min(100, Math.max(0, now - lastTime));
       lastTime = now;
 
-      this.walkProgress += (dt / durationMs) * (this.walkSpeed || 1);
+      this.walkProgress = Math.min(1, Math.max(0,
+        this.walkProgress + (dt / durationMs) * (this.walkSpeed || 1)
+      ));
       if (this.walkProgress >= 1) {
         this.walkProgress = 1;
         this.updateWalkerMarker(targetPath, totalLength, 1);
@@ -1669,7 +2072,7 @@ const MapEngine = {
       // Auto step advancement based on path milestone
       const steps = this.activeNavigation.steps;
       if (steps && steps.length > 0) {
-        const targetStep = Math.min(steps.length - 1, Math.floor(this.walkProgress * steps.length));
+        const targetStep = Math.min(steps.length - 1, Math.max(0, Math.floor(this.walkProgress * steps.length)));
         if (targetStep !== this.activeNavigation.currentStepIdx) {
           this.activeNavigation.currentStepIdx = targetStep;
           this.renderTurnStep(false);

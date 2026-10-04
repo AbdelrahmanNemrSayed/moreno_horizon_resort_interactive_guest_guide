@@ -61,11 +61,11 @@ const VirtualResortMap = {
     'poi_lamama': { x: 530, y: 440, name: 'مطعم لا ماما الإيطالي (8)', neighbors: ['poi_oriental', 'hub_garden_east', 'poi_sirena'] },
 
     // Central Garden Paths around the Central Circular Pool
-    'hub_garden_north': { x: 390, y: 490, name: 'ممشى الحديقة الشمالي', neighbors: ['hub_kids_area', 'poi_beach_bar', 'poi_oriental', 'hub_garden_west', 'hub_garden_east', 'poi_sirena'] },
-    'poi_sirena': { x: 460, y: 520, name: 'مطعم سيرينا الرئيسي (12)', neighbors: ['hub_garden_north', 'poi_lamama', 'hub_garden_east'] },
+    'hub_garden_north': { x: 390, y: 490, name: 'ممشى الحديقة الشمالي', neighbors: ['hub_kids_area', 'poi_beach_bar', 'poi_oriental', 'hub_garden_west', 'hub_garden_east'] },
+    'poi_sirena': { x: 385, y: 770, name: 'مطعم سيرينا الرئيسي (12)', neighbors: ['hub_garden_south', 'poi_lobby_m', 'hub_entrance_plaza', 'hub_garden_east'] },
     'hub_garden_west': { x: 290, y: 600, name: 'ممشى الحديقة الغربي (مسبح)', neighbors: ['hub_garden_north', 'poi_wing_n', 'hub_garden_south', 'poi_lobby_m'] },
-    'hub_garden_east': { x: 490, y: 600, name: 'ممشى الحديقة الشرقي (مسبح)', neighbors: ['hub_garden_north', 'poi_lamama', 'poi_sirena', 'hub_garden_south', 'poi_wing_s'] },
-    'hub_garden_south': { x: 390, y: 690, name: 'ممشى الحديقة الجنوبي', neighbors: ['hub_garden_west', 'hub_garden_east', 'poi_lobby_m', 'hub_entrance_plaza'] },
+    'hub_garden_east': { x: 490, y: 600, name: 'ممشى الحديقة الشرقي (مسبح)', neighbors: ['hub_garden_north', 'poi_lamama', 'hub_garden_south', 'poi_wing_s', 'poi_sirena'] },
+    'hub_garden_south': { x: 390, y: 690, name: 'ممشى الحديقة الجنوبي', neighbors: ['hub_garden_west', 'hub_garden_east', 'poi_lobby_m', 'poi_sirena', 'hub_entrance_plaza'] },
 
     // Wing N (North Wing)
     'hub_wing_n_north': { x: 190, y: 490, name: 'ممر الجناح الشمالي', neighbors: ['poi_aquapark', 'poi_wing_n', 'hub_parking_1'] },
@@ -147,7 +147,7 @@ const VirtualResortMap = {
 
     container.innerHTML = `
       <!-- Optional Background Image (Illustrated Map Photo without directory text) -->
-      <img id="resortMapIllustrated" src="moreno_resort_map.jpg" alt="Moreno Horizon Map" 
+      <img id="resortMapIllustrated" src="moreno_resort_map_new.png" alt="Moreno Horizon Map"
            class="earth-layer-img ${this.viewMode === 'map_overlay' ? 'active' : 'inactive'}" draggable="false">
 
       <!-- Optional Satellite Photo -->
