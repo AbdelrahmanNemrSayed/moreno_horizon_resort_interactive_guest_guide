@@ -189,6 +189,11 @@ const MapEngine = {
     if (walker) {
       walker.style.transform = `rotateZ(${-this.bearing}deg) rotateX(${-currentPitch}deg)`;
     }
+
+    const simAvatar = document.getElementById('simWalkerAvatarWrapper');
+    if (simAvatar) {
+      simAvatar.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+    }
   },
 
   updateCompassUI() {
@@ -814,12 +819,23 @@ const MapEngine = {
     const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
 
     this.isWalkingSimulating = true;
+    this.isSimulatingWalk = true;
+    this.isSimPaused = false;
     this.simSpeed = 1;
-    this.is3D = true;
-    this.set3DButtonsActive(true);
+    this.walkSpeed = 1;
+    this.bearing = 0; // Stable North-Up orientation to prevent dizziness & disorienting map snaps
+
+    // Set comfortable camera parameters for walking
+    this.scale = 1.62;
+    if (this.is3D) {
+      this.pitch = 28; // Comfortable isometric incline
+    } else {
+      this.pitch = 0;
+    }
+    this.set3DButtonsActive(this.is3D);
 
     const viewport = document.getElementById('mapViewport');
-    if (viewport) viewport.classList.add('mode-3d');
+    if (viewport && this.is3D) viewport.classList.add('mode-3d');
 
     // Create or show Simulation HUD
     let simHud = document.getElementById('walkSimulationHud');
@@ -842,12 +858,25 @@ const MapEngine = {
       walker.id = 'simWalkerMarker';
       walker.className = 'sim-walker-marker absolute pointer-events-none z-50';
       walker.innerHTML = `
+        <div class="sim-walker-heading" id="simWalkerHeading">
+          <div class="sim-walker-beam"></div>
+          <div class="sim-walker-arrow">▲</div>
+        </div>
         <div class="sim-walker-aura"></div>
-        <div class="sim-walker-dot">🚶‍♂️</div>
+        <div class="sim-walker-avatar-wrapper" id="simWalkerAvatarWrapper">
+          <div class="sim-walker-dot">🚶‍♂️</div>
+          <div class="sim-walker-label">${lang === 'ar' ? 'أنت الآن' : lang === 'ru' ? 'Вы здесь' : lang === 'de' ? 'Ihr Standort' : 'You are here'}</div>
+        </div>
       `;
       overlay.appendChild(walker);
     }
     if (walker) walker.style.display = 'block';
+
+    const headingEl = document.getElementById('simWalkerHeading');
+    const avatarWrapper = document.getElementById('simWalkerAvatarWrapper');
+    if (avatarWrapper && this.is3D) {
+      avatarWrapper.style.transform = `rotateX(${-this.pitch}deg)`;
+    }
 
     // Compute segment distances
     const segmentDistances = [];
@@ -861,7 +890,25 @@ const MapEngine = {
 
     let progressPx = 0;
     let lastTime = performance.now();
-    const speedPxPerSec = 75; // ~30m/s baseline pace
+    const baseSpeedPxPerSec = 45; // Smooth walking pace (~19 m/s visual simulation)
+    let currentHeading = 0;
+
+    // Initial heading towards first waypoint
+    if (points.length >= 2) {
+      const angleRad = Math.atan2(points[1].x - points[0].x, -(points[1].y - points[0].y));
+      currentHeading = (angleRad * 180) / Math.PI;
+      if (headingEl) headingEl.style.transform = `rotate(${currentHeading}deg)`;
+    }
+
+    // Initial walker placement & camera focus
+    const startPoint = points[0];
+    const startPctX = (startPoint.x / this.CANVAS_WIDTH) * 100;
+    const startPctY = (startPoint.y / this.CANVAS_HEIGHT) * 100;
+    if (walker) {
+      walker.style.left = `${startPctX}%`;
+      walker.style.top = `${startPctY}%`;
+    }
+    this.centerCameraOnWalker(startPctX, startPctY);
 
     // Voice announcement of start
     try {
@@ -875,25 +922,39 @@ const MapEngine = {
       const pct = Math.min(100, (progressPx / totalDistPx) * 100);
       const estMin = Math.max(1, Math.round(remainingMeters / 65));
 
+      // Get current active step title if available
+      let stepText = '';
+      let stepIcon = '🚶‍♂️';
+      if (this.activeNavigation && this.activeNavigation.steps) {
+        const step = this.activeNavigation.steps[this.activeNavigation.currentStepIdx];
+        if (step) {
+          stepText = step.instruction || step.title;
+          stepIcon = step.icon || '🚶‍♂️';
+        }
+      }
+
       simHud.innerHTML = `
         <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center animate-subtle-float">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center animate-subtle-float shrink-0 shadow-md">
               🚶‍♂️
             </span>
-            <div>
+            <div class="min-w-0">
               <div class="flex items-center gap-2">
-                <span class="text-xs font-black text-white">${t.wf_start_simulation || 'محاكاة السير الحي'}</span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">GPS Live</span>
+                <span class="text-xs font-black text-white truncate">${t.wf_start_simulation || 'محاكاة السير الحي'}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 shrink-0">GPS 60fps</span>
               </div>
-              <p class="text-[11px] text-amber-300 font-bold mt-0.5">
+              <p class="text-[11px] text-amber-300 font-bold mt-0.5 truncate">
                 ${remainingMeters > 5 ? `${remainingMeters} ${t.wf_meters || 'متر متبقي'} • ${estMin} دقيقة` : (t.wf_sim_arrived || 'وصلت إلى وجهتك 🎉')}
               </p>
             </div>
           </div>
 
-          <div class="flex items-center gap-1.5">
-            <button onclick="MapEngine.toggleSimSpeed()" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-bold transition tap-effect">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="MapEngine.toggleSimPause()" class="px-2.5 py-1 rounded-lg ${this.isSimPaused ? 'bg-amber-500 text-slate-950 font-black' : 'bg-white/10 hover:bg-white/20 text-white font-bold'} text-xs transition tap-effect" title="${this.isSimPaused ? 'استئناف' : 'إيقاف مؤقت'}">
+              ${this.isSimPaused ? '▶️' : '⏸️'}
+            </button>
+            <button onclick="MapEngine.toggleSimSpeed()" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-bold transition tap-effect" title="سرعة المحاكاة">
               ⚡ ${this.simSpeed}x
             </button>
             <button onclick="MapEngine.stopLiveWalkSimulation()" class="w-7 h-7 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center transition tap-effect" title="${t.wf_stop_simulation || 'إنهاء'}">
@@ -902,8 +963,15 @@ const MapEngine = {
           </div>
         </div>
 
+        ${stepText ? `
+        <div class="text-[11px] text-slate-200 truncate bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 flex items-center gap-1.5">
+          <span class="shrink-0">${stepIcon}</span>
+          <span class="truncate">${stepText}</span>
+        </div>
+        ` : ''}
+
         <div class="w-full bg-white/15 h-1.5 rounded-full overflow-hidden mt-0.5">
-          <div class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all duration-150" style="width: ${pct}%"></div>
+          <div class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all duration-100" style="width: ${pct}%"></div>
         </div>
       `;
     };
@@ -911,19 +979,35 @@ const MapEngine = {
     const animateWalk = (now) => {
       if (!this.isWalkingSimulating) return;
 
-      const dt = (now - lastTime) / 1000;
+      if (this.isSimPaused) {
+        lastTime = now;
+        this.simRafId = requestAnimationFrame(animateWalk);
+        return;
+      }
+
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
       lastTime = now;
 
-      progressPx += speedPxPerSec * this.simSpeed * dt;
+      progressPx += baseSpeedPxPerSec * this.simSpeed * dt;
+      this.walkProgress = Math.min(1, progressPx / totalDistPx);
 
       if (progressPx >= totalDistPx) {
         progressPx = totalDistPx;
+        this.walkProgress = 1;
         const endPoint = points[points.length - 1];
+        const endPctX = (endPoint.x / this.CANVAS_WIDTH) * 100;
+        const endPctY = (endPoint.y / this.CANVAS_HEIGHT) * 100;
         if (walker) {
-          walker.style.left = `${(endPoint.x / this.CANVAS_WIDTH) * 100}%`;
-          walker.style.top = `${(endPoint.y / this.CANVAS_HEIGHT) * 100}%`;
+          walker.style.left = `${endPctX}%`;
+          walker.style.top = `${endPctY}%`;
         }
+        this.centerCameraOnWalker(endPctX, endPctY);
         updateHud(0);
+
+        if (this.activeNavigation && this.activeNavigation.steps) {
+          this.activeNavigation.currentStepIdx = this.activeNavigation.steps.length - 1;
+          this.renderTurnStep(false);
+        }
 
         if (typeof PromoAudioEngine !== 'undefined') {
           PromoAudioEngine.playTransitionChime();
@@ -934,7 +1018,7 @@ const MapEngine = {
 
         setTimeout(() => {
           this.stopLiveWalkSimulation();
-        }, 3500);
+        }, 3200);
         return;
       }
 
@@ -956,8 +1040,19 @@ const MapEngine = {
       const curX = p1.x + (p2.x - p1.x) * segProg;
       const curY = p1.y + (p2.y - p1.y) * segProg;
 
+      // Target heading of current walkway segment
       const angleRad = Math.atan2(p2.x - p1.x, -(p2.y - p1.y));
-      const targetBearing = (angleRad * 180) / Math.PI;
+      const targetHeading = (angleRad * 180) / Math.PI;
+
+      // Smooth heading transition so arrow smoothly curves along turns
+      let diff = (targetHeading - currentHeading) % 360;
+      if (diff < -180) diff += 360;
+      if (diff > 180) diff -= 360;
+      currentHeading += diff * Math.min(1, dt * 10);
+
+      if (headingEl) {
+        headingEl.style.transform = `rotate(${currentHeading}deg)`;
+      }
 
       const curPctX = (curX / this.CANVAS_WIDTH) * 100;
       const curPctY = (curY / this.CANVAS_HEIGHT) * 100;
@@ -966,7 +1061,19 @@ const MapEngine = {
         walker.style.top = `${curPctY}%`;
       }
 
-      this.flyToWalk(curPctX, curPctY, 1.85, 54, targetBearing);
+      // Smooth camera centering on walker position without map rotation
+      this.centerCameraOnWalker(curPctX, curPctY);
+
+      // Advance turn-by-turn steps if active
+      if (this.activeNavigation && this.activeNavigation.steps) {
+        const steps = this.activeNavigation.steps;
+        const targetStep = Math.min(steps.length - 1, Math.max(0, Math.floor(this.walkProgress * steps.length)));
+        if (targetStep !== this.activeNavigation.currentStepIdx) {
+          this.activeNavigation.currentStepIdx = targetStep;
+          this.renderTurnStep(false);
+          if (typeof App !== 'undefined' && App.playBeep) App.playBeep(850);
+        }
+      }
 
       const remainingMeters = Math.max(0, Math.round((totalDistPx - progressPx) * 0.42));
       updateHud(remainingMeters);
@@ -978,63 +1085,23 @@ const MapEngine = {
     this.simRafId = requestAnimationFrame(animateWalk);
   },
 
-  flyToWalk(pctX, pctY, targetScale = 1.85, targetPitch = 54, targetBearing = 0) {
-    const viewport = document.getElementById('mapViewport');
-    const canvas = document.getElementById('mapCanvasWrapper');
-    if (!viewport || !canvas) return;
-
-    this.scale = targetScale;
-    this.pitch = targetPitch;
-    this.bearing = targetBearing;
-
-    const vw = viewport.clientWidth;
-    const vh = viewport.clientHeight;
-
-    const cx = this.CANVAS_WIDTH / 2;
-    const cy = this.CANVAS_HEIGHT / 2;
-
-    const targetPixelX = (pctX / 100) * this.CANVAS_WIDTH;
-    const targetPixelY = (pctY / 100) * this.CANVAS_HEIGHT;
-
-    const dx = targetPixelX - cx;
-    const dy = targetPixelY - cy;
-
-    const radZ = (this.bearing * Math.PI) / 180;
-    const radX = (this.pitch * Math.PI) / 180;
-
-    const x1 = dx * Math.cos(radZ) - dy * Math.sin(radZ);
-    const y1 = dx * Math.sin(radZ) + dy * Math.cos(radZ);
-
-    const x2 = x1;
-    const y2 = y1 * Math.cos(radX);
-    const z2 = -y1 * Math.sin(radX);
-
-    const D = 1200;
-    const k = D / (D - z2);
-
-    const projX = x2 * k * this.scale;
-    const projY = y2 * k * this.scale;
-
-    const desiredScreenX = vw / 2;
-    const desiredScreenY = vh * 0.52;
-
-    this.panX = desiredScreenX - cx - projX;
-    this.panY = desiredScreenY - cy - projY;
-
-    canvas.style.transition = 'none';
-    canvas.style.transformOrigin = '50% 50%';
-    canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale}) rotateX(${this.pitch}deg) rotateZ(${this.bearing}deg)`;
-
-    this.updatePinBillboards();
-    this.updateCompassUI();
+  toggleSimPause() {
+    this.isSimPaused = !this.isSimPaused;
+    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(650);
+    this.renderTurnStep(false);
   },
 
   toggleSimSpeed() {
     this.simSpeed = this.simSpeed === 1 ? 2 : (this.simSpeed === 2 ? 3 : 1);
+    this.walkSpeed = this.simSpeed;
+    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(750);
+    this.renderTurnStep(false);
   },
 
   stopLiveWalkSimulation() {
     this.isWalkingSimulating = false;
+    this.isSimulatingWalk = false;
+    this.isSimPaused = false;
     if (this.simRafId) {
       cancelAnimationFrame(this.simRafId);
       this.simRafId = null;
@@ -1050,6 +1117,17 @@ const MapEngine = {
     if (typeof ConciergeAudioGuide !== 'undefined') {
       ConciergeAudioGuide.stop();
     }
+
+    // Smoothly re-frame the camera to showcase the route or resort
+    if (this.lastRoutePoints && this.lastRoutePoints.length >= 2) {
+      const p1 = this.lastRoutePoints[0];
+      const p2 = this.lastRoutePoints[this.lastRoutePoints.length - 1];
+      const midPctX = ((p1.x + p2.x) / 2 / this.CANVAS_WIDTH) * 100;
+      const midPctY = ((p1.y + p2.y) / 2 / this.CANVAS_HEIGHT) * 100;
+      this.focusCoordinate(midPctX, midPctY, 1.25, true);
+    }
+
+    this.renderTurnStep(false);
   },
 
   bindEvents() {
@@ -1948,7 +2026,10 @@ const MapEngine = {
     const hud = document.getElementById('turnNavHud');
     if (!hud) return;
 
-    const progressPct = this.isSimulatingWalk
+    const isSimActive = this.isWalkingSimulating || this.isSimulatingWalk;
+    const isPaused = this.isSimPaused;
+
+    const progressPct = isSimActive
       ? (this.walkProgress * 100)
       : (((nav.currentStepIdx + 1) / total) * 100);
 
@@ -1958,15 +2039,19 @@ const MapEngine = {
 
     const isLastStep = nav.currentStepIdx === total - 1;
 
-    const simBtnText = this.isSimulatingWalk
-      ? (lang === 'ar' ? 'إيقاف مؤقت' : lang === 'ru' ? 'Пауза' : lang === 'de' ? 'Pause' : 'Pause')
+    const simBtnText = isSimActive
+      ? (isPaused
+          ? (lang === 'ar' ? 'استئناف السير' : lang === 'ru' ? 'Продолжить' : lang === 'de' ? 'Fortsetzen' : 'Resume')
+          : (lang === 'ar' ? 'إيقاف مؤقت' : lang === 'ru' ? 'Пауза' : lang === 'de' ? 'Pause' : 'Pause'))
       : this.walkProgress >= 1
       ? (lang === 'ar' ? 'إعادة السير' : lang === 'ru' ? 'Заново' : lang === 'de' ? 'Neustart' : 'Restart')
       : (lang === 'ar' ? 'محاكاة السير الحي' : lang === 'ru' ? 'Живая ходьба' : lang === 'de' ? 'Live-Simulation' : 'Live Walk');
 
-    const simBtnIcon = this.isSimulatingWalk ? '⏸️' : this.walkProgress >= 1 ? '🔄' : '▶️';
-    const simBtnClass = this.isSimulatingWalk
-      ? 'bg-amber-500 text-slate-950 font-black'
+    const simBtnIcon = isSimActive
+      ? (isPaused ? '▶️' : '⏸️')
+      : this.walkProgress >= 1 ? '🔄' : '▶️';
+    const simBtnClass = isSimActive
+      ? (isPaused ? 'bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black' : 'bg-amber-500 text-slate-950 font-black')
       : this.walkProgress >= 1
       ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black'
       : 'bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black';
@@ -2006,8 +2091,8 @@ const MapEngine = {
           <span>${simBtnIcon}</span>
           <span class="truncate">${simBtnText}</span>
         </button>
-        <button onclick="MapEngine.toggleWalkSpeed()" class="tap-effect py-1.5 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 font-bold text-xs" title="سرعة المحاكاة">
-          ${this.walkSpeed === 2 ? '2x ⚡' : '1x'}
+        <button onclick="MapEngine.toggleSimSpeed()" class="tap-effect py-1.5 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 font-bold text-xs" title="سرعة المحاكاة">
+          ${(this.simSpeed || this.walkSpeed || 1)}x ⚡
         </button>
         <button onclick="MapEngine.prevTurnStep()" ${nav.currentStepIdx === 0 ? 'disabled' : ''} class="tap-effect py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-25 text-white font-bold text-xs" title="السابقة">
           ⬅️
@@ -2019,7 +2104,7 @@ const MapEngine = {
     `;
 
     // Recenter camera on step coordinates if not currently simulating walk
-    if (recenterCamera && !this.isSimulatingWalk && step.coords) {
+    if (recenterCamera && !isSimActive && step.coords) {
       this.focusCoordinate(step.coords.x, step.coords.y, 1.45);
       this.updateWalkerBeacon(step.coords);
     }
@@ -2027,90 +2112,23 @@ const MapEngine = {
 
   // Interactive Live Walk Simulation Methods
   toggleLiveWalkSimulation() {
-    if (this.isWalkingSimulating) {
-      this.stopLiveWalkSimulation();
+    if (this.isWalkingSimulating || this.isSimulatingWalk) {
+      this.toggleSimPause();
     } else {
       this.startLiveWalkSimulation();
     }
   },
 
   startTurnByTurnSimulation() {
-    if (!this.activeNavigation) return;
-    const pathEl = document.getElementById('liveRouteSvgPath');
-    if (!pathEl) {
-      // Fallback: draw route again to ensure path is loaded
-      this.drawRoute(this.activeNavigation.originPoi.coords, this.activeNavigation.targetPoi.coords, '', '', this.activeNavigation.isAccessible);
-    }
-    const targetPath = document.getElementById('liveRouteSvgPath');
-    if (!targetPath) return;
-
-    this.isSimulatingWalk = true;
-    if (this.walkProgress >= 1) {
-      this.walkProgress = 0;
-      this.activeNavigation.currentStepIdx = 0;
-    }
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(900);
-
-    const totalLength = targetPath.getTotalLength();
-    const durationMs = Math.max(7000, (this.activeNavigation.meters || 120) * 75);
-    let lastTime = null;
-
-    const loop = (now) => {
-      if (!this.isSimulatingWalk) return;
-      if (lastTime === null) {
-        lastTime = now;
-        this.walkAnimFrame = requestAnimationFrame(loop);
-        return;
-      }
-
-      const dt = Math.min(100, Math.max(0, now - lastTime));
-      lastTime = now;
-
-      this.walkProgress = Math.min(1, Math.max(0,
-        this.walkProgress + (dt / durationMs) * (this.walkSpeed || 1)
-      ));
-      if (this.walkProgress >= 1) {
-        this.walkProgress = 1;
-        this.updateWalkerMarker(targetPath, totalLength, 1);
-        this.onWalkSimulationComplete();
-        return;
-      }
-
-      this.updateWalkerMarker(targetPath, totalLength, this.walkProgress);
-
-      // Auto step advancement based on path milestone
-      const steps = this.activeNavigation.steps;
-      if (steps && steps.length > 0) {
-        const targetStep = Math.min(steps.length - 1, Math.max(0, Math.floor(this.walkProgress * steps.length)));
-        if (targetStep !== this.activeNavigation.currentStepIdx) {
-          this.activeNavigation.currentStepIdx = targetStep;
-          this.renderTurnStep(false);
-          if (typeof App !== 'undefined' && App.playBeep) App.playBeep(850);
-        }
-      }
-
-      this.walkAnimFrame = requestAnimationFrame(loop);
-    };
-
-    if (this.walkAnimFrame) cancelAnimationFrame(this.walkAnimFrame);
-    this.walkAnimFrame = requestAnimationFrame(loop);
-    this.renderTurnStep(false);
+    this.startLiveWalkSimulation();
   },
 
   pauseLiveWalkSimulation() {
-    this.isSimulatingWalk = false;
-    if (this.walkAnimFrame) {
-      cancelAnimationFrame(this.walkAnimFrame);
-      this.walkAnimFrame = null;
-    }
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(650);
-    this.renderTurnStep(false);
+    this.toggleSimPause();
   },
 
   toggleWalkSpeed() {
-    this.walkSpeed = this.walkSpeed === 1 ? 2 : 1;
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(750);
-    this.renderTurnStep(false);
+    this.toggleSimSpeed();
   },
 
   initWalkerMarker(coords) {
