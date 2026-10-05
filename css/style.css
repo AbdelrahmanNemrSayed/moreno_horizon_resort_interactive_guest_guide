@@ -2503,3 +2503,124 @@ main {
 .ap-debug-hud.collapsed .ap-debug-footer {
   display: none;
 }
+
+/* ==========================================================================
+   Contextual Geofencing & Smart Arrival Toast Notifications
+   ========================================================================== */
+.geofence-toast-container {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 48;
+  width: calc(100% - 24px);
+  max-width: 440px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.geofence-smart-toast {
+  pointer-events: auto;
+  width: 100%;
+  background: rgba(11, 19, 38, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), 0 0 25px rgba(6, 182, 212, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: #f8fafc;
+}
+
+.animate-geofenceEnter {
+  animation: geofenceEnter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-geofenceExit {
+  animation: geofenceExit 0.24s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.geofence-toast-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 15px;
+}
+
+.geofence-toast-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+}
+
+.geofence-toast-icon-radar {
+  position: absolute;
+  inset: -4px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  animation: geofenceRadarPulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+.geofence-toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.geofence-toast-progress-track {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  width: 100%;
+  overflow: hidden;
+}
+
+.geofence-toast-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6, #f59e0b);
+  width: 100%;
+  animation: geofenceProgress linear forwards;
+}
+
+@keyframes geofenceEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes geofenceExit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.95);
+  }
+}
+
+@keyframes geofenceProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+@keyframes geofenceRadarPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+

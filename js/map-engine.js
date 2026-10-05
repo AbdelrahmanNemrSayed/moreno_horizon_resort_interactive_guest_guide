@@ -855,7 +855,7 @@ const MapEngine = {
         </div>
         <div class="leading-tight">
           <div class="flex items-center gap-2">
-            <span class="text-xs sm:text-sm font-black text-amber-300 font-mono">${minutes} دقيقة (${meters} م)</span>
+            <span class="text-xs sm:text-sm font-black text-amber-300 font-mono" id="routeHudMetrics">${minutes} دقيقة (${meters} م)</span>
             ${(originTitle && originTitle.includes('موقعي')) || this.lastGuestPosition 
               ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 font-bold border border-blue-400/40 flex items-center gap-1 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span> تتبع حي مباشر</span>'
               : '<span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">مسار ممهد</span>'}
@@ -881,6 +881,7 @@ const MapEngine = {
     this.endTurnByTurn();
     this.activeLiveNavDestination = null;
     this.lastNavRecalcPos = null;
+    this.offRouteCounter = 0;
     this.closePopover();
     this.removeRoomBeacon();
     const svgLayer = document.getElementById('routeSvgLayer');
@@ -2184,7 +2185,7 @@ const MapEngine = {
           <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
             ${stepOfText}
           </span>
-          <span class="text-[10px] font-mono text-cyan-300 font-bold">
+          <span class="text-[10px] font-mono text-cyan-300 font-bold" id="turnHudMetrics">
             ⏱️ ${nav.minutes} د (${nav.meters}م)
           </span>
           ${isLiveNav ? `
@@ -2609,12 +2610,23 @@ const MapEngine = {
       this.renderApDebugHud(this.lastApTelemetry);
     }
 
+    // Contextual Geofencing Check around resort facilities
+    if (typeof GeofenceService !== 'undefined' && GeofenceService.updatePosition) {
+      GeofenceService.updatePosition(pctX, pctY);
+    }
+
     // Auto-follow camera if requested by guest
     if (this.isAutoFollowingGuest) {
       this.focusCoordinate(pctX, pctY, Math.max(1.5, this.scale), false);
     }
   },
 
+  /**
+   * Dynamic Off-Route Recalculation and Real-time Navigation Progress Tracking
+   * - Measures perpendicular distance from guest's position to active route polyline.
+   * - If deviation > 8 meters (approx. 19 pixels) for 2 consecutive updates, auto-reroutes cleanly.
+   * - Otherwise, calculates remaining distance and walking time in real time and trims traveled path.
+   */
   handleLiveNavigationUpdate(pctX, pctY) {
     if (!this.activeLiveNavDestination) return;
     const destPoi = this.activeLiveNavDestination;
@@ -2636,29 +2648,194 @@ const MapEngine = {
       return;
     }
 
-    // 2. Prevent micro-jitter redraws: only recompute if moved >= 1.2 meters
-    if (this.lastNavRecalcPos) {
-      const movedPx = Math.hypot(curPxX - this.lastNavRecalcPos.x, curPxY - this.lastNavRecalcPos.y);
-      if (movedPx * 0.42 < 1.2) {
-        return;
-      }
-    }
-    this.lastNavRecalcPos = { x: curPxX, y: curPxY };
-
-    // 3. Recalculate route and redraw polyline without jumping camera
     const liveOrigin = { x: pctX, y: pctY };
     const liveTitle = (lang === 'ar') ? 'موقعي الحالي' : (lang === 'ru') ? 'Мое местоположение' : (lang === 'de') ? 'Mein Standort' : 'My Live Location';
     const isAccessible = this.activeNavigation ? this.activeNavigation.isAccessible : false;
 
-    const routeInfo = this.drawRoute(liveOrigin, destPoi.coords, liveTitle, locDest.name, isAccessible, false);
+    // 2. Measure perpendicular deviation from the active polyline drawn on #routeSvgLayer
+    const routePoints = this.lastRoutePoints;
+    const { distMeters: perpDistMeters, nearestSegmentIdx, nearestProjPoint } = 
+      this.calculatePerpendicularDistanceToRoute(curPxX, curPxY, routePoints);
 
-    // 4. Update active navigation metrics & steps
+    // 3. Dynamic Off-Route Threshold (> 8 meters, approx. 19 pixels)
+    const OFF_ROUTE_THRESHOLD_METERS = 8.0;
+
+    if (perpDistMeters > OFF_ROUTE_THRESHOLD_METERS) {
+      this.offRouteCounter = (this.offRouteCounter || 0) + 1;
+    } else {
+      this.offRouteCounter = 0;
+    }
+
+    // Trigger full route recalculation if off-route for 2 consecutive updates or no route points exist
+    if (this.offRouteCounter >= 2 || !routePoints || routePoints.length < 2) {
+      this.offRouteCounter = 0;
+      this.lastNavRecalcPos = { x: curPxX, y: curPxY };
+
+      // Re-route from guest's new position to destination without resetting camera or clearing destination
+      const routeInfo = this.drawRoute(liveOrigin, destPoi.coords, liveTitle, locDest.name, isAccessible, false);
+
+      // Subtle notification on auto-reroute
+      if (typeof App !== 'undefined' && App.showToast) {
+        const rerouteMsg = (lang === 'ar') 
+          ? '🔄 تم تعديل المسار تلقائياً بناءً على موقعك الجديد' 
+          : (lang === 'ru') ? '🔄 Маршрут перестроен с вашего нового положения'
+          : (lang === 'de') ? '🔄 Route automatisch an Ihren Standort angepasst'
+          : '🔄 Route recalculated from your new location';
+        App.showToast(rerouteMsg, 3000);
+      }
+
+      if (this.activeNavigation) {
+        this.activeNavigation.meters = routeInfo ? routeInfo.meters : distToTargetMeters;
+        this.activeNavigation.minutes = routeInfo ? routeInfo.minutes : Math.max(1, Math.round(distToTargetMeters / 65));
+        const originVirtual = { id: 'LIVE_GUEST_LOCATION', coords: liveOrigin, nameAr: liveTitle, isLiveLocation: true };
+        this.activeNavigation.steps = this.buildWalkwaySteps(originVirtual, destPoi, lang, isAccessible);
+        this.renderTurnStep(false);
+      }
+
+      this.updateLiveRouteHudMetrics(
+        routeInfo ? routeInfo.meters : distToTargetMeters,
+        routeInfo ? routeInfo.minutes : Math.max(1, Math.round(distToTargetMeters / 65))
+      );
+      return;
+    }
+
+    // 4. On-Route Progress: Calculate remaining distance along the polyline in real time
+    let remDistPx = 0;
+    if (nearestProjPoint && routePoints && routePoints.length >= 2) {
+      // Distance from guest to projection on the segment
+      remDistPx += Math.hypot(curPxX - nearestProjPoint.x, curPxY - nearestProjPoint.y);
+      // Distance from projection to next waypoint
+      const nextWp = routePoints[nearestSegmentIdx + 1];
+      if (nextWp) {
+        remDistPx += Math.hypot(nextWp.x - nearestProjPoint.x, nextWp.y - nearestProjPoint.y);
+      }
+      // Remaining subsequent segments
+      for (let i = nearestSegmentIdx + 1; i < routePoints.length - 1; i++) {
+        remDistPx += Math.hypot(routePoints[i + 1].x - routePoints[i].x, routePoints[i + 1].y - routePoints[i].y);
+      }
+    } else {
+      remDistPx = distToTargetPx;
+    }
+
+    const remainingMeters = Math.max(0, Math.round(remDistPx * 0.42));
+    const remainingMinutes = Math.max(1, Math.round(remainingMeters / 65));
+
+    // Update active navigation state
     if (this.activeNavigation) {
-      this.activeNavigation.meters = routeInfo ? routeInfo.meters : distToTargetMeters;
-      this.activeNavigation.minutes = routeInfo ? routeInfo.minutes : Math.max(1, Math.round(distToTargetMeters / 65));
-      const originVirtual = { id: 'LIVE_GUEST_LOCATION', coords: liveOrigin, nameAr: liveTitle, isLiveLocation: true };
-      this.activeNavigation.steps = this.buildWalkwaySteps(originVirtual, destPoi, lang, isAccessible);
-      this.renderTurnStep(false);
+      this.activeNavigation.meters = remainingMeters;
+      this.activeNavigation.minutes = remainingMinutes;
+      this.syncTurnStepWithProgress(curPxX, curPxY);
+    }
+
+    // Update UI navigation badges in real time
+    this.updateLiveRouteHudMetrics(remainingMeters, remainingMinutes);
+
+    // Smoothly trim traveled route behind the guest so line starts cleanly at live position
+    this.trimLiveRouteSvgPath(curPxX, curPxY, nearestSegmentIdx, nearestProjPoint);
+  },
+
+  calculatePerpendicularDistanceToRoute(curPxX, curPxY, routePoints) {
+    if (!routePoints || routePoints.length < 2) {
+      return { distMeters: 999, distPx: 999, nearestSegmentIdx: 0, nearestProjPoint: null };
+    }
+
+    let minPerpDistPx = Infinity;
+    let nearestSegmentIdx = 0;
+    let nearestProjPoint = null;
+
+    for (let i = 0; i < routePoints.length - 1; i++) {
+      const p1 = routePoints[i];
+      const p2 = routePoints[i + 1];
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const lenSq = dx * dx + dy * dy;
+
+      let dPx = 0;
+      let proj = { x: p1.x, y: p1.y };
+
+      if (lenSq < 0.0001) {
+        dPx = Math.hypot(curPxX - p1.x, curPxY - p1.y);
+      } else {
+        const t = Math.max(0, Math.min(1, ((curPxX - p1.x) * dx + (curPxY - p1.y) * dy) / lenSq));
+        proj = { x: p1.x + t * dx, y: p1.y + t * dy };
+        dPx = Math.hypot(curPxX - proj.x, curPxY - proj.y);
+      }
+
+      if (dPx < minPerpDistPx) {
+        minPerpDistPx = dPx;
+        nearestSegmentIdx = i;
+        nearestProjPoint = proj;
+      }
+    }
+
+    const distMeters = minPerpDistPx * 0.42; // (1m = 2.381px => 0.42m/px)
+    return {
+      distMeters,
+      distPx: minPerpDistPx,
+      nearestSegmentIdx,
+      nearestProjPoint
+    };
+  },
+
+  updateLiveRouteHudMetrics(meters, minutes) {
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const minText = (lang === 'ar') ? `${minutes} دقيقة (${meters} م)` : `${minutes} min (${meters}m)`;
+
+    // Update #routeHudMetrics inside #mapRouteHud
+    const routeMetrics = document.getElementById('routeHudMetrics');
+    if (routeMetrics) {
+      routeMetrics.textContent = minText;
+    }
+
+    // Update #turnHudMetrics inside #turnNavHud
+    const turnMetrics = document.getElementById('turnHudMetrics');
+    if (turnMetrics) {
+      turnMetrics.textContent = `⏱️ ${minText}`;
+    }
+
+    // Update routeResultBanner if visible
+    const banner = document.getElementById('routeResultBanner');
+    if (banner && !banner.classList.contains('hidden')) {
+      const bannerMeters = banner.querySelector('.route-banner-dist');
+      if (bannerMeters) bannerMeters.textContent = `${meters} م`;
+    }
+  },
+
+  trimLiveRouteSvgPath(curPxX, curPxY, segmentIdx, projPoint) {
+    const svgPath = document.getElementById('liveRouteSvgPath');
+    const routePoints = this.lastRoutePoints;
+    if (!svgPath || !routePoints || routePoints.length < 2) return;
+
+    // Remaining points: from current projection point to destination
+    const remainingPoints = [{ x: Math.round(curPxX), y: Math.round(curPxY) }];
+    if (projPoint && segmentIdx < routePoints.length - 1) {
+      // Add upcoming waypoints
+      for (let i = segmentIdx + 1; i < routePoints.length; i++) {
+        remainingPoints.push(routePoints[i]);
+      }
+    }
+
+    if (remainingPoints.length >= 2) {
+      const newD = remainingPoints.map((pt, idx) => `${idx === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`).join(' ');
+      svgPath.setAttribute('d', newD);
+    }
+  },
+
+  syncTurnStepWithProgress(curPxX, curPxY) {
+    if (!this.activeNavigation || !this.activeNavigation.steps) return;
+    const nav = this.activeNavigation;
+    const currentStep = nav.steps[nav.currentStepIdx];
+    if (!currentStep || nav.currentStepIdx >= nav.steps.length - 1) return;
+
+    const nextStep = nav.steps[nav.currentStepIdx + 1];
+    if (nextStep && nextStep.coords) {
+      const stepPxX = (nextStep.coords.x / 100) * this.CANVAS_WIDTH;
+      const stepPxY = (nextStep.coords.y / 100) * this.CANVAS_HEIGHT;
+      const distToStepMeters = Math.hypot(stepPxX - curPxX, stepPxY - curPxY) * 0.42;
+      if (distToStepMeters < 5.0) {
+        nav.currentStepIdx += 1;
+        this.renderTurnStep(false);
+      }
     }
   },
 
