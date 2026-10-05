@@ -66,7 +66,7 @@
   </script>
 
   <!-- Modular Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=38.0">
+  <link rel="stylesheet" href="css/style.css?v=39.0">
 </head>
 
 <body class="bg-slate-50 dark:bg-brand-darkBg text-slate-800 dark:text-slate-100 font-cairo antialiased min-h-screen selection:bg-brand-gold selection:text-white transition-colors duration-300">
@@ -555,6 +555,10 @@
             <span>🌙</span>
             <span data-i18n="layer_night">رؤية ليلية</span>
           </button>
+          <button onclick="MapEngine.toggleApCalibrationOverlay()" id="btnToggleApDebug" class="map-layer-pill tap-effect text-amber-600 dark:text-amber-400 hover:text-amber-500 border border-amber-500/40 bg-amber-500/10 font-bold" title="معايرة نقاط الواي فاي للمسؤولين (AP Calibration & RSSI Debug)">
+            <span>📡</span>
+            <span data-i18n="layer_ap_debug">معايرة APs (Debug)</span>
+          </button>
         </div>
 
         <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
@@ -692,8 +696,25 @@
           <svg id="routeSvgLayer" viewBox="0 0 896 1200" class="absolute inset-0 w-full h-full pointer-events-none z-10 select-none overflow-visible">
           </svg>
 
+          <!-- SVG AP Distance Calibration Radius Circles Layer -->
+          <svg id="apRadiusSvgLayer" viewBox="0 0 896 1200" class="absolute inset-0 w-full h-full pointer-events-none z-15 select-none overflow-visible hidden">
+            <defs>
+              <filter id="apGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
+
           <!-- Interactive POI Pins Overlay (Numbered Pins matching Resort Map) -->
           <div id="pinsOverlay" class="absolute inset-0 pointer-events-auto z-20">
+          </div>
+
+          <!-- AP Hardware Nodes Overlay for Calibration & Admin Inspection -->
+          <div id="apPinsOverlay" class="absolute inset-0 pointer-events-auto z-25 hidden">
           </div>
         </div>
 
@@ -1412,10 +1433,10 @@
   </button>
 
   <!-- Modular Scripts Architecture -->
-  <script src="js/data.js?v=38.0"></script>
-  <script src="js/virtual-resort-map.js?v=38.0"></script>
-  <script src="js/map-engine.js?v=38.0"></script>
-  <script src="js/wayfinder.js?v=38.0"></script>
-  <script src="js/app.js?v=38.0"></script>
+  <script src="js/data.js?v=39.0"></script>
+  <script src="js/virtual-resort-map.js?v=39.0"></script>
+  <script src="js/map-engine.js?v=39.0"></script>
+  <script src="js/wayfinder.js?v=39.0"></script>
+  <script src="js/app.js?v=39.0"></script>
 </body>
 </html>

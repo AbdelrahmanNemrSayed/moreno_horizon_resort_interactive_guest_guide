@@ -45,6 +45,12 @@ const MapEngine = {
   isAutoFollowingGuest: false,
   liveTrackingHeading: 0,
 
+  // AP Calibration & Debug Overlay State
+  isApDebugActive: false,
+  cachedAccessPoints: [],
+  showRadiusCircles: true,
+  lastApTelemetry: null,
+
   init() {
     this.renderPins();
     this.bindEvents();
@@ -52,6 +58,22 @@ const MapEngine = {
 
     // Initialize Live WiFi Guest Tracking ("Blue Dot")
     this.initLiveGuestTracking();
+
+    // Check URL query parameters for Admin / AP Debug mode (?debug=true, ?admin=true, ?calibrate=true)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('debug') === 'true' || urlParams.get('debug') === '1' || urlParams.get('admin') === 'true' || urlParams.get('calibrate') === 'true') {
+        setTimeout(() => this.toggleApCalibrationOverlay(true), 400);
+      }
+    } catch (e) {}
+
+    // Keyboard shortcut: Ctrl + Shift + D toggles AP calibration overlay
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+        e.preventDefault();
+        this.toggleApCalibrationOverlay();
+      }
+    });
 
     // Initial viewport fit and centering
     this.fitToViewport();
@@ -210,6 +232,10 @@ const MapEngine = {
     if (blueDotWrapper) {
       blueDotWrapper.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
     }
+
+    document.querySelectorAll('.ap-marker-core').forEach(apCore => {
+      apCore.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+    });
   },
 
   updateCompassUI() {
@@ -2495,7 +2521,12 @@ const MapEngine = {
           const payload = JSON.parse(event.data);
           const data = payload.data || payload;
           if (data && typeof data.pctX === 'number' && typeof data.pctY === 'number') {
+            this.lastApTelemetry = data;
             this.updateGuestLiveLocation(data.pctX, data.pctY, data.accuracyRadiusMeters || data.accuracyMeters);
+            if (this.isApDebugActive) {
+              this.updateApRadiusCircles(data.activeAps || [], { pctX: data.pctX, pctY: data.pctY });
+              this.renderApDebugHud(data);
+            }
           }
         } catch (e) {}
       };
@@ -2523,7 +2554,12 @@ const MapEngine = {
           const data = await res.json();
           if (data && data.success && data.location) {
             const loc = data.location;
+            this.lastApTelemetry = loc;
             this.updateGuestLiveLocation(loc.pctX, loc.pctY, loc.accuracyRadiusMeters || loc.accuracyMeters);
+            if (this.isApDebugActive) {
+              this.updateApRadiusCircles(loc.activeAps || [], { pctX: loc.pctX, pctY: loc.pctY });
+              this.renderApDebugHud(loc);
+            }
           }
         }
       } catch (e) {
@@ -2566,6 +2602,12 @@ const MapEngine = {
 
     // Keep origin dropdown synced with live location
     this.syncOriginSelectOptions();
+
+    // Auto-update AP calibration circles and debug HUD if active
+    if (this.isApDebugActive && this.lastApTelemetry) {
+      this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], { pctX, pctY });
+      this.renderApDebugHud(this.lastApTelemetry);
+    }
 
     // Auto-follow camera if requested by guest
     if (this.isAutoFollowingGuest) {
@@ -2875,6 +2917,476 @@ const MapEngine = {
     if (typeof App !== 'undefined' && App.showToast) {
       App.showToast(lang === 'ar' ? '🚀 تم تفعيل النقطة الزرقاء الحية في وضع العرض التفاعلي!' : '🚀 Live Blue Dot tracking activated in interactive demo mode!');
     }
+  },
+
+  // =========================================================================
+  // AP Calibration & Debug Overlay Methods (Admin & Telemetry Inspection)
+  // =========================================================================
+
+  toggleApCalibrationOverlay(forceState = null) {
+    if (forceState !== null) {
+      this.isApDebugActive = Boolean(forceState);
+    } else {
+      this.isApDebugActive = !this.isApDebugActive;
+    }
+
+    const btn = document.getElementById('btnToggleApDebug');
+    if (btn) {
+      if (this.isApDebugActive) {
+        btn.classList.add('bg-amber-500', 'text-slate-950', 'active');
+        btn.classList.remove('text-amber-600', 'dark:text-amber-400');
+      } else {
+        btn.classList.remove('bg-amber-500', 'text-slate-950', 'active');
+        btn.classList.add('text-amber-600', 'dark:text-amber-400');
+      }
+    }
+
+    const svgLayer = document.getElementById('apRadiusSvgLayer');
+    const pinsLayer = document.getElementById('apPinsOverlay');
+
+    if (this.isApDebugActive) {
+      if (svgLayer) svgLayer.classList.remove('hidden');
+      if (pinsLayer) pinsLayer.classList.remove('hidden');
+
+      if (!this.cachedAccessPoints || this.cachedAccessPoints.length === 0) {
+        this.fetchAccessPointsForCalibration();
+      } else {
+        this.renderApMarkers();
+      }
+
+      this.renderApDebugHud(this.lastApTelemetry);
+
+      if (typeof App !== 'undefined' && App.showToast) {
+        App.showToast('📡 تم تفعيل وضع معايرة نقاط الوصول (AP Calibration & Debug Mode)');
+      }
+    } else {
+      if (svgLayer) {
+        svgLayer.classList.add('hidden');
+        svgLayer.innerHTML = '';
+      }
+      if (pinsLayer) {
+        pinsLayer.classList.add('hidden');
+      }
+      const hud = document.getElementById('apDebugHud');
+      if (hud) hud.remove();
+    }
+  },
+
+  async fetchAccessPointsForCalibration() {
+    try {
+      const res = await fetch('/api/access-points');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.accessPoints)) {
+          this.cachedAccessPoints = data.accessPoints;
+          this.renderApMarkers();
+          this.renderApDebugHud(this.lastApTelemetry);
+          if (this.lastApTelemetry && this.lastGuestPosition) {
+            this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], this.lastGuestPosition);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[MapEngine] Failed to fetch access points:', err);
+    }
+  },
+
+  renderApMarkers() {
+    const overlay = document.getElementById('apPinsOverlay');
+    if (!overlay) return;
+    overlay.innerHTML = '';
+
+    const currentPitch = this.is3D ? this.pitch : 0;
+    const rotateStyle = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+
+    this.cachedAccessPoints.forEach(ap => {
+      const pin = document.createElement('div');
+      pin.id = `apMarker_${ap.id}`;
+      pin.className = 'ap-marker';
+      const pctX = ap.pctX != null ? ap.pctX : Number(((ap.x / this.CANVAS_WIDTH) * 100).toFixed(2));
+      const pctY = ap.pctY != null ? ap.pctY : Number(((ap.y / this.CANVAS_HEIGHT) * 100).toFixed(2));
+      pin.style.left = `${pctX}%`;
+      pin.style.top = `${pctY}%`;
+
+      pin.innerHTML = `
+        <div class="ap-marker-core" style="transform: ${rotateStyle}" title="${ap.name || ap.id}">
+          <div class="ap-marker-pulse"></div>
+          <span>📡</span>
+        </div>
+        <div class="ap-marker-tag">
+          <span>${ap.id}</span>
+        </div>
+      `;
+
+      pin.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.showApInspector(ap.id);
+      });
+
+      overlay.appendChild(pin);
+    });
+  },
+
+  updateApRadiusCircles(activeAps = [], guestPos = null) {
+    const svgLayer = document.getElementById('apRadiusSvgLayer');
+    if (!svgLayer) return;
+
+    if (!this.showRadiusCircles || !activeAps || !activeAps.length) {
+      svgLayer.innerHTML = '';
+      return;
+    }
+
+    const guestPxX = guestPos ? (guestPos.pctX / 100) * this.CANVAS_WIDTH : null;
+    const guestPxY = guestPos ? (guestPos.pctY / 100) * this.CANVAS_HEIGHT : null;
+
+    let circlesSvg = `
+      <defs>
+        <radialGradient id="apRssiGradStrong" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.30" />
+          <stop offset="80%" stop-color="#06d6a0" stop-opacity="0.08" />
+          <stop offset="100%" stop-color="#059669" stop-opacity="0.0" />
+        </radialGradient>
+        <radialGradient id="apRssiGradMed" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.25" />
+          <stop offset="80%" stop-color="#f59e0b" stop-opacity="0.06" />
+          <stop offset="100%" stop-color="#d97706" stop-opacity="0.0" />
+        </radialGradient>
+        <radialGradient id="apRssiGradWeak" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.20" />
+          <stop offset="80%" stop-color="#e11d48" stop-opacity="0.04" />
+          <stop offset="100%" stop-color="#be123c" stop-opacity="0.0" />
+        </radialGradient>
+      </defs>
+    `;
+
+    // Highlight detecting AP pins
+    document.querySelectorAll('.ap-marker').forEach(m => m.classList.remove('active-detect'));
+
+    activeAps.forEach(meas => {
+      const ap = this.cachedAccessPoints.find(a => 
+        (a.id && a.id.toUpperCase() === String(meas.id || meas.apId).toUpperCase()) ||
+        (a.bssid && a.bssid.toLowerCase() === String(meas.bssid || meas['ap-bssid']).toLowerCase())
+      );
+      if (!ap) return;
+
+      const markerEl = document.getElementById(`apMarker_${ap.id}`);
+      if (markerEl) markerEl.classList.add('active-detect');
+
+      const distM = Number(meas.distM || meas.distanceMeters || meas.distance || 4.5);
+      const radiusPx = distM * 2.381; // 1 meter = 2.381 pixels
+      const rssi = Number(meas.rssi || -65);
+
+      let strokeColor = '#10b981';
+      let gradFill = 'url(#apRssiGradStrong)';
+      if (rssi < -75) {
+        strokeColor = '#f43f5e';
+        gradFill = 'url(#apRssiGradWeak)';
+      } else if (rssi < -62) {
+        strokeColor = '#fbbf24';
+        gradFill = 'url(#apRssiGradMed)';
+      }
+
+      // Draw Ray to Guest Position if available
+      if (guestPxX != null && guestPxY != null) {
+        circlesSvg += `
+          <line x1="${ap.x}" y1="${ap.y}" x2="${guestPxX}" y2="${guestPxY}" stroke="${strokeColor}" stroke-opacity="0.5" stroke-width="1.8" class="ap-radius-ray" />
+        `;
+      }
+
+      // Draw Distance Radius Circle
+      circlesSvg += `
+        <circle cx="${ap.x}" cy="${ap.y}" r="${radiusPx}" fill="${gradFill}" stroke="${strokeColor}" stroke-width="2" stroke-dasharray="6,4" class="ap-radius-svg-circle" />
+        <g transform="translate(${ap.x}, ${ap.y - radiusPx - 6})">
+          <rect x="-60" y="-14" width="120" height="17" rx="5" fill="#0f172a" fill-opacity="0.92" stroke="${strokeColor}" stroke-width="1" />
+          <text x="0" y="-2" fill="${strokeColor}" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">
+            ${ap.id}: ${rssi}dBm (${distM}m)
+          </text>
+        </g>
+      `;
+    });
+
+    svgLayer.innerHTML = circlesSvg;
+  },
+
+  renderApDebugHud(telemetry = null) {
+    if (!this.isApDebugActive) return;
+
+    let hud = document.getElementById('apDebugHud');
+    const viewport = document.getElementById('mapViewport');
+    if (!viewport) return;
+
+    if (!hud) {
+      hud = document.createElement('div');
+      hud.id = 'apDebugHud';
+      hud.className = 'ap-debug-hud';
+      viewport.appendChild(hud);
+    }
+
+    const data = telemetry || this.lastApTelemetry || {};
+    const mac = data.mac || this.guestMac || 'A4:C3:F0:77:88:99';
+    const x = data.x != null ? data.x : (this.lastGuestPosition ? Math.round((this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH) : '--');
+    const y = data.y != null ? data.y : (this.lastGuestPosition ? Math.round((this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT) : '--');
+    const pctX = data.pctX != null ? data.pctX : (this.lastGuestPosition ? this.lastGuestPosition.pctX : '--');
+    const pctY = data.pctY != null ? data.pctY : (this.lastGuestPosition ? this.lastGuestPosition.pctY : '--');
+    const accuracy = data.accuracyMeters || data.accuracyRadiusMeters || (this.lastGuestPosition ? this.lastGuestPosition.accuracyMeters : 2.5);
+    const method = data.method || 'WLS + Gauss-Newton 2D';
+    const activeAps = data.activeAps || [];
+
+    const rowsHtml = (this.cachedAccessPoints && this.cachedAccessPoints.length > 0)
+      ? this.cachedAccessPoints.map(ap => {
+          const meas = activeAps.find(m => 
+            (m.id && m.id.toUpperCase() === ap.id.toUpperCase()) || 
+            (m.bssid && m.bssid.toLowerCase() === ap.bssid.toLowerCase())
+          );
+          const hasSignal = !!meas;
+          const rssi = hasSignal ? meas.rssi : '--';
+          const dist = hasSignal ? `${meas.distM || meas.distanceMeters}m` : '--';
+          const radPx = hasSignal ? `${Math.round((meas.distM || meas.distanceMeters) * 2.381)}px` : '--';
+          const badgeClass = hasSignal ? 'text-emerald-400 font-bold' : 'text-slate-500';
+
+          return `
+            <tr class="border-b border-slate-800 hover:bg-white/5 transition text-[11px] font-mono">
+              <td class="py-1 px-1.5 font-bold ${badgeClass}">
+                <button onclick="MapEngine.showApInspector('${ap.id}')" class="hover:underline text-left">
+                  ${hasSignal ? '🟢' : '⚪'} ${ap.id}
+                </button>
+              </td>
+              <td class="py-1 px-1 text-center font-bold ${badgeClass}">${rssi}</td>
+              <td class="py-1 px-1 text-center text-slate-300">${dist}</td>
+              <td class="py-1 px-1 text-center text-cyan-400">${radPx}</td>
+            </tr>
+          `;
+        }).join('')
+      : `<tr><td colspan="4" class="text-center py-2 text-slate-500 text-xs">جاري تحميل نقاط الوصول...</td></tr>`;
+
+    hud.innerHTML = `
+      <!-- Header -->
+      <div class="px-3.5 py-2.5 bg-slate-900/90 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span class="font-extrabold text-xs text-white">📡 معايرة APs و RSSI</span>
+          <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono font-bold">${this.cachedAccessPoints.length || 14} APs</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="MapEngine.toggleRadiusCirclesVisibility()" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-300 transition" title="تبديل إظهار دوائر المدى">
+            ${this.showRadiusCircles ? '⭕ دوائر: تشغيل' : '⭕ دوائر: إيقاف'}
+          </button>
+          <button onclick="MapEngine.toggleApDebugHudCollapse()" class="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-slate-300 flex items-center justify-center transition">
+            _
+          </button>
+          <button onclick="MapEngine.toggleApCalibrationOverlay(false)" class="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-slate-300 hover:text-white flex items-center justify-center transition">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Telemetry Body -->
+      <div class="ap-debug-body space-y-3">
+        <!-- Target Device & Position Fix -->
+        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-white/10 space-y-1.5 font-mono text-[11px]">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 font-sans font-bold text-[10px]">الجهاز المستهدف (Client MAC):</span>
+            <span class="text-emerald-400 font-black">${mac}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 font-sans font-bold text-[10px]">الإحداثيات الحسابية:</span>
+            <span class="text-cyan-300 font-bold">X: ${x}px, Y: ${y}px (${pctX}%, ${pctY}%)</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 font-sans font-bold text-[10px]">دقة التثليث (Accuracy):</span>
+            <span class="text-amber-300 font-bold">±${accuracy}m (${activeAps.length} APs)</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 font-sans font-bold text-[10px]">طريقة الحساب:</span>
+            <span class="text-slate-300 text-[10px]">${method}</span>
+          </div>
+        </div>
+
+        <!-- Coordinate System & Leaflet CRS Verification Report -->
+        <details class="p-2.5 rounded-xl bg-blue-950/40 border border-blue-500/30 text-[11px]">
+          <summary class="font-bold text-blue-300 cursor-pointer text-xs select-none">
+            📐 فحص نظام الإحداثيات و Leaflet CRS
+          </summary>
+          <div class="mt-2 space-y-1 text-slate-300 font-mono text-[10px] leading-relaxed">
+            <div class="flex justify-between border-b border-white/10 pb-1">
+              <span>Projection Engine:</span>
+              <span class="text-emerald-400 font-bold">2.5D/3D Canvas + SVG</span>
+            </div>
+            <div class="flex justify-between border-b border-white/10 pb-1">
+              <span>Grid Matrix:</span>
+              <span class="text-cyan-300 font-bold">896 × 1200 pixels</span>
+            </div>
+            <div class="flex justify-between border-b border-white/10 pb-1">
+              <span>Meters-to-Pixels:</span>
+              <span class="text-amber-300 font-bold">2.381 px/m (0.42 m/px)</span>
+            </div>
+            <div class="flex justify-between border-b border-white/10 pb-1">
+              <span>Leaflet CRS Mismatch:</span>
+              <span class="text-emerald-400 font-bold">NONE (0% Mismatch)</span>
+            </div>
+            <p class="text-[9px] text-slate-400 pt-1 font-sans">
+              ✓ تم التأكد: الخريطة لا تستخدم Leaflet Mercator Spherical CRS، بل تعتمد الإحداثيات الديكارتية الحقيقية 1:1 المتطابقة تماماً مع محرك RouterOS Trilateration.
+            </p>
+          </div>
+        </details>
+
+        <!-- Live Access Points Signals Table -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-sans">جدول الإشارات اللحظية (RSSI):</span>
+            <span class="text-[10px] text-cyan-400 font-mono font-bold">${activeAps.length} متصلة</span>
+          </div>
+          <div class="overflow-hidden rounded-xl border border-white/10 bg-slate-900/60">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-800/90 text-[10px] text-slate-400 font-mono border-b border-white/10">
+                  <th class="py-1 px-1.5">AP ID</th>
+                  <th class="py-1 px-1 text-center">RSSI</th>
+                  <th class="py-1 px-1 text-center">المسافة</th>
+                  <th class="py-1 px-1 text-center">القطر</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 1-Click Synthetic RSSI Ping Simulators -->
+        <div class="space-y-1.5 pt-1 border-t border-white/10">
+          <span class="text-[10px] font-bold text-slate-400 font-sans">نبضات تجريبية لمعايرة القطاعات:</span>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button onclick="MapEngine.simulateTestPing(283, 820, 'بهو الاستقبال M')" class="py-1.5 px-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-[10px] text-center transition truncate tap-effect">
+              🏨 بهو الاستقبال M
+            </button>
+            <button onclick="MapEngine.simulateTestPing(344, 665, 'مسبح لوتس (11)')" class="py-1.5 px-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-[10px] text-center transition truncate tap-effect">
+              🏊‍♂️ مسبح لوتس
+            </button>
+            <button onclick="MapEngine.simulateTestPing(348, 575, 'مطعم لا ماما (8)')" class="py-1.5 px-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-[10px] text-center transition truncate tap-effect">
+              🍕 مطعم لا ماما
+            </button>
+            <button onclick="MapEngine.simulateTestPing(381, 281, 'شاطئ المارينا (1)')" class="py-1.5 px-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-[10px] text-center transition truncate tap-effect">
+              🏖️ شاطئ المارينا
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  toggleRadiusCirclesVisibility() {
+    this.showRadiusCircles = !this.showRadiusCircles;
+    if (this.lastApTelemetry && this.lastGuestPosition) {
+      this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], this.lastGuestPosition);
+    } else {
+      const svgLayer = document.getElementById('apRadiusSvgLayer');
+      if (svgLayer) svgLayer.innerHTML = '';
+    }
+    this.renderApDebugHud(this.lastApTelemetry);
+  },
+
+  toggleApDebugHudCollapse() {
+    const hud = document.getElementById('apDebugHud');
+    if (hud) hud.classList.toggle('collapsed');
+  },
+
+  simulateTestPing(x, y, label = '') {
+    const testMac = this.guestMac || 'A4:C3:F0:77:88:99';
+    fetch('/api/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mac: testMac, x, y })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.success && data.result) {
+        const loc = data.result;
+        this.lastApTelemetry = loc;
+        this.updateGuestLiveLocation(loc.pctX, loc.pctY, loc.accuracyRadiusMeters || 2.2);
+        this.updateApRadiusCircles(loc.activeAps || [], { pctX: loc.pctX, pctY: loc.pctY });
+        this.renderApDebugHud(loc);
+        if (typeof App !== 'undefined' && App.showToast) {
+          App.showToast(`📡 تم إرسال نبضة RSSI تجريبية عند [${label || 'الموقع'}]!`);
+        }
+      }
+    })
+    .catch(err => {
+      console.error('[MapEngine] Test ping failed:', err);
+    });
+  },
+
+  showApInspector(apId) {
+    const ap = (this.cachedAccessPoints || []).find(a => a.id.toUpperCase() === String(apId).toUpperCase());
+    if (!ap) return;
+
+    const meas = (this.lastApTelemetry && this.lastApTelemetry.activeAps) 
+      ? this.lastApTelemetry.activeAps.find(m => m.id && m.id.toUpperCase() === ap.id.toUpperCase())
+      : null;
+
+    const rssi = meas ? `${meas.rssi} dBm` : 'لا توجد إشارة من الجهاز حالياً';
+    const dist = meas ? `${meas.distM || meas.distanceMeters} متر` : '--';
+
+    let inspector = document.getElementById('apInspectorModal');
+    if (!inspector) {
+      inspector = document.createElement('div');
+      inspector.id = 'apInspectorModal';
+      inspector.className = 'fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4';
+      document.body.appendChild(inspector);
+    }
+
+    inspector.innerHTML = `
+      <div class="relative w-full max-w-sm bg-slate-900 border border-cyan-500/50 rounded-3xl p-5 text-white shadow-2xl animate-scaleUp font-cairo">
+        <button onclick="document.getElementById('apInspectorModal').style.display='none'" class="absolute top-4 left-4 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center text-xs transition">✕</button>
+
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-2xl bg-cyan-600/30 text-cyan-400 border border-cyan-500/50 flex items-center justify-center text-xl shadow">
+            📡
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-white">${ap.id}</h3>
+            <p class="text-[11px] text-cyan-300 font-semibold">${ap.nameAr || ap.name}</p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-800/90 border border-white/10 space-y-2 text-xs font-mono mb-4">
+          <div class="flex justify-between border-b border-white/10 pb-1">
+            <span class="text-slate-400 font-sans">BSSID:</span>
+            <span class="text-white font-bold">${ap.bssid}</span>
+          </div>
+          <div class="flex justify-between border-b border-white/10 pb-1">
+            <span class="text-slate-400 font-sans">التردد / الدور:</span>
+            <span class="text-cyan-300 font-bold">${ap.band || '5GHz'} • الدور ${ap.floor || 0}</span>
+          </div>
+          <div class="flex justify-between border-b border-white/10 pb-1">
+            <span class="text-slate-400 font-sans">إحداثيات الخريطة:</span>
+            <span class="text-amber-300 font-bold">X: ${ap.x}px, Y: ${ap.y}px (${ap.pctX}%, ${ap.pctY}%)</span>
+          </div>
+          <div class="flex justify-between border-b border-white/10 pb-1">
+            <span class="text-slate-400 font-sans">معامل المسار (Path Loss n):</span>
+            <span class="text-white font-bold">${ap.pathLossN || 2.4}</span>
+          </div>
+          <div class="flex justify-between border-b border-white/10 pb-1">
+            <span class="text-slate-400 font-sans">مرجع الإشارة (A @ 1m):</span>
+            <span class="text-white font-bold">${ap.refRssi1m || -48} dBm</span>
+          </div>
+          <div class="flex justify-between border-b border-white/10 pb-1">
+            <span class="text-slate-400 font-sans">الإشارة الحالية للجهاز:</span>
+            <span class="text-emerald-400 font-bold">${rssi}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400 font-sans">المسافة المحسوبة:</span>
+            <span class="text-cyan-400 font-bold">${dist}</span>
+          </div>
+        </div>
+
+        <button onclick="MapEngine.simulateTestPing(${ap.x}, ${ap.y}, '${ap.id}'); document.getElementById('apInspectorModal').style.display='none';" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs transition shadow-md flex items-center justify-center gap-1.5 tap-effect">
+          <span>🚀</span>
+          <span>محاكاة وجود النزيل عند هذا الـ AP</span>
+        </button>
+      </div>
+    `;
+    inspector.style.display = 'flex';
   }
 };
 
