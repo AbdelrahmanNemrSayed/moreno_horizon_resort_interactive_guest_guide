@@ -2247,6 +2247,129 @@ main {
   border-color: rgba(245, 158, 11, 0.6);
 }
 
+/* ========================================================
+   Live Guest WiFi Indoor Location ("Blue Dot") Marker
+   ======================================================== */
+.live-guest-blue-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 55;
+  transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), top 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: left, top;
+}
+
+/* Pulsing soft blue accuracy circle on map ground plane */
+.blue-dot-accuracy-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 166, 255, 0.18) 0%, rgba(0, 132, 255, 0.08) 65%, rgba(0, 132, 255, 0) 100%);
+  border: 1.5px solid rgba(0, 166, 255, 0.35);
+  pointer-events: none;
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+/* Directional heading cone / beam */
+.blue-dot-heading-cone {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform-origin: center center;
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.3s ease-out;
+}
+.blue-dot-beam {
+  position: absolute;
+  bottom: 0;
+  left: -24px;
+  width: 48px;
+  height: 60px;
+  background: radial-gradient(ellipse at bottom, rgba(56, 189, 248, 0.75) 0%, rgba(14, 165, 233, 0.35) 50%, rgba(14, 165, 233, 0) 80%);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7));
+}
+
+/* Outer radar ripple pulse */
+.blue-dot-radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.35);
+  animation: blueDotPulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes blueDotPulse {
+  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+}
+
+/* 3D Billboard Core Wrapper */
+.blue-dot-core-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 4;
+  transform-origin: center center;
+}
+
+/* Apple/Google Maps standard core glossy blue dot */
+.blue-dot-core {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 18px rgba(14, 165, 233, 0.9), 0 4px 12px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.blue-dot-inner {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px #ffffff;
+}
+
+/* Small elegant tag label */
+.blue-dot-badge {
+  margin-top: 3px;
+  font-size: 9px;
+  font-weight: 900;
+  color: #ffffff;
+  background: rgba(2, 132, 199, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 1px 7px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.02em;
+}
+
+/* Active "Locate Me" Button Pulse */
+.btn-locate-active {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 16px rgba(14, 165, 233, 0.6) !important;
+}
+
 
 
 

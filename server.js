@@ -153,7 +153,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // 5. Test Simulation Generator: Simulate device roaming across APs
-  if (reqPath === '/api/mikrotik/simulate' && req.method === 'POST') {
+  if ((reqPath === '/api/mikrotik/simulate' || reqPath === '/api/simulate') && req.method === 'POST') {
     try {
       const body = await parseBody(req);
       const testMac = indoorLocationService.normalizeMac(body.mac || 'A4:C3:F0:77:88:99');

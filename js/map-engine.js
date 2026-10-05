@@ -37,10 +37,21 @@ const MapEngine = {
   isPickingLocation: false,
   guestLocationPoiId: null,
 
+  // Live Guest WiFi Indoor Positioning State ("Blue Dot")
+  guestMac: null,
+  liveTrackerWs: null,
+  liveTrackerPollTimer: null,
+  lastGuestPosition: null,
+  isAutoFollowingGuest: false,
+  liveTrackingHeading: 0,
+
   init() {
     this.renderPins();
     this.bindEvents();
     this.setLayer(this.currentLayer);
+
+    // Initialize Live WiFi Guest Tracking ("Blue Dot")
+    this.initLiveGuestTracking();
 
     // Initial viewport fit and centering
     this.fitToViewport();
@@ -193,6 +204,11 @@ const MapEngine = {
     const simAvatar = document.getElementById('simWalkerAvatarWrapper');
     if (simAvatar) {
       simAvatar.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+    }
+
+    const blueDotWrapper = document.getElementById('blueDotCoreWrapper');
+    if (blueDotWrapper) {
+      blueDotWrapper.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
     }
   },
 
@@ -2292,6 +2308,376 @@ const MapEngine = {
     const marker = document.getElementById('liveWalkerMarker');
     if (marker) marker.remove();
     this.removeRoomBeacon();
+  },
+
+  // =========================================================================
+  // Live Guest Location ("Blue Dot") WiFi Indoor Tracking Integration
+  // =========================================================================
+
+  initLiveGuestTracking() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramMac = urlParams.get('mac') || urlParams.get('client_mac') || urlParams.get('device_mac') || urlParams.get('clientMac') || urlParams.get('mac_address');
+
+      if (paramMac) {
+        this.guestMac = paramMac.trim().toLowerCase();
+        try {
+          sessionStorage.setItem('moreno_guest_mac', this.guestMac);
+          localStorage.setItem('moreno_guest_mac', this.guestMac);
+        } catch (e) {}
+      } else {
+        try {
+          this.guestMac = sessionStorage.getItem('moreno_guest_mac') || localStorage.getItem('moreno_guest_mac') || null;
+        } catch (e) {}
+      }
+
+      // If MAC is registered, start background tracking
+      if (this.guestMac) {
+        this.startLiveLocationTracking(this.guestMac);
+      }
+
+      // Device Orientation for directional heading beam
+      if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', (e) => {
+          if (e.alpha != null) {
+            this.liveTrackingHeading = e.alpha;
+            const headingCone = document.getElementById('blueDotHeadingCone');
+            if (headingCone) {
+              headingCone.style.transform = `rotate(${-this.bearing - this.liveTrackingHeading}deg)`;
+            }
+          }
+        }, { passive: true });
+      }
+    } catch (err) {
+      console.warn('[MapEngine] Live tracking initialization bypassed:', err);
+    }
+  },
+
+  ensureBlueDotMarker() {
+    const overlay = document.getElementById('pinsOverlay');
+    if (!overlay) return null;
+
+    let marker = document.getElementById('liveGuestBlueDotMarker');
+    if (!marker) {
+      marker = document.createElement('div');
+      marker.id = 'liveGuestBlueDotMarker';
+      marker.className = 'live-guest-blue-dot';
+      marker.style.display = 'none';
+
+      const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+      const label = (lang === 'ar') ? 'أنت هنا' : (lang === 'ru') ? 'Вы здесь' : (lang === 'de') ? 'Sie sind hier' : 'You are here';
+
+      marker.innerHTML = `
+        <div class="blue-dot-accuracy-circle" id="blueDotAccuracyCircle"></div>
+        <div class="blue-dot-heading-cone" id="blueDotHeadingCone">
+          <div class="blue-dot-beam"></div>
+        </div>
+        <div class="blue-dot-radar-ring"></div>
+        <div class="blue-dot-core-wrapper" id="blueDotCoreWrapper">
+          <div class="blue-dot-core">
+            <div class="blue-dot-inner"></div>
+          </div>
+          <div class="blue-dot-badge">
+            <span id="blueDotBadgeText">${label}</span>
+          </div>
+        </div>
+      `;
+      overlay.appendChild(marker);
+    }
+    return marker;
+  },
+
+  startLiveLocationTracking(mac) {
+    if (!mac) return;
+    this.guestMac = mac.trim().toLowerCase();
+    this.ensureBlueDotMarker();
+
+    // 1. Try WebSocket Connection
+    try {
+      if (this.liveTrackerWs) {
+        this.liveTrackerWs.close();
+        this.liveTrackerWs = null;
+      }
+
+      const host = window.location.hostname || 'localhost';
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//${host}:3001?mac=${encodeURIComponent(this.guestMac)}`;
+
+      const ws = new WebSocket(wsUrl);
+      this.liveTrackerWs = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          const data = payload.data || payload;
+          if (data && typeof data.pctX === 'number' && typeof data.pctY === 'number') {
+            this.updateGuestLiveLocation(data.pctX, data.pctY, data.accuracyRadiusMeters || data.accuracyMeters);
+          }
+        } catch (e) {}
+      };
+
+      ws.onerror = () => {
+        // Fallback to polling / SSE on error
+        this.startLocationPolling(this.guestMac);
+      };
+
+      ws.onclose = () => {
+        this.startLocationPolling(this.guestMac);
+      };
+    } catch (e) {
+      this.startLocationPolling(this.guestMac);
+    }
+  },
+
+  startLocationPolling(mac) {
+    if (this.liveTrackerPollTimer) return;
+
+    const fetchPos = async () => {
+      try {
+        const res = await fetch(`/api/location?mac=${encodeURIComponent(mac)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success && data.location) {
+            const loc = data.location;
+            this.updateGuestLiveLocation(loc.pctX, loc.pctY, loc.accuracyRadiusMeters || loc.accuracyMeters);
+          }
+        }
+      } catch (e) {
+        // Graceful silent fallback
+      }
+    };
+
+    fetchPos();
+    this.liveTrackerPollTimer = setInterval(fetchPos, 2000);
+  },
+
+  updateGuestLiveLocation(pctX, pctY, accuracyMeters = 3.0) {
+    const marker = this.ensureBlueDotMarker();
+    if (!marker) return;
+
+    this.lastGuestPosition = {
+      pctX,
+      pctY,
+      accuracyMeters: Number(accuracyMeters) || 3.0,
+      timestamp: Date.now()
+    };
+
+    marker.style.display = 'block';
+    marker.style.left = `${pctX}%`;
+    marker.style.top = `${pctY}%`;
+
+    // Scale accuracy circle (pixels on map: 1 meter = 2.381 px)
+    const accuracyCircle = document.getElementById('blueDotAccuracyCircle');
+    if (accuracyCircle) {
+      const radiusPx = (this.lastGuestPosition.accuracyMeters * 2.381);
+      const diamPx = Math.max(30, Math.min(240, radiusPx * 2));
+      accuracyCircle.style.width = `${diamPx}px`;
+      accuracyCircle.style.height = `${diamPx}px`;
+    }
+
+    // Auto-follow camera if requested by guest
+    if (this.isAutoFollowingGuest) {
+      this.focusCoordinate(pctX, pctY, Math.max(1.5, this.scale), false);
+    }
+  },
+
+  locateMe() {
+    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(900);
+    this.stopOrbitTour();
+
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const btn = document.getElementById('btnLocateMe');
+
+    // 1. If we already have a real-time position fix
+    if (this.lastGuestPosition) {
+      this.isAutoFollowingGuest = true;
+      if (btn) btn.classList.add('btn-locate-active');
+
+      this.focusCoordinate(this.lastGuestPosition.pctX, this.lastGuestPosition.pctY, 1.65, true);
+
+      const msg = (lang === 'ar')
+        ? `🎯 تم تحديد موقعك الحالي (دقة ±${Math.round(this.lastGuestPosition.accuracyMeters)}م)`
+        : (lang === 'ru') ? `🎯 Ваше местоположение на карте (точность ±${Math.round(this.lastGuestPosition.accuracyMeters)}м)`
+        : (lang === 'de') ? `🎯 Ihr Standort erfasst (Genauigkeit ±${Math.round(this.lastGuestPosition.accuracyMeters)}m)`
+        : `🎯 Your live location focused (accuracy ±${Math.round(this.lastGuestPosition.accuracyMeters)}m)`;
+
+      if (typeof App !== 'undefined' && App.showToast) App.showToast(msg);
+      return;
+    }
+
+    // 2. If a MAC is configured but no signal packet arrived yet
+    if (this.guestMac) {
+      const msg = (lang === 'ar')
+        ? `📡 جارٍ جلب إشارة الواي فاي لجهازك (${this.guestMac})...`
+        : `📡 Fetching WiFi positioning signal for device (${this.guestMac})...`;
+      if (typeof App !== 'undefined' && App.showToast) App.showToast(msg);
+
+      // Attempt immediate API sync
+      fetch(`/api/location?mac=${encodeURIComponent(this.guestMac)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.success && data.location) {
+            this.updateGuestLiveLocation(data.location.pctX, data.location.pctY, data.location.accuracyRadiusMeters);
+            this.locateMe();
+          }
+        })
+        .catch(() => {});
+      return;
+    }
+
+    // 3. Fallback: No MAC registered yet -> Open interactive modal
+    this.openLocateGuestModal();
+  },
+
+  openLocateGuestModal() {
+    let modal = document.getElementById('locateGuestModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'locateGuestModal';
+      modal.className = 'fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4';
+      document.body.appendChild(modal);
+    }
+
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const isAr = lang === 'ar';
+
+    modal.innerHTML = `
+      <div class="relative w-full max-w-md bg-slate-900 border border-blue-500/40 rounded-3xl p-5 sm:p-6 text-white shadow-2xl animate-scaleUp">
+        <button onclick="MapEngine.closeLocateGuestModal()" class="absolute top-4 left-4 sm:top-5 sm:left-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-sm transition">✕</button>
+
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 rounded-2xl bg-blue-600/30 text-blue-400 border border-blue-500/50 flex items-center justify-center text-2xl shadow-lg">
+            🎯
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">${isAr ? 'تحديد موقعك داخل المنتجع' : 'Live Resort Positioning'}</h3>
+            <p class="text-[11px] text-blue-300 font-semibold">${isAr ? 'نظام WiFi Indoor Positioning الذكي' : 'WiFi Indoor Positioning System'}</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+          ${isAr 
+            ? 'يتم تفعيل النقطة الزرقاء الحية تلقائياً عند تسجيل الدخول لشبكة واي فاي الفندق عبر الرابط المخصص. يمكنك ربط جهازك بإدخال عنوان MAC أو تجربة المحاكاة التفاعلية.' 
+            : 'Your live Blue Dot is automatically activated when connecting to the hotel guest WiFi. You can link your device via MAC address or start interactive demo simulation.'}
+        </p>
+
+        <!-- MAC Input Form -->
+        <div class="space-y-3 mb-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">${isAr ? 'عنوان MAC الخاص بجهازك:' : 'Your Device MAC Address:'}</label>
+            <div class="flex items-center gap-2">
+              <input 
+                type="text" 
+                id="inputGuestMacAddress" 
+                placeholder="A4:C3:F0:12:34:56" 
+                value="${this.guestMac || ''}"
+                class="flex-1 px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+              <button onclick="MapEngine.saveGuestMacFromInput()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition tap-effect">
+                ${isAr ? 'ربط' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1-Click Demo Simulator -->
+        <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-white/10 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-300 flex items-center gap-1.5">
+              <span>🚀</span> ${isAr ? 'تجربة المحاكاة الحية' : 'Live Interactive Demo'}
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">1-Click Live</span>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            ${isAr 
+              ? 'توليد إشارات واي فاي تجريبية لجهازك والتنقل به في ردهة الاستقبال والمسابح.' 
+              : 'Generate synthetic WiFi RSSI signals to test real-time Blue Dot positioning.'}
+          </p>
+          <button onclick="MapEngine.startDemoLocationSimulation()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-slate-950 font-black text-xs transition tap-effect flex items-center justify-center gap-1.5 shadow-md">
+            <span>✨</span>
+            <span>${isAr ? 'تشغيل النقطة الزرقاء التجريبية' : 'Start Demo Blue Dot Tracker'}</span>
+          </button>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'flex';
+  },
+
+  closeLocateGuestModal() {
+    const modal = document.getElementById('locateGuestModal');
+    if (modal) modal.style.display = 'none';
+  },
+
+  saveGuestMacFromInput() {
+    const input = document.getElementById('inputGuestMacAddress');
+    if (!input || !input.value.trim()) return;
+    const mac = input.value.trim().toLowerCase();
+
+    this.guestMac = mac;
+    try {
+      sessionStorage.setItem('moreno_guest_mac', mac);
+      localStorage.setItem('moreno_guest_mac', mac);
+    } catch (e) {}
+
+    this.closeLocateGuestModal();
+    this.startLiveLocationTracking(mac);
+    this.locateMe();
+  },
+
+  startDemoLocationSimulation() {
+    this.closeLocateGuestModal();
+    const demoMac = 'A4:C3:F0:77:88:99';
+    this.guestMac = demoMac;
+
+    // Waypoints for demo walking across the resort (Lobby -> Sirena -> Lotus Pool -> La Mama -> Beach)
+    const demoWaypoints = [
+      { x: 283, y: 820, name: 'بهو الاستقبال M' },
+      { x: 310, y: 795, name: 'مطعم سيرينا' },
+      { x: 344, y: 665, name: 'مسبح لوتس' },
+      { x: 348, y: 575, name: 'مطعم لا ماما' },
+      { x: 428, y: 340, name: 'بار الشاطئ' },
+      { x: 381, y: 281, name: 'منطقة المارينا والشاطئ' }
+    ];
+
+    let wpIdx = 0;
+    const sendDemoPing = () => {
+      const wp = demoWaypoints[wpIdx];
+      wpIdx = (wpIdx + 1) % demoWaypoints.length;
+
+      fetch('/api/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mac: demoMac, x: wp.x, y: wp.y })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.success && data.result) {
+          const loc = data.result;
+          this.updateGuestLiveLocation(loc.pctX, loc.pctY, loc.accuracyRadiusMeters || 2.2);
+          if (wpIdx === 1) {
+            this.locateMe();
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback internal simulation if backend simulation endpoint not reached
+        const pctX = Number(((wp.x / this.CANVAS_WIDTH) * 100).toFixed(2));
+        const pctY = Number(((wp.y / this.CANVAS_HEIGHT) * 100).toFixed(2));
+        this.updateGuestLiveLocation(pctX, pctY, 2.0);
+        if (wpIdx === 1) {
+          this.locateMe();
+        }
+      });
+    };
+
+    sendDemoPing();
+    if (this.demoTimer) clearInterval(this.demoTimer);
+    this.demoTimer = setInterval(sendDemoPing, 3500);
+
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    if (typeof App !== 'undefined' && App.showToast) {
+      App.showToast(lang === 'ar' ? '🚀 تم تفعيل النقطة الزرقاء الحية في وضع العرض التفاعلي!' : '🚀 Live Blue Dot tracking activated in interactive demo mode!');
+    }
   }
 };
 

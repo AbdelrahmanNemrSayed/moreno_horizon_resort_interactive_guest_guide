@@ -66,7 +66,7 @@
   </script>
 
   <!-- Modular Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=36.0">
+  <link rel="stylesheet" href="css/style.css?v=37.0">
 </head>
 
 <body class="bg-slate-50 dark:bg-brand-darkBg text-slate-800 dark:text-slate-100 font-cairo antialiased min-h-screen selection:bg-brand-gold selection:text-white transition-colors duration-300">
@@ -511,7 +511,12 @@
         </div>
 
         <!-- Tour, Zoom, Reset & Fullscreen Controls -->
-        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl">
+        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex-wrap sm:flex-nowrap">
+          <button onclick="MapEngine.locateMe()" id="btnLocateMe" title="موقعي الحالي (WiFi Live Tracker)" class="tap-effect px-2.5 h-8 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-sm flex items-center gap-1.5 transition">
+            <span class="w-2 h-2 rounded-full bg-cyan-300 animate-ping"></span>
+            <span>🎯</span>
+            <span class="hidden sm:inline" data-i18n="locate_me_btn">موقعي</span>
+          </button>
           <button onclick="App.startCinematicTour()" title="جولة سينمائية تلقائية بالمنتجع" class="tap-effect px-2.5 h-8 rounded-xl bg-white dark:bg-slate-700 text-slate-800 dark:text-white font-extrabold text-xs shadow-sm flex items-center gap-1">
             <span>🎬</span>
             <span class="hidden sm:inline" data-i18n="mapTourBtn">جولة المعالم</span>
@@ -1407,10 +1412,10 @@
   </button>
 
   <!-- Modular Scripts Architecture -->
-  <script src="js/data.js?v=36.0"></script>
-  <script src="js/virtual-resort-map.js?v=36.0"></script>
-  <script src="js/map-engine.js?v=36.0"></script>
-  <script src="js/wayfinder.js?v=36.0"></script>
-  <script src="js/app.js?v=36.0"></script>
+  <script src="js/data.js?v=37.0"></script>
+  <script src="js/virtual-resort-map.js?v=37.0"></script>
+  <script src="js/map-engine.js?v=37.0"></script>
+  <script src="js/wayfinder.js?v=37.0"></script>
+  <script src="js/app.js?v=37.0"></script>
 </body>
 </html>
