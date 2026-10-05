@@ -20,13 +20,178 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2'
 };
 
-const server = http.createServer((req, res) => {
-  let reqPath = decodeURI(req.url.split('?')[0]);
-  if (reqPath === '/' || reqPath === '') {
-    reqPath = '/index.html';
+const { indoorLocationService } = require('./services/indoorLocation');
+
+function parseBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+      if (body.length > 2 * 1024 * 1024) {
+        req.destroy();
+        reject(new Error('Payload too large'));
+      }
+    });
+    req.on('end', () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch (err) {
+        reject(err);
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+const server = http.createServer(async (req, res) => {
+  const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const reqPath = decodeURI(urlObj.pathname);
+
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, corsHeaders);
+    res.end();
+    return;
   }
 
-  const filePath = path.join(PUBLIC_DIR, reqPath);
+  // ==========================================
+  // API Routes: WiFi Indoor Positioning
+  // ==========================================
+
+  // 1. Post MikroTik Registration-Table RSSI Feed
+  if (reqPath === '/api/mikrotik/feed' && req.method === 'POST') {
+    try {
+      const feed = await parseBody(req);
+      const rows = Array.isArray(feed) ? feed : (feed.data || feed.clients || []);
+      const results = indoorLocationService.processMikroTikFeed(rows);
+      res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, count: results.length, devices: results }));
+    } catch (err) {
+      res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // 2. Query Device Location by MAC or list all devices
+  if (reqPath === '/api/location' && req.method === 'GET') {
+    const mac = urlObj.searchParams.get('mac');
+    if (mac) {
+      const loc = indoorLocationService.getDeviceLocation(mac);
+      if (!loc) {
+        res.writeHead(404, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: false, error: `Device with MAC ${mac} not found or inactive` }));
+      } else {
+        res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, location: loc }));
+      }
+    } else {
+      const all = indoorLocationService.getAllDevices();
+      res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, count: all.length, devices: all }));
+    }
+    return;
+  }
+
+  // 3. Real-Time Server-Sent Events (SSE) Position Stream
+  if (reqPath === '/api/location/stream' && req.method === 'GET') {
+    const targetMac = indoorLocationService.normalizeMac(urlObj.searchParams.get('mac'));
+
+    res.writeHead(200, {
+      ...corsHeaders,
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive'
+    });
+    res.write('retry: 2000\n\n');
+
+    // Send immediate initial position if available
+    if (targetMac) {
+      const initLoc = indoorLocationService.getDeviceLocation(targetMac);
+      if (initLoc) {
+        res.write(`data: ${JSON.stringify(initLoc)}\n\n`);
+      }
+    }
+
+    // Subscribe to live trilateration updates
+    const unsubscribe = indoorLocationService.subscribe(deviceLoc => {
+      if (!targetMac || deviceLoc.mac === targetMac) {
+        res.write(`data: ${JSON.stringify(deviceLoc)}\n\n`);
+      }
+    });
+
+    // 15-second heartbeat to prevent proxy timeout
+    const heartbeatTimer = setInterval(() => {
+      res.write(': keepalive\n\n');
+    }, 15000);
+
+    req.on('close', () => {
+      clearInterval(heartbeatTimer);
+      unsubscribe();
+    });
+    return;
+  }
+
+  // 4. Configured Access Points List
+  if (reqPath === '/api/access-points' && req.method === 'GET') {
+    const aps = indoorLocationService.getAccessPoints();
+    res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      count: aps.length,
+      mapWidth: indoorLocationService.mapWidth,
+      mapHeight: indoorLocationService.mapHeight,
+      accessPoints: aps
+    }));
+    return;
+  }
+
+  // 5. Test Simulation Generator: Simulate device roaming across APs
+  if (reqPath === '/api/mikrotik/simulate' && req.method === 'POST') {
+    try {
+      const body = await parseBody(req);
+      const testMac = indoorLocationService.normalizeMac(body.mac || 'A4:C3:F0:77:88:99');
+      const targetX = Number(body.x != null ? body.x : 344); // default: Lotus Pool
+      const targetY = Number(body.y != null ? body.y : 665);
+
+      // Generate synthetic RSSI for all configured APs
+      const syntheticRows = indoorLocationService.getAccessPoints().map(ap => {
+        const distM = Math.max(0.5, Math.hypot(targetX - ap.x, targetY - ap.y) * indoorLocationService.metersPerPixel);
+        // Add random measurement noise (+- 2 dBm)
+        const noise = (Math.random() - 0.5) * 4.0;
+        const rssi = Math.round(indoorLocationService.distanceToRssi(distM, ap.refRssi1m, ap.pathLossN) + noise);
+        return {
+          'mac-address': testMac,
+          'signal-strength': `${rssi}dBm`,
+          'ap-bssid': ap.bssid
+        };
+      });
+
+      const updated = indoorLocationService.processMikroTikFeed(syntheticRows);
+      res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, simulatedTarget: { x: targetX, y: targetY }, result: updated[0] }));
+    } catch (err) {
+      res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // ==========================================
+  // Static File Serving
+  // ==========================================
+  let staticPath = reqPath;
+  if (staticPath === '/' || staticPath === '') {
+    staticPath = '/index.html';
+  }
+
+  const filePath = path.join(PUBLIC_DIR, staticPath);
 
   // Security: prevent directory traversal
   if (!filePath.startsWith(PUBLIC_DIR)) {
@@ -51,7 +216,7 @@ const server = http.createServer((req, res) => {
       'Cache-Control': (ext === '.html' || ext === '.js' || ext === '.json' || ext === '.css') ? 'no-cache, no-store, must-revalidate' : 'public, max-age=3600'
     };
 
-    if (reqPath.endsWith('sw.js')) {
+    if (staticPath.endsWith('sw.js')) {
       headers['Service-Worker-Allowed'] = '/';
       headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
     }
