@@ -22,6 +22,11 @@ const MIME_TYPES = {
 
 const { indoorLocationService } = require('./services/indoorLocation');
 
+// Admin & Monitoring State
+let lastMikrotikFeedTime = null;
+const feedLogs = [];
+const ADMIN_SECRET = process.env.ADMIN_KEY || 'admin123';
+
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -51,7 +56,7 @@ const server = http.createServer(async (req, res) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-key'
   };
 
   if (req.method === 'OPTIONS') {
@@ -70,6 +75,18 @@ const server = http.createServer(async (req, res) => {
       const feed = await parseBody(req);
       const rows = Array.isArray(feed) ? feed : (feed.data || feed.clients || []);
       const results = indoorLocationService.processMikroTikFeed(rows);
+
+      lastMikrotikFeedTime = Date.now();
+      feedLogs.unshift({
+        id: 'feed_' + Date.now(),
+        timestamp: Date.now(),
+        count: rows.length,
+        devicesProcessed: results.length,
+        sample: rows.slice(0, 4),
+        ip: req.socket.remoteAddress
+      });
+      if (feedLogs.length > 50) feedLogs.pop();
+
       res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ success: true, count: results.length, devices: results }));
     } catch (err) {
@@ -152,7 +169,55 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 5. Test Simulation Generator: Simulate device roaming across APs
+  // 5. Admin Stats Endpoint for Monitoring Dashboard
+  if (reqPath === '/api/admin/stats' && req.method === 'GET') {
+    const key = urlObj.searchParams.get('key') || req.headers['x-admin-key'];
+    const isLocalhost = req.headers.host && (req.headers.host.includes('localhost') || req.headers.host.includes('127.0.0.1'));
+    if (!isLocalhost && key !== ADMIN_SECRET) {
+      res.writeHead(401, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'Unauthorized: Invalid admin key' }));
+      return;
+    }
+
+    const allDevices = indoorLocationService.getAllDevices();
+    const aps = indoorLocationService.getAccessPoints();
+    const now = Date.now();
+    const lastFeedSec = lastMikrotikFeedTime ? Math.round((now - lastMikrotikFeedTime) / 1000) : null;
+    const isFeedActive = lastFeedSec !== null && lastFeedSec <= 35;
+
+    res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      connectedDevicesCount: allDevices.length,
+      lastFeedTimestamp: lastMikrotikFeedTime,
+      lastFeedSecondsAgo: lastFeedSec,
+      feedStatus: isFeedActive ? 'active' : 'idle',
+      activeDevices: allDevices,
+      accessPointsCount: aps.length,
+      accessPoints: aps,
+      feedLogs: feedLogs.slice(0, 30),
+      serverUptimeSec: Math.round(process.uptime()),
+      systemTime: new Date().toISOString()
+    }));
+    return;
+  }
+
+  // 6. Admin Purge Inactive Devices Endpoint
+  if (reqPath === '/api/admin/purge' && req.method === 'POST') {
+    const key = urlObj.searchParams.get('key') || req.headers['x-admin-key'];
+    const isLocalhost = req.headers.host && (req.headers.host.includes('localhost') || req.headers.host.includes('127.0.0.1'));
+    if (!isLocalhost && key !== ADMIN_SECRET) {
+      res.writeHead(401, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'Unauthorized' }));
+      return;
+    }
+    indoorLocationService.deviceStates.clear();
+    res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ success: true, message: 'All active device states purged' }));
+    return;
+  }
+
+  // 7. Test Simulation Generator: Simulate device roaming across APs
   if ((reqPath === '/api/mikrotik/simulate' || reqPath === '/api/simulate') && req.method === 'POST') {
     try {
       const body = await parseBody(req);
@@ -174,6 +239,19 @@ const server = http.createServer(async (req, res) => {
       });
 
       const updated = indoorLocationService.processMikroTikFeed(syntheticRows);
+
+      lastMikrotikFeedTime = Date.now();
+      feedLogs.unshift({
+        id: 'sim_' + Date.now(),
+        timestamp: Date.now(),
+        count: syntheticRows.length,
+        devicesProcessed: 1,
+        sample: syntheticRows.slice(0, 3),
+        isSimulation: true,
+        ip: req.socket.remoteAddress
+      });
+      if (feedLogs.length > 50) feedLogs.pop();
+
       res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ success: true, simulatedTarget: { x: targetX, y: targetY }, result: updated[0] }));
     } catch (err) {
@@ -189,6 +267,8 @@ const server = http.createServer(async (req, res) => {
   let staticPath = reqPath;
   if (staticPath === '/' || staticPath === '') {
     staticPath = '/index.html';
+  } else if (staticPath === '/admin' || staticPath === '/admin/') {
+    staticPath = '/admin.html';
   }
 
   const filePath = path.join(PUBLIC_DIR, staticPath);

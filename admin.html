@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم والرصد اللاسلكي | Moreno Horizon Resort RTLS Admin</title>
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" href="moreno_resort_map_new.png">
+
+  <!-- Google Fonts: Cairo & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS Framework CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0B2545',
+              deep: '#134074',
+              teal: '#1D976C',
+              sea: '#00B4D8',
+              gold: '#DDA15E',
+              goldDark: '#BC6C25',
+              darkBg: '#070D18',
+              cardDark: '#0E1726',
+              borderDark: '#1E293B'
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', 'Cairo', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070D18;
+      color: #F1F5F9;
+      font-family: 'Cairo', sans-serif;
+    }
+    .glass-card {
+      background: rgba(14, 23, 38, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+      box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.2);
+    }
+    .terminal-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .terminal-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .terminal-scroll::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.3);
+      border-radius: 9999px;
+    }
+    .terminal-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(56, 189, 248, 0.6);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.85); opacity: 0.9; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .radar-pulse-ring {
+      animation: pulse-ring 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    }
+    .ap-pin-badge {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .ap-pin-badge:hover {
+      transform: translate(-50%, -50%) scale(1.35);
+      z-index: 50;
+    }
+    .device-dot-marker {
+      transition: left 0.6s cubic-bezier(0.25, 1, 0.5, 1), top 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .heatmap-halo {
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 glass-card border-b border-slate-800/90 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Hub Title -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="w-10 h-10 rounded-2xl bg-white p-1 shadow-lg border border-amber-500/30 flex items-center justify-center shrink-0 hover:scale-105 transition">
+          <img src="assets/images/moreno_logo.jpg" alt="Logo" class="w-full h-full object-contain">
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-black text-white tracking-wide">Moreno Horizon Resort</h1>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">RTLS Admin v2.0</span>
+          </div>
+          <p class="text-[11px] font-semibold text-slate-400">لوحة الرصد اللحظي وتتبع إشارات MikroTik ونقاط الوصول اللاسلكية</p>
+        </div>
+      </div>
+
+      <!-- Live Feed Pulse & Action Hub -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- Live Status Badge -->
+        <div id="feedStatusPill" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-bold shadow-inner">
+          <span id="feedStatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+          <span id="feedStatusText" class="text-slate-300">جاري الاتصال بالسيرفر...</span>
+        </div>
+
+        <!-- Refresh Interval Selector -->
+        <div class="flex items-center bg-slate-900/90 rounded-xl p-1 border border-slate-800 text-xs">
+          <button id="btnAutoRefreshToggle" onclick="toggleAutoRefresh()" class="px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 font-bold transition flex items-center gap-1 shadow">
+            <span id="refreshIcon" class="animate-spin">🔄</span>
+            <span id="lblRefreshRate">2 ثوانٍ</span>
+          </button>
+        </div>
+
+        <!-- Guest Map Link -->
+        <a href="/?debug=true" target="_blank" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg transition">
+          <span>🗺️</span>
+          <span class="hidden md:inline">الخريطة التفاعلية (Debug)</span>
+        </a>
+
+        <!-- Lang Switcher -->
+        <button onclick="toggleAdminLanguage()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition" id="btnAdminLang">
+          EN
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5 space-y-5">
+
+    <!-- KPI Metric Cards Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      
+      <!-- Card 1: Connected Devices -->
+      <div class="glass-card rounded-2xl p-4 relative overflow-hidden transition glass-card-hover">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold">الأجهزة النشطة المتتبعة</span>
+          <span class="text-lg">📱</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="kpiDevicesCount" class="text-2xl sm:text-3xl font-black text-cyan-400 font-mono">0</span>
+          <span class="text-xs text-slate-400 font-medium">نزيل / هاتف</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>تثليث مساحي مستمر (EMA Filter)</span>
+        </div>
+        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Card 2: MikroTik Feed Ingestion Status -->
+      <div class="glass-card rounded-2xl p-4 relative overflow-hidden transition glass-card-hover">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold">تغذية راوتر MikroTik</span>
+          <span class="text-lg">📡</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="kpiFeedState" class="text-lg sm:text-xl font-black text-amber-300">خامل (Idle)</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-400 truncate" id="kpiLastPacketTime">
+          لم يتم استلام حزم بعد
+        </div>
+        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Card 3: Access Points Network -->
+      <div class="glass-card rounded-2xl p-4 relative overflow-hidden transition glass-card-hover">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold">نقاط الوصول (APs)</span>
+          <span class="text-lg">📶</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="kpiApsCount" class="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">14</span>
+          <span class="text-xs text-slate-400 font-medium">/ 14 نقطة متصلة</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+          <span class="text-emerald-400 font-bold">100%</span>
+          <span>تغطية كاملة للمنتجع والشاطئ</span>
+        </div>
+        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Card 4: Server Uptime & Trilateration Engine -->
+      <div class="glass-card rounded-2xl p-4 relative overflow-hidden transition glass-card-hover">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold">زمن تشغيل المحرك</span>
+          <span class="text-lg">⚡</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="kpiServerUptime" class="text-xl sm:text-2xl font-black text-purple-400 font-mono">--:--</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+          <span>دقة متوسطة:</span>
+          <span class="text-cyan-300 font-bold font-mono">± 2.2 م</span>
+        </div>
+        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+    </div>
+
+    <!-- Webhook Integration & Quick MikroTik Helper Banner -->
+    <div class="glass-card rounded-2xl p-4 border border-cyan-500/30 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-slate-950 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xl shrink-0 border border-cyan-500/30">
+          🌐
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="text-xs sm:text-sm font-bold text-white">رابط استقبال بيانات MikroTik (Public Ingestion Webhook):</h3>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">جاهز للاستقبال</span>
+          </div>
+          <p class="text-xs text-cyan-400 font-mono mt-0.5 truncate font-bold" id="webhookUrlDisplay">http://localhost:3000/api/mikrotik/feed</p>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-[10px] text-slate-400">⚡ رابط Cloudflare Tunnel:</span>
+            <input 
+              type="text" 
+              id="customTunnelInput" 
+              oninput="updateCustomTunnelUrl(this.value)" 
+              placeholder="https://xxxx.trycloudflare.com" 
+              class="px-2 py-0.5 rounded bg-slate-950 border border-slate-700 text-[11px] font-mono text-cyan-300 w-56 sm:w-72 placeholder-slate-600 focus:outline-none focus:border-cyan-400"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 w-full md:w-auto shrink-0 justify-end">
+        <button onclick="copyWebhookUrl()" id="btnCopyWebhook" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow">
+          <span>📋</span>
+          <span>نسخ الرابط</span>
+        </button>
+        <button onclick="toggleMikrotikScriptModal()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs border border-white/15 transition flex items-center gap-1.5">
+          <span>📜</span>
+          <span>سكريبت MikroTik ROS</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Workspace Grid: Table & Live Mini Map -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      
+      <!-- Left Column (7 cols): Live Devices Table & Packet Logs -->
+      <div class="lg:col-span-7 space-y-4">
+
+        <!-- Tabs Navigation -->
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div class="flex items-center gap-2">
+            <button id="tabBtnDevices" onclick="switchAdminTab('devices')" class="px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition">
+              <span>📱</span>
+              <span>الأجهزة النشطة</span>
+              <span id="badgeTabDeviceCount" class="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500 text-slate-950 font-black">0</span>
+            </button>
+            <button id="tabBtnLogs" onclick="switchAdminTab('logs')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 font-bold text-xs flex items-center gap-1.5 transition">
+              <span>📟</span>
+              <span>سجل الحزم الواردة (Live Log)</span>
+            </button>
+          </div>
+
+          <!-- Quick Actions on Table -->
+          <div class="flex items-center gap-2">
+            <button onclick="purgeActiveDevices()" class="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1" title="مسح الأجهزة المخزنة مؤقتاً">
+              <span>🧹</span>
+              <span class="hidden sm:inline">مسح الأجهزة</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 1: Live Devices Table Panel -->
+        <div id="tabContentDevices" class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+          
+          <!-- Search & Filter Bar -->
+          <div class="p-3 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/60">
+            <div class="relative flex-1">
+              <span class="absolute inset-y-0 start-0 flex items-center ps-3 text-slate-400 text-xs">🔍</span>
+              <input 
+                type="text" 
+                id="deviceSearchInput" 
+                oninput="renderDevicesTable()" 
+                placeholder="بحث بـ MAC Address أو اسم المنطقة (مثل: لوتس، سيرينا، الشاطئ)..."
+                class="w-full ps-8 pe-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+              >
+            </div>
+            <div class="text-[11px] text-slate-400 shrink-0">
+              إجمالي: <span id="lblFilteredDeviceCount" class="font-bold text-cyan-400 font-mono">0</span>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto max-h-[460px] terminal-scroll">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] font-bold tracking-wider sticky top-0 z-10 border-b border-slate-800">
+                <tr>
+                  <th class="py-2.5 px-3">الجهاز (MAC Address)</th>
+                  <th class="py-2.5 px-3">المنطقة الحالية (Zone)</th>
+                  <th class="py-2.5 px-3">الإحداثيات (X, Y)</th>
+                  <th class="py-2.5 px-3">أقوى AP / الإشارة</th>
+                  <th class="py-2.5 px-3">آخر ظهور</th>
+                  <th class="py-2.5 px-3 text-center">الإجراء</th>
+                </tr>
+              </thead>
+              <tbody id="devicesTableBody" class="divide-y divide-slate-800/60 font-medium">
+                <!-- Dynamically Populated -->
+                <tr>
+                  <td colspan="6" class="py-12 text-center text-slate-400">
+                    <div class="text-3xl mb-2">📡</div>
+                    <p class="font-bold">لا توجد أجهزة متصلة حالياً</p>
+                    <p class="text-[11px] text-slate-500 mt-1">ابدأ محاكاة التجول بالأسفل أو أرسل حزمة MikroTik حقيقية للمشاهدة الفورية.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Raw MikroTik Packet Stream Panel -->
+        <div id="tabContentLogs" class="glass-card rounded-2xl overflow-hidden shadow-2xl hidden">
+          <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs font-bold text-white">Live Packet Ingestion Stream (/api/mikrotik/feed)</span>
+            </div>
+            <button onclick="clearFeedLogs()" class="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 transition">
+              مسح السجل
+            </button>
+          </div>
+
+          <div id="packetTerminalLog" class="p-3 font-mono text-[11px] max-h-[460px] overflow-y-auto terminal-scroll bg-slate-950 text-emerald-400 space-y-2">
+            <div class="text-slate-500">[System] Terminal ready. Waiting for incoming registration-table feeds...</div>
+          </div>
+        </div>
+
+        <!-- Simulation & Quick Test Controls -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>🎮</span>
+              <span>أدوات المحاكاة والاختبار السريع (Simulation & Debugging)</span>
+            </h3>
+            <span class="text-[10px] text-slate-400">بدون الحاجة لراوتر فعلي</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button onclick="startRoamingSimulation()" id="btnStartRoaming" class="tap-effect py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+              <span>🚶‍♂️</span>
+              <span id="lblRoamingText">محاكاة تجول جهاز</span>
+            </button>
+
+            <button onclick="sendQuickPing(283, 820, 'الاستقبال الرئيسي')" class="tap-effect py-2 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold border border-white/10 transition flex items-center justify-center gap-1">
+              <span>🛎️</span>
+              <span>نبضة الاستقبال</span>
+            </button>
+
+            <button onclick="sendQuickPing(344, 665, 'مسبح لوتس')" class="tap-effect py-2 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold border border-white/10 transition flex items-center justify-center gap-1">
+              <span>🏊‍♂️</span>
+              <span>نبضة مسبح لوتس</span>
+            </button>
+
+            <button onclick="sendQuickPing(381, 281, 'شاطئ البحر والمارينا')" class="tap-effect py-2 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold border border-white/10 transition flex items-center justify-center gap-1">
+              <span>🏖️</span>
+              <span>نبضة الشاطئ</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column (5 cols): Embedded Mini Live Map -->
+      <div class="lg:col-span-5 space-y-4">
+        
+        <div class="glass-card rounded-2xl p-3 sm:p-4 shadow-2xl flex flex-col">
+          
+          <!-- Mini Map Header & Toggles -->
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-sm">🗺️</span>
+              <h3 class="text-xs sm:text-sm font-bold text-white">الخريطة الحية (Live Spatial Overview)</h3>
+            </div>
+
+            <!-- Heatmap and AP labels toggles -->
+            <div class="flex items-center gap-1.5">
+              <button 
+                id="btnToggleHeatmap" 
+                onclick="toggleHeatmap()" 
+                class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white border border-slate-700 text-[11px] font-bold transition flex items-center gap-1"
+                title="تفعيل خريطة الكثافة الإشغالية (Occupancy Heatmap)"
+              >
+                <span>🔥</span>
+                <span>Heatmap</span>
+              </button>
+              <button 
+                id="btnToggleApPins" 
+                onclick="toggleApPins()" 
+                class="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition flex items-center gap-1"
+                title="إظهار/إخفاء نقاط الـ AP"
+              >
+                <span>📶</span>
+                <span>APs (14)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Map Aspect Container (896x1200 Proportions) -->
+          <div class="relative w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[896/1200] max-h-[580px] select-none" id="miniMapContainer">
+            
+            <!-- Map Background Image -->
+            <img 
+              src="moreno_resort_map_new.png" 
+              alt="Moreno Horizon Map" 
+              class="w-full h-full object-cover pointer-events-none opacity-85"
+            >
+
+            <!-- Occupancy Heatmap Halo SVG Layer -->
+            <svg id="heatmapSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible">
+              <defs>
+                <radialGradient id="heatGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ef4444" stop-opacity="0.65" />
+                  <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+              <g id="heatmapHalosGroup" class="hidden"></g>
+            </svg>
+
+            <!-- Access Points Overlay Layer -->
+            <div id="miniMapApPinsLayer" class="absolute inset-0 pointer-events-auto z-20">
+              <!-- Dynamically populated 14 APs -->
+            </div>
+
+            <!-- Live Devices Overlay Layer -->
+            <div id="miniMapDevicesLayer" class="absolute inset-0 pointer-events-auto z-30">
+              <!-- Dynamically populated moving blue dots -->
+            </div>
+
+            <!-- Click to Ping Hint Tooltip -->
+            <div class="absolute bottom-2 start-2 end-2 text-center pointer-events-none z-40">
+              <span class="inline-block px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur border border-white/10 text-[10px] text-slate-300 font-semibold shadow">
+                💡 انقر في أي مكان على الخريطة لإرسال نبضة تجريبية فورية
+              </span>
+            </div>
+          </div>
+
+          <!-- Selected Device Inspector Card -->
+          <div id="selectedDeviceCard" class="mt-3 p-3 rounded-xl bg-slate-900/90 border border-cyan-500/30 text-xs hidden animate-fadeIn">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-white flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                <span id="inspectMac">AA:BB:CC:DD:EE:FF</span>
+              </span>
+              <button onclick="closeInspectorCard()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mt-2 font-mono">
+              <div>📍 المنطقة: <span id="inspectZone" class="text-cyan-300 font-bold">--</span></div>
+              <div>🎯 الدقة: <span id="inspectAccuracy" class="text-amber-300 font-bold">--</span></div>
+              <div>📐 الإحداثيات: <span id="inspectCoords" class="text-slate-200">--</span></div>
+              <div>📶 أقوى AP: <span id="inspectAp" class="text-emerald-400 font-bold">--</span></div>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-end gap-2">
+              <a id="inspectLinkToMap" href="#" target="_blank" class="px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition">
+                فتح تتبع النزيل في الخريطة 🗺️
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MikroTik Script Generator Modal -->
+  <div id="mikrotikScriptModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl max-w-2xl w-full p-5 border border-cyan-500/40 shadow-2xl relative">
+      <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📜</span>
+          <h3 class="text-sm sm:text-base font-bold text-white">سكريبت تصدير إشارات MikroTik RouterOS</h3>
+        </div>
+        <button onclick="toggleMikrotikScriptModal()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+        قم بنسخ هذا السكريبت ووضعه في <strong>System ➔ Scripts</strong> أو جدولته في <strong>System ➔ Scheduler</strong> في راوتر الميكروتيك ليتم إرسال جدول الإشارات كل ثانيتين إلى السيرفر:
+      </p>
+
+      <div class="relative">
+        <pre class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-[11px] text-cyan-300 font-mono overflow-x-auto terminal-scroll max-h-64 leading-normal" id="mikrotikScriptCode"># MikroTik RouterOS v6/v7 Script for Moreno Horizon Resort RTLS
+:local webhookUrl "http://YOUR-SERVER-IP:3000/api/mikrotik/feed"
+:local payload "["
+:local first true
+
+/interface wireless registration-table
+:foreach i in=[find] do={
+  :local mac [get $i mac-address]
+  :local sig [get $i signal-strength]
+  :local iface [get $i interface]
+  :local apBssid [/interface wireless get [find name=$iface] mac-address]
+  
+  :if ($first = false) do={ :set payload ($payload . ",") }
+  :set payload ($payload . "{\"mac-address\":\"" . $mac . "\",\"signal-strength\":\"" . $sig . "\",\"ap-bssid\":\"" . $apBssid . "\"}")
+  :set first false
+}
+:set payload ($payload . "]")
+
+# Send HTTP POST to Ingestion Webhook
+/tool fetch http-method=post http-header-field="Content-Type: application/json" http-data=$payload url=$webhookUrl keep-result=no</pre>
+
+        <button onclick="copyMikrotikScript()" id="btnCopyScript" class="absolute top-2 end-2 px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs shadow transition">
+          نسخ الكود
+        </button>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
+        <span>💡 يدعم جميع أجهزة MikroTik cAP, hAP, RB Series.</span>
+        <button onclick="toggleMikrotikScriptModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard JavaScript Logic -->
+  <script>
+    // State management
+    let dashboardData = {
+      connectedDevicesCount: 0,
+      activeDevices: [],
+      accessPoints: [],
+      feedStatus: 'idle',
+      lastFeedSecondsAgo: null,
+      feedLogs: []
+    };
+
+    let isAutoRefreshActive = true;
+    let refreshIntervalMs = 2000;
+    let refreshTimer = null;
+    let isRoamingSimulationActive = false;
+    let roamingTimer = null;
+    let roamingStepIdx = 0;
+    let isHeatmapActive = false;
+    let areApPinsVisible = true;
+    let currentAdminLang = 'ar';
+    let selectedDeviceMac = null;
+
+    // Standard POI references for spatial zone lookup
+    const RESORT_ZONES = [
+      { id: '1', nameAr: 'شاطئ البحر والمارينا', nameEn: 'Beach & Marina Pier', x: 381, y: 281 },
+      { id: '2', nameAr: 'مركز الغوص والرياضات البحرية', nameEn: 'Diving Center', x: 256, y: 310 },
+      { id: '3', nameAr: 'أكوا بارك مورينو', nameEn: 'Moreno Aqua Park', x: 209, y: 500 },
+      { id: '4', nameAr: 'منطقة ألعاب الأطفال', nameEn: 'Kids Play Area', x: 266, y: 416 },
+      { id: '5', nameAr: 'بار الشاطئ والممشى الخشبي', nameEn: 'Beach Bar & Lounge', x: 428, y: 340 },
+      { id: '6', nameAr: 'المطعم الشرقي وسناك بار', nameEn: 'Oriental & Snack Bar', x: 442, y: 535 },
+      { id: '8', nameAr: 'مطعم لا ماما الإيطالي', nameEn: 'La Mama Italian', x: 348, y: 575 },
+      { id: '9', nameAr: 'النادي الصحي والسبا', nameEn: 'Health Club & Spa', x: 170, y: 750 },
+      { id: '10', nameAr: 'ملاعب التنس الاحترافية', nameEn: 'Pro Tennis Courts', x: 618, y: 732 },
+      { id: '11', nameAr: 'مسبح لوتس والبحيرة المركزية', nameEn: 'Lotus Pool & Lagoon', x: 344, y: 665 },
+      { id: '12', nameAr: 'مطعم سيرينا الرئيسي', nameEn: 'Sirena Buffet Restaurant', x: 310, y: 795 },
+      { id: 'M', nameAr: 'بهو الاستقبال الرئيسي M', nameEn: 'Main Lobby & Reception', x: 283, y: 820 },
+      { id: '15', nameAr: 'العيادة والصيدلية', nameEn: 'Clinic & Pharmacy', x: 370, y: 1049 },
+      { id: '16', nameAr: 'مسجد المنتجع', nameEn: 'Resort Mosque', x: 426, y: 1049 },
+      { id: 'MLS', nameAr: 'المبنى التجاري MLS', nameEn: 'Commercial Mall MLS', x: 163, y: 1037 }
+    ];
+
+    // Mock Roaming Path Coordinates (Reception -> Serena -> Lotus Pool -> Aqua Park -> Beach)
+    const ROAMING_WAYPOINTS = [
+      { x: 283, y: 820, label: 'بهو الاستقبال الرئيسي' },
+      { x: 310, y: 795, label: 'مطعم سيرينا' },
+      { x: 344, y: 665, label: 'مسبح لوتس المركزي' },
+      { x: 300, y: 550, label: 'ممشى الحديقة الوسطى' },
+      { x: 209, y: 500, label: 'أكوا بارك' },
+      { x: 256, y: 310, label: 'مركز الغوص' },
+      { x: 381, y: 281, label: 'شاطئ البحر والمارينا' },
+      { x: 428, y: 340, label: 'بار الشاطئ' },
+      { x: 442, y: 535, label: 'المطعم الشرقي' },
+      { x: 344, y: 665, label: 'مسبح لوتس' }
+    ];
+
+    // Initialize Dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      initWebhookUrl();
+      fetchAdminStats();
+      startAutoRefresh();
+      setupMiniMapClick();
+    });
+
+    function initWebhookUrl() {
+      const origin = window.location.origin;
+      const webhookUrl = `${origin}/api/mikrotik/feed`;
+      const el = document.getElementById('webhookUrlDisplay');
+      if (el) el.textContent = webhookUrl;
+
+      // Update script sample with active host
+      const scriptCode = document.getElementById('mikrotikScriptCode');
+      if (scriptCode) {
+        scriptCode.textContent = scriptCode.textContent.replace('http://YOUR-SERVER-IP:3000/api/mikrotik/feed', webhookUrl);
+      }
+    }
+
+    function updateCustomTunnelUrl(val) {
+      val = (val || '').trim();
+      if (!val) {
+        initWebhookUrl();
+        return;
+      }
+      if (!val.startsWith('http://') && !val.startsWith('https://')) {
+        val = 'https://' + val;
+      }
+      val = val.replace(/\/+$/, '');
+      const webhookUrl = `${val}/api/mikrotik/feed`;
+      const el = document.getElementById('webhookUrlDisplay');
+      if (el) el.textContent = webhookUrl;
+
+      const scriptCode = document.getElementById('mikrotikScriptCode');
+      if (scriptCode) {
+        scriptCode.textContent = scriptCode.textContent.replace(/https?:\/\/[^\s"\']+\/api\/mikrotik\/feed/g, webhookUrl);
+      }
+    }
+
+    async function fetchAdminStats() {
+      try {
+        const res = await fetch('/api/admin/stats');
+        const data = await res.json();
+        if (data && data.success) {
+          dashboardData = data;
+          updateKpis();
+          renderDevicesTable();
+          renderMiniMapPins();
+          renderMiniMapDevices();
+          renderFeedLogs();
+          updateHeatmapHalos();
+        }
+      } catch (err) {
+        console.error('[Admin] Failed to fetch stats:', err);
+        updateFeedStatusPill('error', 'فشل الاتصال بالخادم');
+      }
+    }
+
+    function updateKpis() {
+      // 1. Devices Count
+      const count = dashboardData.connectedDevicesCount || (dashboardData.activeDevices ? dashboardData.activeDevices.length : 0);
+      document.getElementById('kpiDevicesCount').textContent = count;
+      document.getElementById('badgeTabDeviceCount').textContent = count;
+
+      // 2. Feed Status
+      const isFeedActive = dashboardData.feedStatus === 'active';
+      const secAgo = dashboardData.lastFeedSecondsAgo;
+      const kpiState = document.getElementById('kpiFeedState');
+      const kpiTime = document.getElementById('kpiLastPacketTime');
+
+      if (isFeedActive) {
+        kpiState.textContent = 'نشط (Active)';
+        kpiState.className = 'text-lg sm:text-xl font-black text-emerald-400';
+        kpiTime.textContent = `آخر حزمة استُلمت منذ ${secAgo} ثانية`;
+        updateFeedStatusPill('active', `MikroTik متصل (منذ ${secAgo}ث)`);
+      } else {
+        kpiState.textContent = 'خامل (Idle)';
+        kpiState.className = 'text-lg sm:text-xl font-black text-amber-400';
+        kpiTime.textContent = secAgo != null ? `آخر حزمة منذ ${secAgo} ثانية` : 'في انتظار استقبال أول حزمة...';
+        updateFeedStatusPill('idle', 'في انتظار حزم MikroTik');
+      }
+
+      // 3. APs Count
+      if (dashboardData.accessPointsCount) {
+        document.getElementById('kpiApsCount').textContent = dashboardData.accessPointsCount;
+      }
+
+      // 4. Server Uptime
+      if (dashboardData.serverUptimeSec) {
+        const uptimeM = Math.floor(dashboardData.serverUptimeSec / 60);
+        const uptimeH = Math.floor(uptimeM / 60);
+        const uptimeText = uptimeH > 0 ? `${uptimeH}س ${uptimeM % 60}د` : `${uptimeM} دقيقة`;
+        document.getElementById('kpiServerUptime').textContent = uptimeText;
+      }
+    }
+
+    function updateFeedStatusPill(status, text) {
+      const dot = document.getElementById('feedStatusDot');
+      const lbl = document.getElementById('feedStatusText');
+      lbl.textContent = text;
+
+      if (status === 'active') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping';
+      } else if (status === 'idle') {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+      }
+    }
+
+    function resolveNearestZone(x, y) {
+      let nearest = { nameAr: 'الممرات المفتوحة', nameEn: 'Resort Pathways', dist: Infinity };
+      for (const z of RESORT_ZONES) {
+        const d = Math.hypot(z.x - x, z.y - y);
+        if (d < nearest.dist) {
+          nearest = { ...z, dist: d };
+        }
+      }
+      return nearest;
+    }
+
+    function renderDevicesTable() {
+      const tbody = document.getElementById('devicesTableBody');
+      const filter = (document.getElementById('deviceSearchInput').value || '').trim().toLowerCase();
+      const devices = dashboardData.activeDevices || [];
+
+      const filtered = devices.filter(d => {
+        if (!filter) return true;
+        const mac = (d.mac || '').toLowerCase();
+        const zone = resolveNearestZone(d.x, d.y);
+        return mac.includes(filter) || zone.nameAr.includes(filter) || zone.nameEn.toLowerCase().includes(filter);
+      });
+
+      document.getElementById('lblFilteredDeviceCount').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-10 text-center text-slate-400">
+              <div class="text-2xl mb-1">🔍</div>
+              <p class="font-bold">لا توجد أجهزة مطابقة للبحث</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const now = Date.now();
+
+      tbody.innerHTML = filtered.map(d => {
+        const zone = resolveNearestZone(d.x, d.y);
+        const ageSec = Math.max(0, Math.round((now - (d.lastSeen || now)) / 1000));
+        const strongestAp = (d.activeAps && d.activeAps.length > 0) ? d.activeAps[0] : null;
+        const rssi = strongestAp ? strongestAp.rssi : '--';
+        
+        let rssiBadgeColor = 'bg-slate-800 text-slate-400';
+        if (typeof rssi === 'number') {
+          if (rssi >= -65) rssiBadgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+          else if (rssi >= -78) rssiBadgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+          else rssiBadgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+        }
+
+        return `
+          <tr class="hover:bg-slate-900/60 transition cursor-pointer" onclick="selectDevice('${d.mac}')">
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0"></span>
+                <span class="font-mono font-bold text-white tracking-wide">${d.mac}</span>
+              </div>
+            </td>
+            <td class="py-3 px-3">
+              <span class="px-2 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold text-[11px]">
+                ${zone.nameAr}
+              </span>
+            </td>
+            <td class="py-3 px-3 font-mono text-[11px] text-slate-300">
+              X: <span class="text-white font-bold">${d.x}</span>, Y: <span class="text-white font-bold">${d.y}</span> 
+              <span class="text-slate-500">(${d.pctX}%, ${d.pctY}%)</span>
+            </td>
+            <td class="py-3 px-3 font-mono">
+              <div class="flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ${rssiBadgeColor}">
+                  ${rssi} dBm
+                </span>
+                <span class="text-[10px] text-slate-400 truncate max-w-[80px]">${strongestAp ? strongestAp.id : '--'}</span>
+              </div>
+            </td>
+            <td class="py-3 px-3 text-[11px] text-slate-400 font-mono">
+              ${ageSec === 0 ? 'الآن' : `منذ ${ageSec}ث`}
+            </td>
+            <td class="py-3 px-3 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <button 
+                  onclick="event.stopPropagation(); inspectDeviceOnMap('${d.mac}')" 
+                  class="p-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 transition" 
+                  title="عرض على الخريطة المصغرة"
+                >
+                  🎯
+                </button>
+                <a 
+                  href="/?mac=${encodeURIComponent(d.mac)}&debug=true" 
+                  target="_blank" 
+                  onclick="event.stopPropagation()" 
+                  class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 transition" 
+                  title="فتح في دليل النزيل"
+                >
+                  🗺️
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderMiniMapPins() {
+      const layer = document.getElementById('miniMapApPinsLayer');
+      if (!layer || layer.children.length > 0) return; // already rendered
+      const aps = dashboardData.accessPoints || [];
+
+      layer.innerHTML = aps.map(ap => {
+        return `
+          <div 
+            style="left: ${ap.pctX}%; top: ${ap.pctY}%;" 
+            class="ap-pin-badge absolute flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+            title="${ap.nameAr || ap.name} (${ap.id})"
+          >
+            <div class="w-4 h-4 rounded-full bg-cyan-500 border-2 border-slate-950 shadow-lg flex items-center justify-center text-[8px] font-bold text-slate-950">
+              📡
+            </div>
+            <!-- AP Hover Tag -->
+            <div class="hidden group-hover:block absolute bottom-full mb-1 bg-slate-900/95 border border-cyan-500/40 text-cyan-300 text-[9px] px-2 py-0.5 rounded shadow-xl whitespace-nowrap z-50 pointer-events-none">
+              ${ap.id}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMiniMapDevices() {
+      const layer = document.getElementById('miniMapDevicesLayer');
+      if (!layer) return;
+      const devices = dashboardData.activeDevices || [];
+
+      layer.innerHTML = devices.map(d => {
+        const isSelected = selectedDeviceMac === d.mac;
+        return `
+          <div 
+            id="dot-${d.mac.replace(/[:]/g, '')}"
+            style="left: ${d.pctX}%; top: ${d.pctY}%;" 
+            class="device-dot-marker absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-30"
+            onclick="selectDevice('${d.mac}')"
+          >
+            <div class="relative flex items-center justify-center">
+              <div class="radar-pulse-ring absolute w-6 h-6 rounded-full ${isSelected ? 'bg-amber-400' : 'bg-cyan-400'}"></div>
+              <div class="w-3.5 h-3.5 rounded-full ${isSelected ? 'bg-amber-400 ring-2 ring-white' : 'bg-cyan-400 ring-2 ring-slate-950'} shadow-lg flex items-center justify-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-950"></span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderFeedLogs() {
+      const term = document.getElementById('packetTerminalLog');
+      if (!term) return;
+      const logs = dashboardData.feedLogs || [];
+      if (logs.length === 0) return;
+
+      term.innerHTML = logs.map(l => {
+        const timeStr = new Date(l.timestamp).toLocaleTimeString();
+        const sampleStr = JSON.stringify(l.sample || [], null, 2);
+        return `
+          <div class="p-2 rounded bg-slate-900/80 border border-slate-800 text-[10px]">
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-cyan-400 font-bold">[${timeStr}] Ingestion Packet #${l.id}</span>
+              <span class="text-emerald-400 font-bold">${l.count} records processed</span>
+            </div>
+            <pre class="text-slate-300 text-[9px] overflow-x-auto whitespace-pre-wrap">${sampleStr}</pre>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateHeatmapHalos() {
+      const group = document.getElementById('heatmapHalosGroup');
+      if (!group) return;
+      const devices = dashboardData.activeDevices || [];
+
+      if (!isHeatmapActive) {
+        group.classList.add('hidden');
+        return;
+      }
+      group.classList.remove('hidden');
+
+      // Calculate density per facility
+      const counts = {};
+      devices.forEach(d => {
+        const zone = resolveNearestZone(d.x, d.y);
+        counts[zone.id] = (counts[zone.id] || 0) + 1;
+      });
+
+      group.innerHTML = RESORT_ZONES.map(z => {
+        const count = counts[z.id] || 0;
+        if (count === 0) return '';
+        const pctX = (z.x / 896) * 100;
+        const pctY = (z.y / 1200) * 100;
+        const radius = Math.min(120, 35 + count * 22);
+
+        return `
+          <circle cx="${pctX}%" cy="${pctY}%" r="${radius}" fill="url(#heatGrad)" class="heatmap-halo">
+            <animate attributeName="opacity" values="0.75;0.95;0.75" dur="3s" repeatCount="indefinite" />
+          </circle>
+        `;
+      }).join('');
+    }
+
+    function toggleHeatmap() {
+      isHeatmapActive = !isHeatmapActive;
+      const btn = document.getElementById('btnToggleHeatmap');
+      if (isHeatmapActive) {
+        btn.className = 'px-2.5 py-1 rounded-lg bg-rose-500 text-white font-black text-[11px] shadow transition flex items-center gap-1';
+      } else {
+        btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white border border-slate-700 text-[11px] font-bold transition flex items-center gap-1';
+      }
+      updateHeatmapHalos();
+    }
+
+    function toggleApPins() {
+      areApPinsVisible = !areApPinsVisible;
+      const layer = document.getElementById('miniMapApPinsLayer');
+      const btn = document.getElementById('btnToggleApPins');
+      if (areApPinsVisible) {
+        layer.style.display = 'block';
+        btn.className = 'px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition flex items-center gap-1';
+      } else {
+        layer.style.display = 'none';
+        btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 text-[11px] font-bold transition flex items-center gap-1';
+      }
+    }
+
+    function switchAdminTab(tab) {
+      const devContent = document.getElementById('tabContentDevices');
+      const logContent = document.getElementById('tabContentLogs');
+      const devBtn = document.getElementById('tabBtnDevices');
+      const logBtn = document.getElementById('tabBtnLogs');
+
+      if (tab === 'devices') {
+        devContent.classList.remove('hidden');
+        logContent.classList.add('hidden');
+        devBtn.className = 'px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition';
+        logBtn.className = 'px-3.5 py-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 font-bold text-xs flex items-center gap-1.5 transition';
+      } else {
+        devContent.classList.add('hidden');
+        logContent.classList.remove('hidden');
+        logBtn.className = 'px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition';
+        devBtn.className = 'px-3.5 py-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 font-bold text-xs flex items-center gap-1.5 transition';
+      }
+    }
+
+    function selectDevice(mac) {
+      selectedDeviceMac = mac;
+      renderDevicesTable();
+      renderMiniMapDevices();
+
+      const dev = (dashboardData.activeDevices || []).find(d => d.mac === mac);
+      const card = document.getElementById('selectedDeviceCard');
+      if (!dev || !card) return;
+
+      const zone = resolveNearestZone(dev.x, dev.y);
+      const strongestAp = (dev.activeAps && dev.activeAps.length > 0) ? dev.activeAps[0] : null;
+
+      document.getElementById('inspectMac').textContent = dev.mac;
+      document.getElementById('inspectZone').textContent = zone.nameAr;
+      document.getElementById('inspectAccuracy').textContent = `± ${(dev.accuracyMeters || 2.2).toFixed(1)} م`;
+      document.getElementById('inspectCoords').textContent = `X:${dev.x}, Y:${dev.y} (${dev.pctX}%, ${dev.pctY}%)`;
+      document.getElementById('inspectAp').textContent = strongestAp ? `${strongestAp.id} (${strongestAp.rssi} dBm)` : '--';
+      document.getElementById('inspectLinkToMap').href = `/?mac=${encodeURIComponent(dev.mac)}&debug=true`;
+
+      card.classList.remove('hidden');
+    }
+
+    function inspectDeviceOnMap(mac) {
+      selectDevice(mac);
+      const dev = (dashboardData.activeDevices || []).find(d => d.mac === mac);
+      if (dev) {
+        const dot = document.getElementById(`dot-${mac.replace(/[:]/g, '')}`);
+        if (dot) {
+          dot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    function closeInspectorCard() {
+      selectedDeviceMac = null;
+      document.getElementById('selectedDeviceCard').classList.add('hidden');
+      renderDevicesTable();
+      renderMiniMapDevices();
+    }
+
+    function setupMiniMapClick() {
+      const container = document.getElementById('miniMapContainer');
+      if (!container) return;
+
+      container.addEventListener('click', (e) => {
+        const rect = container.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        const pctX = (clickX / rect.width) * 100;
+        const pctY = (clickY / rect.height) * 100;
+        const canvasX = Math.round((pctX / 100) * 896);
+        const canvasY = Math.round((pctY / 100) * 1200);
+
+        sendQuickPing(canvasX, canvasY, 'نقرة الخريطة المباشرة');
+      });
+    }
+
+    async function sendQuickPing(x, y, label = 'Mock Ping') {
+      try {
+        const testMac = 'E4:5F:01:99:88:77';
+        const res = await fetch('/api/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mac: testMac, x, y })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          fetchAdminStats();
+        }
+      } catch (err) {
+        console.error('[Admin] Ping failed:', err);
+      }
+    }
+
+    function startRoamingSimulation() {
+      if (isRoamingSimulationActive) {
+        clearInterval(roamingTimer);
+        isRoamingSimulationActive = false;
+        document.getElementById('lblRoamingText').textContent = 'محاكاة تجول جهاز';
+        document.getElementById('btnStartRoaming').className = 'tap-effect py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition';
+        return;
+      }
+
+      isRoamingSimulationActive = true;
+      document.getElementById('lblRoamingText').textContent = 'إيقاف التجول ⏸️';
+      document.getElementById('btnStartRoaming').className = 'tap-effect py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition';
+
+      const mockMac = 'B8:27:EB:55:44:33';
+      roamingStepIdx = 0;
+
+      const runStep = () => {
+        const wp = ROAMING_WAYPOINTS[roamingStepIdx % ROAMING_WAYPOINTS.length];
+        roamingStepIdx++;
+        sendQuickPing(wp.x, wp.y, wp.label);
+      };
+
+      runStep();
+      roamingTimer = setInterval(runStep, 2500);
+    }
+
+    async function purgeActiveDevices() {
+      if (!confirm('هل تريد مسح جميع الأجهزة المتتبعة حالياً؟')) return;
+      try {
+        await fetch('/api/admin/purge', { method: 'POST' });
+        selectedDeviceMac = null;
+        closeInspectorCard();
+        fetchAdminStats();
+      } catch (err) {
+        console.error('[Admin] Purge failed:', err);
+      }
+    }
+
+    function toggleAutoRefresh() {
+      isAutoRefreshActive = !isAutoRefreshActive;
+      const icon = document.getElementById('refreshIcon');
+      const lbl = document.getElementById('lblRefreshRate');
+      if (isAutoRefreshActive) {
+        icon.classList.add('animate-spin');
+        lbl.textContent = '2 ثوانٍ';
+        startAutoRefresh();
+      } else {
+        icon.classList.remove('animate-spin');
+        lbl.textContent = 'موقوف';
+        clearInterval(refreshTimer);
+      }
+    }
+
+    function startAutoRefresh() {
+      clearInterval(refreshTimer);
+      refreshTimer = setInterval(() => {
+        if (isAutoRefreshActive) {
+          fetchAdminStats();
+        }
+      }, refreshIntervalMs);
+    }
+
+    function copyWebhookUrl() {
+      const url = document.getElementById('webhookUrlDisplay').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('btnCopyWebhook');
+        btn.innerHTML = '<span>✓</span> <span>تم النسخ!</span>';
+        setTimeout(() => {
+          btn.innerHTML = '<span>📋</span> <span>نسخ الرابط</span>';
+        }, 2000);
+      });
+    }
+
+    function toggleMikrotikScriptModal() {
+      const modal = document.getElementById('mikrotikScriptModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function copyMikrotikScript() {
+      const code = document.getElementById('mikrotikScriptCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.getElementById('btnCopyScript');
+        btn.textContent = '✓ تم النسخ!';
+        setTimeout(() => {
+          btn.textContent = 'نسخ الكود';
+        }, 2000);
+      });
+    }
+
+    function clearFeedLogs() {
+      const term = document.getElementById('packetTerminalLog');
+      if (term) term.innerHTML = '<div class="text-slate-500">[System] Feed logs cleared.</div>';
+    }
+
+    function toggleAdminLanguage() {
+      currentAdminLang = currentAdminLang === 'ar' ? 'en' : 'ar';
+      document.getElementById('btnAdminLang').textContent = currentAdminLang === 'ar' ? 'EN' : 'عربي';
+      document.documentElement.dir = currentAdminLang === 'ar' ? 'rtl' : 'ltr';
+      renderDevicesTable();
+    }
+  </script>
+</body>
+</html>
