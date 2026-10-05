@@ -926,8 +926,9 @@ const App = {
               ${t.btn_book_table || '🍽️ حجز طاولة'}
             </button>
           ` : ''}
-          <button onclick="App.setAsRouteDestination('${poi.id}')" class="flex-1 py-3 rounded-2xl bg-brand-deep hover:bg-brand-navy text-white font-bold text-xs shadow-md">
-            ${t.btn_route || '🚀 رسم المسار'}
+          <button onclick="App.setAsRouteDestination('${poi.id}')" class="flex-1 py-3 rounded-2xl ${(typeof MapEngine !== 'undefined' && MapEngine.lastGuestPosition) ? 'bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 text-slate-950 font-black' : 'bg-brand-deep hover:bg-brand-navy text-white font-bold'} text-xs shadow-md flex items-center justify-center gap-1.5 tap-effect">
+            <span>${(typeof MapEngine !== 'undefined' && MapEngine.lastGuestPosition) ? '🧭' : '🚀'}</span>
+            <span>${(typeof MapEngine !== 'undefined' && MapEngine.lastGuestPosition) ? ((lang === 'ar') ? 'الاتجاهات من موقعي' : (lang === 'ru' ? 'Вести от меня' : (lang === 'de' ? 'Route von hier' : 'Navigate Here'))) : (t.btn_route || 'رسم المسار')}</span>
           </button>
           <button onclick="App.closeModal('detailModal')" class="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs">
             ${t.modal_close || 'إغلاق'}
@@ -941,6 +942,10 @@ const App = {
 
   setAsRouteDestination(id) {
     this.closeModal('detailModal');
+    if (typeof MapEngine !== 'undefined' && MapEngine.navigateDirectTo) {
+      MapEngine.navigateDirectTo(id);
+      return;
+    }
     const select = document.getElementById('selectDestination');
     if (select) {
       select.value = id;

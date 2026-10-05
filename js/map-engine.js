@@ -469,15 +469,25 @@ const MapEngine = {
     const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, hours: poi.hours, tag: poi.tagAr, description: poi.descriptionAr, category: poi.categoryNameAr };
     const icon = this.getPoiIcon(poi);
 
-    // Calculate approximate walking distance from lobby or saved room
-    const savedRoom = localStorage.getItem('moreno_guest_room');
-    let originPoi = resortPois.find(p => p.id === 'M');
-    if (savedRoom) {
-      const roomNum = parseInt(savedRoom);
-      const b = resortPois.filter(p => p.isBuilding).find(b => b.rooms.some(r => r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max)));
-      if (b) originPoi = b;
+    // Calculate walking distance from live Blue Dot position, or fallback to saved room / lobby M
+    let originCoords;
+    let isFromLiveLocation = false;
+    let originPoi = null;
+
+    if (this.lastGuestPosition) {
+      originCoords = { x: this.lastGuestPosition.pctX, y: this.lastGuestPosition.pctY };
+      isFromLiveLocation = true;
+    } else {
+      const savedRoom = localStorage.getItem('moreno_guest_room');
+      originPoi = resortPois.find(p => p.id === 'M');
+      if (savedRoom) {
+        const roomNum = parseInt(savedRoom);
+        const b = resortPois.filter(p => p.isBuilding).find(b => b.rooms.some(r => r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max)));
+        if (b) originPoi = b;
+      }
+      originCoords = originPoi ? originPoi.coords : { x: 31.55, y: 68.36 };
     }
-    const originCoords = originPoi ? originPoi.coords : { x: 31.55, y: 68.36 };
+
     const distPx = Math.hypot((poi.coords.x - originCoords.x) * (this.CANVAS_WIDTH / 100), (poi.coords.y - originCoords.y) * (this.CANVAS_HEIGHT / 100));
     const distMeters = Math.round(distPx * 0.42);
     const walkMin = Math.max(1, Math.round(distMeters / 65));
@@ -487,7 +497,9 @@ const MapEngine = {
     popover.className = 'map-bottom-sheet-card';
 
     const imgUrl = poi.image || 'assets/images/hero_resort.jpg';
-    const walkBtnText = (lang === 'ar') ? 'تحديد المسار والملاحة الحية 🚶‍♂️' : (lang === 'ru') ? 'Живой маршрут 🚶‍♂️' : (lang === 'de') ? 'Live Route 🚶‍♂️' : 'Live Route & Walk 🚶‍♂️';
+    const walkBtnText = isFromLiveLocation
+      ? ((lang === 'ar') ? 'الاتجاهات من موقعي 🧭' : (lang === 'ru') ? 'Вести от меня 🧭' : (lang === 'de') ? 'Route von hier 🧭' : 'Navigate Here 🧭')
+      : ((lang === 'ar') ? 'تحديد المسار والملاحة 🚶‍♂️' : (lang === 'ru') ? 'Живой маршрут 🚶‍♂️' : (lang === 'de') ? 'Live Route 🚶‍♂️' : 'Get Directions 🚶‍♂️');
     const detailBtnText = (lang === 'ar') ? 'التفاصيل ℹ️' : (lang === 'ru') ? 'Инфо ℹ️' : (lang === 'de') ? 'Info ℹ️' : 'Details ℹ️';
 
     popover.innerHTML = `
@@ -510,6 +522,7 @@ const MapEngine = {
             <span class="text-amber-300 font-semibold truncate">${loc.category || poi.categoryNameAr || ''}</span>
             <span>•</span>
             <span class="text-emerald-400 font-bold shrink-0">🟢 مفتوح</span>
+            ${isFromLiveLocation ? '<span class="text-blue-400 font-bold text-[9px] bg-blue-500/20 px-1.5 py-0.2 rounded-full border border-blue-500/30">📍 من موقعك</span>' : ''}
           </div>
           <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
             <span>⏱️ ${walkMin} دقيقة (${distMeters}م)</span>
@@ -521,8 +534,8 @@ const MapEngine = {
 
       <!-- Actions -->
       <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-white/10">
-        <button onclick="event.stopPropagation(); MapEngine.navigateDirectTo('${poi.id}')" class="tap-effect py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md hover:brightness-110">
-          <span>🚶‍♂️</span>
+        <button onclick="event.stopPropagation(); MapEngine.navigateDirectTo('${poi.id}')" class="tap-effect py-2 px-3 rounded-xl ${isFromLiveLocation ? 'bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 text-slate-950 font-black' : 'bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black'} text-xs flex items-center justify-center gap-1.5 shadow-md hover:brightness-110">
+          <span>${isFromLiveLocation ? '🧭' : '🚶‍♂️'}</span>
           <span class="truncate">${walkBtnText}</span>
         </button>
         <button onclick="event.stopPropagation(); App.openPoiModal(resortPois.find(p => p.id === '${poi.id}'))" class="tap-effect py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-white/15">
@@ -545,33 +558,60 @@ const MapEngine = {
     const destPoi = resortPois.find(p => p.id === destId);
     if (!destPoi) return;
 
-    // Check if guest has saved room
-    const savedRoom = localStorage.getItem('moreno_guest_room');
-    const pinnedOrigin = resortPois.find(p => p.id === this.guestLocationPoiId);
-    let originPoi = pinnedOrigin || resortPois.find(p => p.id === 'M');
-    if (!pinnedOrigin && savedRoom) {
-      const roomNum = parseInt(savedRoom);
-      const buildings = resortPois.filter(p => p.isBuilding);
-      for (const b of buildings) {
-        for (const r of b.rooms) {
-          const isMatch = r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max);
-          if (isMatch) {
-            originPoi = b;
-            break;
+    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    const locDest = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(destPoi, lang) : { name: destPoi.nameAr };
+
+    let originPoi;
+    let originTitle;
+
+    // 1. If guest has live Blue Dot location, route directly from live position
+    if (this.lastGuestPosition) {
+      const liveName = (lang === 'ar') ? 'موقعي الحالي' : (lang === 'ru') ? 'Мое местоположение' : (lang === 'de' ? 'Mein Standort' : 'My Live Location');
+      originPoi = {
+        id: 'LIVE_GUEST_LOCATION',
+        nameAr: liveName,
+        nameEn: 'My Live Location',
+        nameRu: 'Мое местоположение',
+        nameDe: 'Mein Standort',
+        coords: { x: this.lastGuestPosition.pctX, y: this.lastGuestPosition.pctY },
+        isLiveLocation: true
+      };
+      originTitle = `📍 ${liveName}`;
+      this.activeLiveNavDestination = destPoi;
+      this.lastNavRecalcPos = {
+        x: (this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH,
+        y: (this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT
+      };
+    } else {
+      this.activeLiveNavDestination = null;
+      this.lastNavRecalcPos = null;
+
+      // Fallback: Check if guest has saved room or pinned origin
+      const savedRoom = localStorage.getItem('moreno_guest_room');
+      const pinnedOrigin = resortPois.find(p => p.id === this.guestLocationPoiId);
+      originPoi = pinnedOrigin || resortPois.find(p => p.id === 'M');
+      if (!pinnedOrigin && savedRoom) {
+        const roomNum = parseInt(savedRoom);
+        const buildings = resortPois.filter(p => p.isBuilding);
+        for (const b of buildings) {
+          for (const r of b.rooms) {
+            const isMatch = r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max);
+            if (isMatch) {
+              originPoi = b;
+              break;
+            }
           }
         }
       }
+      const locOrigin = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(originPoi, lang) : { name: originPoi.nameAr };
+      originTitle = locOrigin.name;
     }
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const locDest = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(destPoi, lang) : { name: destPoi.nameAr };
-    const locOrigin = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(originPoi, lang) : { name: originPoi.nameAr };
-
-    this.drawRoute(originPoi.coords, destPoi.coords, locOrigin.name, locDest.name);
-    this.startTurnByTurn(originPoi, destPoi, false);
+    this.drawRoute(originPoi.coords, destPoi.coords, originTitle, locDest.name, false, true);
+    this.startTurnByTurn(originPoi, destPoi, false, true);
   },
 
-  drawRoute(originCoords, destCoords, originTitle, destTitle, isAccessible = false) {
+  drawRoute(originCoords, destCoords, originTitle, destTitle, isAccessible = false, recenterCamera = true) {
     this.closePopover();
     const svgLayer = document.getElementById('routeSvgLayer');
     if (!svgLayer) return;
@@ -651,10 +691,12 @@ const MapEngine = {
       </g>
     `;
 
-    // Center and zoom map view to focus the full route
-    const midPctX = (originCoords.x + destCoords.x) / 2;
-    const midPctY = (originCoords.y + destCoords.y) / 2;
-    this.focusCoordinate(midPctX, midPctY, 1.25);
+    // Center and zoom map view to focus the full route (only on initial navigation start)
+    if (recenterCamera) {
+      const midPctX = (originCoords.x + destCoords.x) / 2;
+      const midPctY = (originCoords.y + destCoords.y) / 2;
+      this.focusCoordinate(midPctX, midPctY, 1.25);
+    }
 
     // Show floating route HUD
     this.renderRouteHud(originTitle, destTitle, distMeters, walkMin);
@@ -718,7 +760,9 @@ const MapEngine = {
 
   buildWalkwaySteps(originPoi, targetPoi, lang, isAccessible = false) {
     const t = i18n[lang] || i18n.ar;
-    const origin = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(originPoi, lang) : { name: originPoi.nameAr };
+    const origin = (typeof getLocalizedPoi === 'function' && !originPoi.isLiveLocation) 
+      ? getLocalizedPoi(originPoi, lang) 
+      : { name: originPoi.isLiveLocation ? ((lang === 'ar') ? 'موقعي الحالي' : 'My Live Location') : (originPoi.nameAr || 'المبنى الرئيسي') };
     const target = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(targetPoi, lang) : { name: targetPoi.nameAr };
     const points = this.getWalkwayRoutePoints(originPoi.coords, targetPoi.coords);
     const toCoords = point => ({
@@ -786,7 +830,9 @@ const MapEngine = {
         <div class="leading-tight">
           <div class="flex items-center gap-2">
             <span class="text-xs sm:text-sm font-black text-amber-300 font-mono">${minutes} دقيقة (${meters} م)</span>
-            <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">مسار حي</span>
+            ${(originTitle && originTitle.includes('موقعي')) || this.lastGuestPosition 
+              ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 font-bold border border-blue-400/40 flex items-center gap-1 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span> تتبع حي مباشر</span>'
+              : '<span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">مسار ممهد</span>'}
           </div>
           <p class="text-[10px] text-slate-300 mt-0.5 truncate max-w-[180px] sm:max-w-xs">${originTitle || 'موقعك'} ➔ ${destTitle || 'الوجهة'}</p>
         </div>
@@ -807,6 +853,8 @@ const MapEngine = {
   clearRoute() {
     this.stopLiveWalkSimulation();
     this.endTurnByTurn();
+    this.activeLiveNavDestination = null;
+    this.lastNavRecalcPos = null;
     this.closePopover();
     this.removeRoomBeacon();
     const svgLayer = document.getElementById('routeSvgLayer');
@@ -1986,14 +2034,35 @@ const MapEngine = {
     
     // Fallbacks if not provided
     if (!originPoi) {
-      originPoi = resortPois.find(p => p.id === 'M') || { coords: { x: 31.55, y: 68.36 }, nameAr: 'المبنى الرئيسي (Lobby M)' };
+      if (this.lastGuestPosition) {
+        originPoi = {
+          id: 'LIVE_GUEST_LOCATION',
+          nameAr: (lang === 'ar' ? 'موقعي الحالي' : 'My Live Location'),
+          nameEn: 'My Live Location',
+          coords: { x: this.lastGuestPosition.pctX, y: this.lastGuestPosition.pctY },
+          isLiveLocation: true
+        };
+      } else {
+        originPoi = resortPois.find(p => p.id === 'M') || { coords: { x: 31.55, y: 68.36 }, nameAr: 'المبنى الرئيسي (Lobby M)' };
+      }
     }
     if (!targetPoi) return;
 
+    if (originPoi.isLiveLocation) {
+      this.activeLiveNavDestination = targetPoi;
+      this.lastNavRecalcPos = {
+        x: (originPoi.coords.x / 100) * this.CANVAS_WIDTH,
+        y: (originPoi.coords.y / 100) * this.CANVAS_HEIGHT
+      };
+    } else {
+      this.activeLiveNavDestination = null;
+    }
+
     const steps = this.buildWalkwaySteps(originPoi, targetPoi, lang, isAccessible);
+    const originName = originPoi.isLiveLocation ? ((lang === 'ar') ? '📍 موقعي الحالي' : '📍 My Location') : originPoi.nameAr;
     
     // Draw route path and retrieve calculated metrics
-    const routeInfo = this.drawRoute(originPoi.coords, targetPoi.coords, originPoi.nameAr, targetPoi.nameAr, isAccessible);
+    const routeInfo = this.drawRoute(originPoi.coords, targetPoi.coords, originName, targetPoi.nameAr, isAccessible, recenterCamera);
 
     this.activeNavigation = {
       originPoi,
@@ -2022,8 +2091,14 @@ const MapEngine = {
     }
     hud.classList.remove('hidden');
 
-    // Place initial walker marker at the starting coordinate
-    this.initWalkerMarker(originPoi.coords);
+    // Place initial walker marker at the starting coordinate only if NOT live location
+    if (!originPoi.isLiveLocation) {
+      this.initWalkerMarker(originPoi.coords);
+    } else {
+      const marker = document.getElementById('liveWalkerMarker');
+      if (marker) marker.style.display = 'none';
+      this.ensureBlueDotMarker();
+    }
 
     this.renderTurnStep(recenterCamera);
     if (recenterCamera) {
@@ -2034,7 +2109,7 @@ const MapEngine = {
   renderTurnStep(recenterCamera = true) {
     if (!this.activeNavigation) return;
     const nav = this.activeNavigation;
-    const step = nav.steps[nav.currentStepIdx];
+    const step = nav.steps[nav.currentStepIdx] || nav.steps[0];
     const total = nav.steps.length;
     const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
     const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
@@ -2044,6 +2119,7 @@ const MapEngine = {
 
     const isSimActive = this.isWalkingSimulating || this.isSimulatingWalk;
     const isPaused = this.isSimPaused;
+    const isLiveNav = !!(nav.originPoi && nav.originPoi.isLiveLocation);
 
     const progressPct = isSimActive
       ? (this.walkProgress * 100)
@@ -2082,9 +2158,15 @@ const MapEngine = {
           <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
             ${stepOfText}
           </span>
-          <span class="text-[10px] font-mono text-cyan-300">
+          <span class="text-[10px] font-mono text-cyan-300 font-bold">
             ⏱️ ${nav.minutes} د (${nav.meters}م)
           </span>
+          ${isLiveNav ? `
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 font-bold border border-blue-400/40 flex items-center gap-1 shadow-sm">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
+              ${lang === 'ar' ? 'تتبع مباشر' : 'Live Tracking'}
+            </span>
+          ` : ''}
           <button onclick="MapEngine.toggleStepFree()" class="text-[9px] px-2 py-0.5 rounded-full ${nav.isAccessible ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-300'} font-bold transition">
             ${nav.isAccessible ? '♿ مسار ميسر' : '♿ ميسر'}
           </button>
@@ -2119,8 +2201,8 @@ const MapEngine = {
       </div>
     `;
 
-    // Recenter camera on step coordinates if not currently simulating walk
-    if (recenterCamera && !isSimActive && step.coords) {
+    // Recenter camera on step coordinates if not simulating walk and NOT live navigation
+    if (recenterCamera && !isSimActive && !isLiveNav && step.coords) {
       this.focusCoordinate(step.coords.x, step.coords.y, 1.45);
       this.updateWalkerBeacon(step.coords);
     }
@@ -2298,6 +2380,8 @@ const MapEngine = {
     if (typeof App !== 'undefined' && App.playBeep) App.playBeep(500);
     this.pauseLiveWalkSimulation();
     this.activeNavigation = null;
+    this.activeLiveNavDestination = null;
+    this.lastNavRecalcPos = null;
     this.walkProgress = 0;
     document.body.classList.remove('turn-navigation-active');
 
@@ -2475,9 +2559,122 @@ const MapEngine = {
       accuracyCircle.style.height = `${diamPx}px`;
     }
 
+    // Auto-update route if turn-by-turn navigation is actively tracking this guest
+    if (this.activeLiveNavDestination) {
+      this.handleLiveNavigationUpdate(pctX, pctY);
+    }
+
+    // Keep origin dropdown synced with live location
+    this.syncOriginSelectOptions();
+
     // Auto-follow camera if requested by guest
     if (this.isAutoFollowingGuest) {
       this.focusCoordinate(pctX, pctY, Math.max(1.5, this.scale), false);
+    }
+  },
+
+  handleLiveNavigationUpdate(pctX, pctY) {
+    if (!this.activeLiveNavDestination) return;
+    const destPoi = this.activeLiveNavDestination;
+
+    // Calculate distance to destination in meters
+    const destPxX = (destPoi.coords.x / 100) * this.CANVAS_WIDTH;
+    const destPxY = (destPoi.coords.y / 100) * this.CANVAS_HEIGHT;
+    const curPxX = (pctX / 100) * this.CANVAS_WIDTH;
+    const curPxY = (pctY / 100) * this.CANVAS_HEIGHT;
+    const distToTargetPx = Math.hypot(destPxX - curPxX, destPxY - curPxY);
+    const distToTargetMeters = Math.round(distToTargetPx * 0.42);
+
+    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    const locDest = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(destPoi, lang) : { name: destPoi.nameAr };
+
+    // 1. Check Arrival (< 4.5 meters)
+    if (distToTargetMeters <= 4.5) {
+      this.onGuestArrivedAtDestination(destPoi, locDest.name);
+      return;
+    }
+
+    // 2. Prevent micro-jitter redraws: only recompute if moved >= 1.2 meters
+    if (this.lastNavRecalcPos) {
+      const movedPx = Math.hypot(curPxX - this.lastNavRecalcPos.x, curPxY - this.lastNavRecalcPos.y);
+      if (movedPx * 0.42 < 1.2) {
+        return;
+      }
+    }
+    this.lastNavRecalcPos = { x: curPxX, y: curPxY };
+
+    // 3. Recalculate route and redraw polyline without jumping camera
+    const liveOrigin = { x: pctX, y: pctY };
+    const liveTitle = (lang === 'ar') ? 'موقعي الحالي' : (lang === 'ru') ? 'Мое местоположение' : (lang === 'de') ? 'Mein Standort' : 'My Live Location';
+    const isAccessible = this.activeNavigation ? this.activeNavigation.isAccessible : false;
+
+    const routeInfo = this.drawRoute(liveOrigin, destPoi.coords, liveTitle, locDest.name, isAccessible, false);
+
+    // 4. Update active navigation metrics & steps
+    if (this.activeNavigation) {
+      this.activeNavigation.meters = routeInfo ? routeInfo.meters : distToTargetMeters;
+      this.activeNavigation.minutes = routeInfo ? routeInfo.minutes : Math.max(1, Math.round(distToTargetMeters / 65));
+      const originVirtual = { id: 'LIVE_GUEST_LOCATION', coords: liveOrigin, nameAr: liveTitle, isLiveLocation: true };
+      this.activeNavigation.steps = this.buildWalkwaySteps(originVirtual, destPoi, lang, isAccessible);
+      this.renderTurnStep(false);
+    }
+  },
+
+  onGuestArrivedAtDestination(destPoi, destName) {
+    if (typeof App !== 'undefined' && App.playBeep) {
+      App.playBeep(1100);
+      setTimeout(() => App.playBeep(1400), 200);
+    }
+    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    const arriveMsg = (lang === 'ar')
+      ? `🎉 لقد وصلت بنجاح إلى: ${destName}!`
+      : (lang === 'ru') ? `🎉 Вы успешно прибыли в: ${destName}!`
+      : (lang === 'de') ? `🎉 Sie haben Ihr Ziel erreicht: ${destName}!`
+      : `🎉 You have arrived at: ${destName}!`;
+
+    if (typeof App !== 'undefined' && App.showToast) {
+      App.showToast(arriveMsg, 6000);
+    }
+
+    if (typeof ConciergeAudioGuide !== 'undefined' && ConciergeAudioGuide.speak) {
+      ConciergeAudioGuide.speak(arriveMsg, lang);
+    }
+
+    this.activeLiveNavDestination = null;
+    this.lastNavRecalcPos = null;
+
+    // Update HUD to show arrival
+    const hud = document.getElementById('turnNavHud');
+    if (hud) {
+      hud.innerHTML = `
+        <div class="p-3 text-center animate-scaleUp">
+          <div class="text-3xl mb-1">🎉</div>
+          <h4 class="text-sm font-black text-emerald-400 mb-1">${arriveMsg}</h4>
+          <p class="text-xs text-slate-300 mb-3">${lang === 'ar' ? 'نتمنى لك قضاء وقت ممتع في هذا المرفق.' : 'Enjoy your time at this facility!'}</p>
+          <button onclick="MapEngine.endTurnByTurn()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-lg tap-effect">
+            ${lang === 'ar' ? 'تم الوصول ✓' : 'Done ✓'}
+          </button>
+        </div>
+      `;
+    }
+  },
+
+  syncOriginSelectOptions() {
+    const select = document.getElementById('selectOrigin');
+    if (!select) return;
+    let liveOpt = select.querySelector('option[value="LIVE_GUEST_LOCATION"]');
+    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
+    const label = (lang === 'ar') ? '📍 موقعي الحالي (Live Blue Dot)' : '📍 My Live Location (Live Blue Dot)';
+    if (!liveOpt) {
+      liveOpt = document.createElement('option');
+      liveOpt.value = 'LIVE_GUEST_LOCATION';
+      liveOpt.textContent = label;
+      select.insertBefore(liveOpt, select.firstChild);
+    } else {
+      liveOpt.textContent = label;
+    }
+    if (this.lastGuestPosition && select.value !== 'LIVE_GUEST_LOCATION') {
+      select.value = 'LIVE_GUEST_LOCATION';
     }
   },
 

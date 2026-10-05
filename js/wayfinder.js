@@ -185,8 +185,6 @@ const Wayfinder = {
 
     const originSelect = document.getElementById('selectOrigin');
     const originId = originSelect ? originSelect.value : 'M';
-    const originOpt = originSelect && originSelect.options && originSelect.selectedIndex >= 0 ? originSelect.options[originSelect.selectedIndex] : null;
-    const originText = originOpt ? originOpt.text.replace(/^[📍\s]+/, '') : (t.wf_your_location || 'موقعك');
     const destinationSelect = document.getElementById('selectDestination');
     const destination = destinationSelect ? destinationSelect.value : '';
     const banner = document.getElementById('routeResultBanner');
@@ -196,7 +194,28 @@ const Wayfinder = {
       return;
     }
 
-    const originPoi = resortPois.find(p => p.id === originId) || resortPois.find(p => p.id === 'M');
+    let originPoi;
+    let originText;
+
+    if (originId === 'LIVE_GUEST_LOCATION' && MapEngine.lastGuestPosition) {
+      originPoi = {
+        id: 'LIVE_GUEST_LOCATION',
+        nameAr: (lang === 'ar') ? 'موقعي الحالي' : 'My Live Location',
+        nameEn: 'My Live Location',
+        nameRu: 'Мое местоположение',
+        nameDe: 'Mein Standort',
+        coords: { x: MapEngine.lastGuestPosition.pctX, y: MapEngine.lastGuestPosition.pctY },
+        isLiveLocation: true
+      };
+      originText = (lang === 'ar') ? '📍 موقعي الحالي' : '📍 My Live Location';
+      MapEngine.activeLiveNavDestination = resortPois.find(p => p.id === destination);
+    } else {
+      originPoi = resortPois.find(p => p.id === originId) || resortPois.find(p => p.id === 'M');
+      const originOpt = originSelect && originSelect.options && originSelect.selectedIndex >= 0 ? originSelect.options[originSelect.selectedIndex] : null;
+      originText = originOpt ? originOpt.text.replace(/^[📍\s]+/, '') : (t.wf_your_location || 'موقعك');
+      MapEngine.activeLiveNavDestination = null;
+    }
+
     const targetPoi = resortPois.find(p => p.id === destination);
     if (!targetPoi) return;
 
@@ -207,8 +226,8 @@ const Wayfinder = {
     MapEngine.focusCoordinate(targetPoi.coords.x, targetPoi.coords.y, 1.45);
 
     // Draw animated route & auto start live turn-by-turn navigation
-    const routeInfo = MapEngine.drawRoute(originPoi.coords, targetPoi.coords, originText, locTarget.name);
-    MapEngine.startTurnByTurn(originPoi, targetPoi, false);
+    const routeInfo = MapEngine.drawRoute(originPoi.coords, targetPoi.coords, originText, locTarget.name, false, true);
+    MapEngine.startTurnByTurn(originPoi, targetPoi, false, true);
 
     banner.classList.remove('hidden');
     banner.innerHTML = `
