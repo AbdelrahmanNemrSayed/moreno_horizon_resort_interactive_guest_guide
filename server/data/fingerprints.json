@@ -1,0 +1,184 @@
+[
+  {
+    "id": "FP-LOBBY-M",
+    "label": "بهو الاستقبال الرئيسي M (Main Lobby)",
+    "labelEn": "Main Lobby & Reception M",
+    "x": 283,
+    "y": 820,
+    "pctX": 31.55,
+    "pctY": 68.36,
+    "expectedRssi": {
+      "48:8f:5a:01:a1:01": -49,
+      "48:8f:5a:01:a2:02": -62,
+      "48:8f:5a:01:a3:03": -73,
+      "48:8f:5a:01:a7:07": -81
+    },
+    "recordedAt": "2026-10-06T10:00:00.000Z"
+  },
+  {
+    "id": "FP-SIRENA-12",
+    "label": "مطعم سيرينا الرئيسي (Sirena Restaurant)",
+    "labelEn": "Sirena Buffet Restaurant",
+    "x": 310,
+    "y": 795,
+    "pctX": 34.6,
+    "pctY": 66.25,
+    "expectedRssi": {
+      "48:8f:5a:01:a2:02": -48,
+      "48:8f:5a:01:a1:01": -60,
+      "48:8f:5a:01:a6:06": -72,
+      "48:8f:5a:01:a7:07": -75
+    },
+    "recordedAt": "2026-10-06T10:05:00.000Z"
+  },
+  {
+    "id": "FP-POOL-LOTUS",
+    "label": "مسبح لوتس والبحيرة المركزية (Lotus Pool)",
+    "labelEn": "Lotus Main Pool Island",
+    "x": 344,
+    "y": 665,
+    "pctX": 38.35,
+    "pctY": 55.45,
+    "expectedRssi": {
+      "48:8f:5a:01:a7:07": -45,
+      "48:8f:5a:01:a5:05": -65,
+      "48:8f:5a:01:a9:09": -69,
+      "48:8f:5a:01:a2:02": -77
+    },
+    "recordedAt": "2026-10-06T10:10:00.000Z"
+  },
+  {
+    "id": "FP-BEACH-MARINA",
+    "label": "شاطئ البحر والمارينا (Beach & Marina)",
+    "labelEn": "Marina Pier & Beach Front",
+    "x": 381,
+    "y": 281,
+    "pctX": 42.52,
+    "pctY": 23.42,
+    "expectedRssi": {
+      "48:8f:5a:01:ae:0e": -45,
+      "48:8f:5a:01:ac:0c": -64,
+      "48:8f:5a:01:ad:0d": -70
+    },
+    "recordedAt": "2026-10-06T10:15:00.000Z"
+  },
+  {
+    "id": "FP-AQUAPARK",
+    "label": "أكوا بارك مورينو (Aqua Park Slides)",
+    "labelEn": "Aquapark Slides Tower",
+    "x": 209,
+    "y": 500,
+    "pctX": 23.33,
+    "pctY": 41.67,
+    "expectedRssi": {
+      "48:8f:5a:01:a8:08": -46,
+      "48:8f:5a:01:a4:04": -66,
+      "48:8f:5a:01:ad:0d": -76
+    },
+    "recordedAt": "2026-10-06T10:20:00.000Z"
+  },
+  {
+    "id": "FP-BEACH-BAR",
+    "label": "بار الشاطئ والممشى الخشبي (Beach Bar)",
+    "labelEn": "Beach Bar & Canopy",
+    "x": 428,
+    "y": 340,
+    "pctX": 47.77,
+    "pctY": 28.33,
+    "expectedRssi": {
+      "48:8f:5a:01:ac:0c": -46,
+      "48:8f:5a:01:ae:0e": -63,
+      "48:8f:5a:01:aa:0a": -75
+    },
+    "recordedAt": "2026-10-06T10:25:00.000Z"
+  },
+  {
+    "id": "FP-LAMAMA-8",
+    "label": "مطعم لا ماما الإيطالي (La Mama Italian)",
+    "labelEn": "La Mama Italian Restaurant",
+    "x": 348,
+    "y": 575,
+    "pctX": 38.84,
+    "pctY": 47.92,
+    "expectedRssi": {
+      "48:8f:5a:01:a9:09": -48,
+      "48:8f:5a:01:a5:05": -62,
+      "48:8f:5a:01:a7:07": -68
+    },
+    "recordedAt": "2026-10-06T10:30:00.000Z"
+  },
+  {
+    "id": "FP-ORIENTAL-6",
+    "label": "المطعم الشرقي وسناك بار (Oriental Grill)",
+    "labelEn": "Oriental Grill Restaurant",
+    "x": 442,
+    "y": 535,
+    "pctX": 49.33,
+    "pctY": 44.58,
+    "expectedRssi": {
+      "48:8f:5a:01:aa:0a": -48,
+      "48:8f:5a:01:a5:05": -67,
+      "48:8f:5a:01:a9:09": -72
+    },
+    "recordedAt": "2026-10-06T10:35:00.000Z"
+  },
+  {
+    "id": "FP-SPA-9",
+    "label": "مركز السبا والجاكوزي الصحي (Health Club & Spa)",
+    "labelEn": "Health Club & Spa Center",
+    "x": 170,
+    "y": 750,
+    "pctX": 18.97,
+    "pctY": 62.5,
+    "expectedRssi": {
+      "48:8f:5a:01:ab:0b": -48,
+      "48:8f:5a:01:a3:03": -65,
+      "48:8f:5a:01:a1:01": -76
+    },
+    "recordedAt": "2026-10-06T10:40:00.000Z"
+  },
+  {
+    "id": "FP-DIVING-2",
+    "label": "مركز الغوص والرياضات البحرية (Diving Center)",
+    "labelEn": "Diving Center & Water Sports",
+    "x": 256,
+    "y": 310,
+    "pctX": 28.57,
+    "pctY": 25.83,
+    "expectedRssi": {
+      "48:8f:5a:01:ad:0d": -47,
+      "48:8f:5a:01:ae:0e": -68,
+      "48:8f:5a:01:a8:08": -74
+    },
+    "recordedAt": "2026-10-06T10:45:00.000Z"
+  },
+  {
+    "id": "FP-TENNIS-10",
+    "label": "ملاعب التنس الاحترافية (Pro Tennis Courts)",
+    "labelEn": "Pro Tennis Courts",
+    "x": 618,
+    "y": 732,
+    "pctX": 68.97,
+    "pctY": 61,
+    "expectedRssi": {
+      "48:8f:5a:01:a6:06": -76,
+      "48:8f:5a:01:a7:07": -82,
+      "48:8f:5a:01:aa:0a": -84
+    },
+    "recordedAt": "2026-10-06T10:50:00.000Z"
+  },
+  {
+    "id": "FP-CLINIC-15",
+    "label": "العيادة والصيدلية (Clinic & Pharmacy)",
+    "labelEn": "Resort Medical Clinic & Pharmacy",
+    "x": 370,
+    "y": 1049,
+    "pctX": 41.29,
+    "pctY": 87.42,
+    "expectedRssi": {
+      "48:8f:5a:01:a1:01": -78,
+      "48:8f:5a:01:a2:02": -81
+    },
+    "recordedAt": "2026-10-06T10:55:00.000Z"
+  }
+]

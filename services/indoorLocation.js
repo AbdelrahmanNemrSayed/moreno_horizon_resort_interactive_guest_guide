@@ -12,13 +12,17 @@
 const fs = require('fs');
 const path = require('path');
 
-// Default AP configuration path
+// Default AP and Fingerprint configuration paths
 const CONFIG_PATH = path.resolve(__dirname, '../config/accessPoints.json');
+const FINGERPRINTS_PATH = path.resolve(__dirname, '../server/data/fingerprints.json');
+const ALT_FINGERPRINTS_PATH = path.resolve(__dirname, '../data/fingerprints.json');
 
 class IndoorLocationService {
   constructor(configPath = CONFIG_PATH) {
     this.configPath = configPath;
+    this.fingerprintsPath = fs.existsSync(FINGERPRINTS_PATH) ? FINGERPRINTS_PATH : ALT_FINGERPRINTS_PATH;
     this.loadConfig();
+    this.loadFingerprints();
 
     // In-memory tracked devices cache: MAC -> DeviceState
     this.deviceStates = new Map();
@@ -311,6 +315,259 @@ class IndoorLocationService {
   }
 
   /**
+   * Load WiFi Radio Fingerprints survey database
+   */
+  loadFingerprints() {
+    try {
+      if (fs.existsSync(this.fingerprintsPath)) {
+        const raw = fs.readFileSync(this.fingerprintsPath, 'utf8');
+        this.fingerprints = JSON.parse(raw);
+      } else {
+        this.fingerprints = [];
+      }
+      console.log(`[IndoorLocation] Loaded ${this.fingerprints.length} radio survey fingerprints.`);
+    } catch (err) {
+      console.error('[IndoorLocation] Failed to load fingerprints:', err);
+      this.fingerprints = [];
+    }
+  }
+
+  /**
+   * Save fingerprints back to disk
+   */
+  saveFingerprints() {
+    try {
+      const dir = path.dirname(this.fingerprintsPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(this.fingerprintsPath, JSON.stringify(this.fingerprints, null, 2), 'utf8');
+      return true;
+    } catch (err) {
+      console.error('[IndoorLocation] Failed to save fingerprints:', err);
+      return false;
+    }
+  }
+
+  getFingerprints() {
+    return this.fingerprints || [];
+  }
+
+  addFingerprint(data) {
+    if (!data || typeof data !== 'object') throw new Error('Invalid fingerprint payload');
+    const x = Number(data.x);
+    const y = Number(data.y);
+    if (isNaN(x) || isNaN(y)) throw new Error('Coordinates (x, y) are required');
+
+    const expectedRssi = {};
+    if (data.expectedRssi && typeof data.expectedRssi === 'object') {
+      for (const [bssid, val] of Object.entries(data.expectedRssi)) {
+        const norm = this.normalizeMac(bssid);
+        const rssiNum = Number(val);
+        if (norm && !isNaN(rssiNum)) {
+          expectedRssi[norm] = Math.round(rssiNum);
+        }
+      }
+    }
+
+    const id = data.id || `FP-CALIB-${Date.now().toString(36).toUpperCase()}`;
+    const pctX = Number(((x / this.mapWidth) * 100).toFixed(2));
+    const pctY = Number(((y / this.mapHeight) * 100).toFixed(2));
+
+    const fp = {
+      id,
+      label: data.label || `نقطة معايرة (${x}, ${y})`,
+      labelEn: data.labelEn || `Calibration Point (${x}, ${y})`,
+      x: Math.round(x),
+      y: Math.round(y),
+      pctX,
+      pctY,
+      expectedRssi,
+      recordedAt: new Date().toISOString()
+    };
+
+    // Update existing if same ID, or push new
+    const idx = this.fingerprints.findIndex(f => f.id === id);
+    if (idx >= 0) {
+      this.fingerprints[idx] = fp;
+    } else {
+      this.fingerprints.push(fp);
+    }
+
+    this.saveFingerprints();
+    return fp;
+  }
+
+  deleteFingerprint(id) {
+    const initLen = this.fingerprints.length;
+    this.fingerprints = this.fingerprints.filter(f => f.id !== id);
+    if (this.fingerprints.length !== initLen) {
+      this.saveFingerprints();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * k-Nearest Neighbors (k-NN, k=3) Weighted Euclidean Distance Fingerprint Matcher
+   * Distance = sqrt( sum( (measuredRssi_i - recordedRssi_i)^2 ) )
+   */
+  estimatePositionByFingerprints(measurements, k = 3) {
+    if (!this.fingerprints || this.fingerprints.length === 0 || !measurements || measurements.length === 0) {
+      return null;
+    }
+
+    // Build normalized map of measured RSSI
+    const measMap = new Map();
+    for (const m of measurements) {
+      const norm = this.normalizeMac(m.bssid);
+      if (norm && m.rssi != null) {
+        measMap.set(norm, Number(m.rssi));
+      }
+    }
+
+    if (measMap.size === 0) return null;
+
+    // Calculate Euclidean distance to each fingerprint in signal space
+    const scored = [];
+    const missingApPenalty = 18.0; // dBm penalty when AP expected was not seen or vice-versa
+
+    for (const fp of this.fingerprints) {
+      let sumSq = 0;
+      let matchedCount = 0;
+      let totalApsEvaluated = 0;
+
+      // Check APs expected at this fingerprint
+      for (const [expBssid, expRssi] of Object.entries(fp.expectedRssi)) {
+        totalApsEvaluated++;
+        const normExpBssid = this.normalizeMac(expBssid);
+        if (measMap.has(normExpBssid)) {
+          const diff = measMap.get(normExpBssid) - expRssi;
+          sumSq += diff * diff;
+          matchedCount++;
+        } else {
+          sumSq += missingApPenalty * missingApPenalty;
+        }
+      }
+
+      // Check measured APs not listed in fingerprint
+      for (const [measBssid] of measMap.entries()) {
+        if (!fp.expectedRssi[measBssid]) {
+          totalApsEvaluated++;
+          sumSq += (missingApPenalty * 0.75) * (missingApPenalty * 0.75);
+        }
+      }
+
+      if (matchedCount === 0 || totalApsEvaluated === 0) continue;
+
+      const normDist = Math.sqrt(sumSq / totalApsEvaluated);
+      scored.push({ fp, distance: normDist, matchedCount });
+    }
+
+    if (scored.length === 0) return null;
+
+    // Sort by signal space distance ascending
+    scored.sort((a, b) => a.distance - b.distance);
+
+    // Pick top k
+    const kNeighbors = scored.slice(0, Math.min(k, scored.length));
+    const bestDist = kNeighbors[0].distance;
+
+    // Weighted centroid using inverse distance weighting: w_i = 1 / (d_i + 0.1)
+    let totalWeight = 0;
+    let weightedX = 0;
+    let weightedY = 0;
+
+    for (const n of kNeighbors) {
+      const w = 1.0 / Math.max(0.1, n.distance);
+      totalWeight += w;
+      weightedX += n.fp.x * w;
+      weightedY += n.fp.y * w;
+    }
+
+    const estX = Math.round(weightedX / totalWeight);
+    const estY = Math.round(weightedY / totalWeight);
+    const accuracyMeters = Number(Math.max(1.5, Math.min(22.0, bestDist * 0.45)).toFixed(1));
+
+    return {
+      x: estX,
+      y: estY,
+      pctX: Number(((estX / this.mapWidth) * 100).toFixed(2)),
+      pctY: Number(((estY / this.mapHeight) * 100).toFixed(2)),
+      accuracyMeters,
+      bestDistance: Number(bestDist.toFixed(2)),
+      bestMatch: kNeighbors[0].fp,
+      neighbors: kNeighbors.map(n => ({
+        id: n.fp.id,
+        label: n.fp.label,
+        distance: Number(n.distance.toFixed(2))
+      })),
+      method: `fingerprint_knn${kNeighbors.length}`
+    };
+  }
+
+  /**
+   * Hybrid Positioning Engine:
+   * Combines Radio Fingerprinting (k-NN) and Geometric Trilateration
+   * Uses Fingerprinting when device matches surveyed locations closely,
+   * falls back to Trilateration in unsurveyed open areas.
+   */
+  estimateHybridPosition(measurements, activeAps) {
+    const fpPos = this.estimatePositionByFingerprints(measurements, 3);
+    const trilatPos = this.trilaterate(activeAps);
+
+    if (!fpPos && !trilatPos) return null;
+    if (!trilatPos) return fpPos;
+    if (!fpPos) return trilatPos;
+
+    // Evaluate fingerprint match confidence (lower distance = higher confidence)
+    const d = fpPos.bestDistance;
+
+    // 1. High match with surveyed zone (d <= 6.5 dBm) -> Dominant fingerprinting (90%)
+    if (d <= 6.5) {
+      return {
+        x: Math.round(fpPos.x * 0.90 + trilatPos.x * 0.10),
+        y: Math.round(fpPos.y * 0.90 + trilatPos.y * 0.10),
+        pctX: Number(((Math.round(fpPos.x * 0.90 + trilatPos.x * 0.10) / this.mapWidth) * 100).toFixed(2)),
+        pctY: Number(((Math.round(fpPos.y * 0.90 + trilatPos.y * 0.10) / this.mapHeight) * 100).toFixed(2)),
+        accuracyMeters: fpPos.accuracyMeters,
+        method: `fingerprint_dominant (${fpPos.bestMatch.label})`,
+        nearestFingerprint: fpPos.bestMatch.label,
+        euclideanDistance: d
+      };
+    }
+
+    // 2. Moderate match (6.5 < d <= 16.0 dBm) -> Smooth linear blend
+    if (d <= 16.0) {
+      const blendFactor = (16.0 - d) / 9.5; // 1.0 at 6.5, down to 0.0 at 16.0
+      const fpWeight = 0.85 * blendFactor;
+      const trilatWeight = 1.0 - fpWeight;
+
+      const blendedX = Math.round(fpPos.x * fpWeight + trilatPos.x * trilatWeight);
+      const blendedY = Math.round(fpPos.y * fpWeight + trilatPos.y * trilatWeight);
+      const blendedAcc = Number((fpPos.accuracyMeters * fpWeight + trilatPos.accuracyMeters * trilatWeight).toFixed(1));
+
+      return {
+        x: blendedX,
+        y: blendedY,
+        pctX: Number(((blendedX / this.mapWidth) * 100).toFixed(2)),
+        pctY: Number(((blendedY / this.mapHeight) * 100).toFixed(2)),
+        accuracyMeters: blendedAcc,
+        method: `hybrid_blend (FP ${Math.round(fpWeight * 100)}% + Tri ${Math.round(trilatWeight * 100)}%)`,
+        nearestFingerprint: fpPos.bestMatch.label,
+        euclideanDistance: d
+      };
+    }
+
+    // 3. Low match (d > 16.0 dBm) -> Fallback 100% to Trilateration in open unsurveyed grounds
+    return {
+      ...trilatPos,
+      method: `${trilatPos.method} (fallback_unsurveyed)`,
+      euclideanDistance: d
+    };
+  }
+
+  /**
    * 3. Temporal Jitter Smoothing Filter (EMA + Velocity Clamping)
    * Eliminates rapid jumps and multipath noise
    * 
@@ -459,7 +716,8 @@ class IndoorLocationService {
       // Use up to top 6 APs for trilateration to avoid distant noise
       const activeAps = measurements.slice(0, 6);
 
-      const rawPos = this.trilaterate(activeAps);
+      // Hybrid estimation: k-NN Fingerprinting combined with Trilateration
+      const rawPos = this.estimateHybridPosition(measurements, activeAps);
       if (!rawPos) continue;
 
       const smoothedState = this.smoothDevicePosition(mac, rawPos, now);
@@ -468,6 +726,9 @@ class IndoorLocationService {
         rssi: a.rssi,
         distM: Number(a.distanceMeters.toFixed(1))
       }));
+      smoothedState.method = rawPos.method;
+      smoothedState.nearestFingerprint = rawPos.nearestFingerprint || null;
+      smoothedState.euclideanDistance = rawPos.euclideanDistance || null;
 
       const out = {
         mac,
@@ -478,6 +739,8 @@ class IndoorLocationService {
         accuracyMeters: smoothedState.accuracyMeters,
         apCount: activeAps.length,
         method: rawPos.method,
+        nearestFingerprint: rawPos.nearestFingerprint || null,
+        euclideanDistance: rawPos.euclideanDistance || null,
         lastSeen: now,
         activeAps: smoothedState.activeAps
       };
@@ -524,6 +787,9 @@ class IndoorLocationService {
       pctX: state.smoothedPctX,
       pctY: state.smoothedPctY,
       accuracyMeters: state.accuracyMeters,
+      method: state.method || 'trilateration',
+      nearestFingerprint: state.nearestFingerprint || null,
+      euclideanDistance: state.euclideanDistance || null,
       rawX: state.rawX,
       rawY: state.rawY,
       lastSeen: state.lastTimestamp,

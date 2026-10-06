@@ -727,6 +727,11 @@ const MapEngine = {
     // Show floating route HUD
     this.renderRouteHud(originTitle, destTitle, distMeters, walkMin);
 
+    // AI Voice Concierge spoken route start announcement
+    if (typeof VoiceConcierge !== 'undefined' && VoiceConcierge.onRouteCalculated) {
+      VoiceConcierge.onRouteCalculated({ destTitle, meters: distMeters, minutes: walkMin });
+    }
+
     return { meters: distMeters, minutes: walkMin };
   },
 
@@ -2233,6 +2238,11 @@ const MapEngine = {
       this.focusCoordinate(step.coords.x, step.coords.y, 1.45);
       this.updateWalkerBeacon(step.coords);
     }
+
+    // AI Voice Concierge turn-by-turn spoken guidance
+    if (typeof VoiceConcierge !== 'undefined' && VoiceConcierge.onTurnStep) {
+      VoiceConcierge.onTurnStep(step, nav.currentStepIdx, total);
+    }
   },
 
   // Interactive Live Walk Simulation Methods
@@ -2576,16 +2586,34 @@ const MapEngine = {
     const marker = this.ensureBlueDotMarker();
     if (!marker) return;
 
+    let displayPctX = Number(pctX);
+    let displayPctY = Number(pctY);
+    let matchResult = null;
+
+    // Apply snap-to-path map matching and obstacle avoidance
+    if (typeof MapMatcher !== 'undefined' && MapMatcher.matchLocation) {
+      const rawPxX = (pctX / 100) * this.CANVAS_WIDTH;
+      const rawPxY = (pctY / 100) * this.CANVAS_HEIGHT;
+      matchResult = MapMatcher.matchLocation(rawPxX, rawPxY);
+      displayPctX = matchResult.pctX;
+      displayPctY = matchResult.pctY;
+    }
+
     this.lastGuestPosition = {
-      pctX,
-      pctY,
+      pctX: displayPctX,
+      pctY: displayPctY,
+      rawPctX: pctX,
+      rawPctY: pctY,
+      isSnapped: matchResult ? matchResult.isSnapped : false,
+      zone: matchResult ? matchResult.zone : null,
+      edge: matchResult ? matchResult.edge : null,
       accuracyMeters: Number(accuracyMeters) || 3.0,
       timestamp: Date.now()
     };
 
     marker.style.display = 'block';
-    marker.style.left = `${pctX}%`;
-    marker.style.top = `${pctY}%`;
+    marker.style.left = `${displayPctX}%`;
+    marker.style.top = `${displayPctY}%`;
 
     // Scale accuracy circle (pixels on map: 1 meter = 2.381 px)
     const accuracyCircle = document.getElementById('blueDotAccuracyCircle');
@@ -2598,7 +2626,7 @@ const MapEngine = {
 
     // Auto-update route if turn-by-turn navigation is actively tracking this guest
     if (this.activeLiveNavDestination) {
-      this.handleLiveNavigationUpdate(pctX, pctY);
+      this.handleLiveNavigationUpdate(displayPctX, displayPctY);
     }
 
     // Keep origin dropdown synced with live location
@@ -2606,18 +2634,18 @@ const MapEngine = {
 
     // Auto-update AP calibration circles and debug HUD if active
     if (this.isApDebugActive && this.lastApTelemetry) {
-      this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], { pctX, pctY });
+      this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], { pctX: displayPctX, pctY: displayPctY });
       this.renderApDebugHud(this.lastApTelemetry);
     }
 
     // Contextual Geofencing Check around resort facilities
     if (typeof GeofenceService !== 'undefined' && GeofenceService.updatePosition) {
-      GeofenceService.updatePosition(pctX, pctY);
+      GeofenceService.updatePosition(displayPctX, displayPctY);
     }
 
     // Auto-follow camera if requested by guest
     if (this.isAutoFollowingGuest) {
-      this.focusCoordinate(pctX, pctY, Math.max(1.5, this.scale), false);
+      this.focusCoordinate(displayPctX, displayPctY, Math.max(1.5, this.scale), false);
     }
   },
 
@@ -2857,6 +2885,11 @@ const MapEngine = {
 
     if (typeof ConciergeAudioGuide !== 'undefined' && ConciergeAudioGuide.speak) {
       ConciergeAudioGuide.speak(arriveMsg, lang);
+    }
+
+    // AI Voice Concierge arrival announcement & celebration chime
+    if (typeof VoiceConcierge !== 'undefined' && VoiceConcierge.onDestinationArrived) {
+      VoiceConcierge.onDestinationArrived(destPoi, destName);
     }
 
     this.activeLiveNavDestination = null;
@@ -3377,6 +3410,18 @@ const MapEngine = {
             <span class="text-slate-400 font-sans font-bold text-[10px]">طريقة الحساب:</span>
             <span class="text-slate-300 text-[10px]">${method}</span>
           </div>
+          <div class="flex items-center justify-between border-t border-white/10 pt-1.5">
+            <span class="text-slate-400 font-sans font-bold text-[10px]">مطابقة المسار (Map-Match):</span>
+            <span class="text-[10px] font-bold ${this.lastGuestPosition?.isSnapped ? 'text-emerald-400' : this.lastGuestPosition?.zone ? 'text-cyan-400' : 'text-slate-400'}">
+              ${this.lastGuestPosition?.isSnapped ? '🟢 Snapped to Walkway' : this.lastGuestPosition?.zone ? '🔷 Free Roam (' + this.lastGuestPosition.zone + ')' : '⚪ Unmatched'}
+            </span>
+          </div>
+
+          <!-- Record Fingerprint Here Button -->
+          <button onclick="MapEngine.recordFingerprintAtCurrentPosition()" class="w-full mt-2 py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg transition active:scale-95">
+            <span>🎯</span>
+            <span>تسجيل بصمة راديوية هنا (Record Fingerprint)</span>
+          </button>
         </div>
 
         <!-- Coordinate System & Leaflet CRS Verification Report -->
@@ -3564,6 +3609,55 @@ const MapEngine = {
       </div>
     `;
     inspector.style.display = 'flex';
+  },
+
+  async recordFingerprintAtCurrentPosition() {
+    if (!this.lastGuestPosition) {
+      if (typeof App !== 'undefined' && App.showToast) {
+        App.showToast('⚠️ لا يوجد موقع مباشر متاح حالياً لتسجيل البصمة.');
+      }
+      return;
+    }
+
+    const curX = Math.round((this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH);
+    const curY = Math.round((this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT);
+    const label = prompt('أدخل اسم نقطة المعايرة (مثلاً: تراس مطعم سيرينا، مسبح لوتس):', `نقطة معايرة (${curX}, ${curY})`);
+    if (!label) return;
+
+    // Collect current incoming RSSI vector from active APs
+    const expectedRssi = {};
+    if (this.lastApTelemetry && Array.isArray(this.lastApTelemetry.activeAps)) {
+      for (const ap of this.lastApTelemetry.activeAps) {
+        const bssid = ap.bssid || (this.cachedAccessPoints.find(a => a.id === ap.id) || {}).bssid;
+        if (bssid && ap.rssi) {
+          expectedRssi[bssid.toLowerCase()] = ap.rssi;
+        }
+      }
+    }
+
+    try {
+      const res = await fetch('/api/admin/fingerprints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          x: curX,
+          y: curY,
+          label,
+          labelEn: label,
+          expectedRssi
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (typeof App !== 'undefined' && App.showToast) {
+          App.showToast(`🎯 تم حفظ البصمة الراديوية بنجاح: ${label} (${Object.keys(expectedRssi).length} APs)`);
+        }
+      } else {
+        alert('فشل حفظ البصمة: ' + (data.error || 'خطأ غير معروف'));
+      }
+    } catch (err) {
+      alert('خطأ في الاتصال بالخادم: ' + err.message);
+    }
   }
 };
 

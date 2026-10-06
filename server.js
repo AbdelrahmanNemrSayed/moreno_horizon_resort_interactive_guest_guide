@@ -217,6 +217,42 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // 6.5 WiFi Radio Fingerprints Survey & Calibration APIs
+  if (reqPath === '/api/admin/fingerprints' && req.method === 'GET') {
+    const list = indoorLocationService.getFingerprints();
+    res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ success: true, count: list.length, fingerprints: list }));
+    return;
+  }
+
+  if (reqPath === '/api/admin/fingerprints' && req.method === 'POST') {
+    try {
+      const body = await parseBody(req);
+      const fp = indoorLocationService.addFingerprint(body);
+      res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, fingerprint: fp }));
+    } catch (err) {
+      res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  if ((reqPath === '/api/admin/fingerprints' || reqPath.startsWith('/api/admin/fingerprints/')) && req.method === 'DELETE') {
+    const parts = reqPath.split('/');
+    const idFromPath = parts.length > 4 ? decodeURIComponent(parts[4]) : null;
+    const targetId = idFromPath || urlObj.searchParams.get('id');
+    if (!targetId) {
+      res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'Fingerprint ID is required' }));
+      return;
+    }
+    const deleted = indoorLocationService.deleteFingerprint(targetId);
+    res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ success: true, deleted, id: targetId }));
+    return;
+  }
+
   // 7. Test Simulation Generator: Simulate device roaming across APs
   if ((reqPath === '/api/mikrotik/simulate' || reqPath === '/api/simulate') && req.method === 'POST') {
     try {
