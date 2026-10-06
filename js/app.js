@@ -1499,7 +1499,7 @@ const App = {
 
   openMikrotikPortal() {
     this.playBeep(800);
-    const configUrl = (window.resortContactConfig && window.resortContactConfig.hotspotLoginUrl) || 'http://10.5.50.1/login';
+    const configUrl = localStorage.getItem('moreno_hotspot_url') || (window.resortContactConfig && window.resortContactConfig.hotspotLoginUrl) || 'http://10.5.50.1/login';
     const urlParams = new URLSearchParams(window.location.search);
     const mac = urlParams.get('mac') || localStorage.getItem('moreno_guest_mac') || '';
     try {

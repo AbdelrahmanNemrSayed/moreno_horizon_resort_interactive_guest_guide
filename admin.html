@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم والرصد اللاسلكي | Moreno Horizon Resort RTLS Admin</title>
+  <title>لوحة الإدارة والتحكم الشاملة | Moreno Horizon Resort Control & RTLS Center</title>
   
   <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" href="moreno_resort_map_new.png">
 
-  <!-- Google Fonts: Cairo & Plus Jakarta Sans -->
+  <!-- Google Fonts: Cairo & Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -28,8 +28,8 @@
               sea: '#00B4D8',
               gold: '#DDA15E',
               goldDark: '#BC6C25',
-              darkBg: '#070D18',
-              cardDark: '#0E1726',
+              darkBg: '#050A14',
+              cardDark: '#0D1726',
               borderDark: '#1E293B'
             }
           },
@@ -44,21 +44,57 @@
   </script>
 
   <style>
+    /* Ultra-Premium Glassmorphic Theme */
     body {
-      background-color: #070D18;
+      background-color: #060B14;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.16) 0px, transparent 45%),
+        radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.14) 0px, transparent 45%),
+        radial-gradient(at 50% 45%, rgba(99, 102, 241, 0.1) 0px, transparent 55%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(244, 63, 94, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
       color: #F1F5F9;
       font-family: 'Cairo', sans-serif;
+      min-height: 100vh;
     }
+
+    /* Glass Elements */
     .glass-card {
-      background: rgba(14, 23, 38, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(13, 23, 39, 0.72);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .glass-card-hover {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .glass-card-hover:hover {
-      border-color: rgba(6, 182, 212, 0.4);
-      box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.2);
+      border-color: rgba(6, 182, 212, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px -10px rgba(6, 182, 212, 0.25), 0 0 20px rgba(6, 182, 212, 0.1);
     }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .glass-input {
+      background: rgba(6, 12, 22, 0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.25s ease;
+    }
+    .glass-input:focus {
+      border-color: rgba(6, 182, 212, 0.65);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+      outline: none;
+    }
+
+    /* Terminal Scrollbar */
     .terminal-scroll::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -67,19 +103,21 @@
       background: rgba(15, 23, 42, 0.6);
     }
     .terminal-scroll::-webkit-scrollbar-thumb {
-      background: rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.35);
       border-radius: 9999px;
     }
     .terminal-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(56, 189, 248, 0.6);
+      background: rgba(56, 189, 248, 0.7);
     }
+
     @keyframes pulse-ring {
-      0% { transform: scale(0.85); opacity: 0.9; }
-      100% { transform: scale(2.2); opacity: 0; }
+      0% { transform: scale(0.85); opacity: 0.95; }
+      100% { transform: scale(2.3); opacity: 0; }
     }
     .radar-pulse-ring {
       animation: pulse-ring 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
     }
+
     .ap-pin-badge {
       transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -94,25 +132,30 @@
       pointer-events: none;
       transition: opacity 0.5s ease;
     }
+    .tap-effect:active {
+      transform: scale(0.96);
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-slate-950">
 
-  <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-40 glass-card border-b border-slate-800/90 shadow-xl">
+  <!-- Top Glassy Navigation Bar -->
+  <header class="sticky top-0 z-40 glass-card border-b border-white/10 shadow-2xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
       
       <!-- Brand & Hub Title -->
       <div class="flex items-center gap-3">
-        <a href="/" class="w-10 h-10 rounded-2xl bg-white p-1 shadow-lg border border-amber-500/30 flex items-center justify-center shrink-0 hover:scale-105 transition">
+        <a href="/" class="w-10 h-10 rounded-2xl bg-white/90 p-1 shadow-lg border border-amber-500/30 flex items-center justify-center shrink-0 hover:scale-105 transition backdrop-blur-md">
           <img src="assets/images/moreno_logo.jpg" alt="Logo" class="w-full h-full object-contain">
         </a>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-sm sm:text-base font-black text-white tracking-wide">Moreno Horizon Resort</h1>
-            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">RTLS Admin v2.0</span>
+            <span class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm">
+              Unified Admin & RTLS Center
+            </span>
           </div>
-          <p class="text-[11px] font-semibold text-slate-400">لوحة الرصد اللحظي وتتبع إشارات MikroTik ونقاط الوصول اللاسلكية</p>
+          <p class="text-[11px] font-semibold text-slate-400">لوحة الإدارة والتحكم الشاملة في إعدادات المنتجع والرصد اللاسلكي</p>
         </div>
       </div>
 
@@ -120,27 +163,27 @@
       <div class="flex items-center gap-2 sm:gap-3">
         
         <!-- Live Status Badge -->
-        <div id="feedStatusPill" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-bold shadow-inner">
+        <div id="feedStatusPill" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl glass-pill text-xs font-bold shadow-inner">
           <span id="feedStatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
           <span id="feedStatusText" class="text-slate-300">جاري الاتصال بالسيرفر...</span>
         </div>
 
         <!-- Refresh Interval Selector -->
-        <div class="flex items-center bg-slate-900/90 rounded-xl p-1 border border-slate-800 text-xs">
-          <button id="btnAutoRefreshToggle" onclick="toggleAutoRefresh()" class="px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 font-bold transition flex items-center gap-1 shadow">
+        <div class="flex items-center glass-pill rounded-xl p-1 text-xs">
+          <button id="btnAutoRefreshToggle" onclick="toggleAutoRefresh()" class="px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 font-black transition flex items-center gap-1 shadow">
             <span id="refreshIcon" class="animate-spin">🔄</span>
             <span id="lblRefreshRate">2 ثوانٍ</span>
           </button>
         </div>
 
         <!-- Guest Map Link -->
-        <a href="/?debug=true" target="_blank" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg transition">
+        <a href="/?debug=true" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg transition tap-effect">
           <span>🗺️</span>
-          <span class="hidden md:inline">الخريطة التفاعلية (Debug)</span>
+          <span class="hidden md:inline">الخريطة التفاعلية (Live Guide)</span>
         </a>
 
         <!-- Lang Switcher -->
-        <button onclick="toggleAdminLanguage()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition" id="btnAdminLang">
+        <button onclick="toggleAdminLanguage()" class="px-2.5 py-1.5 rounded-xl glass-pill hover:bg-white/10 text-slate-300 text-xs font-bold transition" id="btnAdminLang">
           EN
         </button>
       </div>
@@ -161,7 +204,7 @@
         </div>
         <div class="flex items-baseline gap-2">
           <span id="kpiDevicesCount" class="text-2xl sm:text-3xl font-black text-cyan-400 font-mono">0</span>
-          <span class="text-xs text-slate-400 font-medium">نزيل / هاتف</span>
+          <span class="text-xs text-slate-400 font-medium">نزيل / جهاز</span>
         </div>
         <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -185,7 +228,24 @@
         <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
       </div>
 
-      <!-- Card 3: Access Points Network -->
+      <!-- Card 3: Room Wings & Capacity -->
+      <div class="glass-card rounded-2xl p-4 relative overflow-hidden transition glass-card-hover">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold">أجنحة وغرف المنتجع</span>
+          <span class="text-lg">🚪</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="kpiRoomsCount" class="text-2xl sm:text-3xl font-black text-amber-400 font-mono">796</span>
+          <span class="text-xs text-slate-400 font-medium">غرفة في 4 مبانٍ</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+          <span class="text-emerald-400 font-bold">Wing N, S, M, MLS</span>
+          <span>• مسارات ممرات ذكية</span>
+        </div>
+        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Card 4: Access Points & Network -->
       <div class="glass-card rounded-2xl p-4 relative overflow-hidden transition glass-card-hover">
         <div class="flex items-center justify-between text-slate-400 mb-2">
           <span class="text-xs font-bold">نقاط الوصول (APs)</span>
@@ -202,28 +262,12 @@
         <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
       </div>
 
-      <!-- Card 4: Server Uptime & Trilateration Engine -->
-      <div class="glass-card rounded-2xl p-4 relative overflow-hidden transition glass-card-hover">
-        <div class="flex items-center justify-between text-slate-400 mb-2">
-          <span class="text-xs font-bold">زمن تشغيل المحرك</span>
-          <span class="text-lg">⚡</span>
-        </div>
-        <div class="flex items-baseline gap-2">
-          <span id="kpiServerUptime" class="text-xl sm:text-2xl font-black text-purple-400 font-mono">--:--</span>
-        </div>
-        <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
-          <span>دقة متوسطة:</span>
-          <span class="text-cyan-300 font-bold font-mono">± 2.2 م</span>
-        </div>
-        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
-      </div>
-
     </div>
 
-    <!-- Webhook Integration & Quick MikroTik Helper Banner -->
-    <div class="glass-card rounded-2xl p-4 border border-cyan-500/30 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-slate-950 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
+    <!-- Webhook Integration Banner -->
+    <div class="glass-card rounded-2xl p-4 border border-cyan-500/30 bg-gradient-to-r from-slate-900/90 via-slate-900/75 to-slate-950 flex flex-col md:flex-row items-center justify-between gap-3 shadow-xl">
       <div class="flex items-center gap-3 w-full md:w-auto">
-        <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xl shrink-0 border border-cyan-500/30">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xl shrink-0 border border-cyan-500/30 shadow-inner">
           🌐
         </div>
         <div class="min-w-0">
@@ -239,63 +283,80 @@
               id="customTunnelInput" 
               oninput="updateCustomTunnelUrl(this.value)" 
               placeholder="https://xxxx.trycloudflare.com" 
-              class="px-2 py-0.5 rounded bg-slate-950 border border-slate-700 text-[11px] font-mono text-cyan-300 w-56 sm:w-72 placeholder-slate-600 focus:outline-none focus:border-cyan-400"
+              class="px-2 py-0.5 rounded bg-slate-950/80 border border-white/10 text-[11px] font-mono text-cyan-300 w-56 sm:w-72 placeholder-slate-600 focus:outline-none focus:border-cyan-400"
             >
           </div>
         </div>
       </div>
 
       <div class="flex items-center gap-2 w-full md:w-auto shrink-0 justify-end">
-        <button onclick="copyWebhookUrl()" id="btnCopyWebhook" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow">
+        <button onclick="copyWebhookUrl()" id="btnCopyWebhook" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow tap-effect">
           <span>📋</span>
           <span>نسخ الرابط</span>
         </button>
-        <button onclick="toggleMikrotikScriptModal()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs border border-white/15 transition flex items-center gap-1.5">
+        <button onclick="toggleMikrotikScriptModal()" class="px-3 py-1.5 rounded-xl glass-pill hover:bg-white/15 text-slate-200 hover:text-white font-bold text-xs transition flex items-center gap-1.5 tap-effect">
           <span>📜</span>
-          <span>سكريبت MikroTik ROS</span>
+          <span>سكريبت RouterOS</span>
         </button>
       </div>
     </div>
 
-    <!-- Main Workspace Grid: Table & Live Mini Map -->
+    <!-- Main Workspace Grid: Content Panels & Live Mini Map -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
       
-      <!-- Left Column (7 cols): Live Devices Table & Packet Logs -->
+      <!-- Left Column (7 cols): Dynamic Settings & Operations Tabs -->
       <div class="lg:col-span-7 space-y-4">
 
-        <!-- Tabs Navigation -->
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <div class="flex items-center gap-2">
-            <button id="tabBtnDevices" onclick="switchAdminTab('devices')" class="px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition">
-              <span>📱</span>
-              <span>الأجهزة النشطة</span>
-              <span id="badgeTabDeviceCount" class="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500 text-slate-950 font-black">0</span>
-            </button>
-            <button id="tabBtnLogs" onclick="switchAdminTab('logs')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 font-bold text-xs flex items-center gap-1.5 transition">
-              <span>📟</span>
-              <span>سجل الحزم الواردة (Live Log)</span>
-            </button>
-            <button id="tabBtnFingerprints" onclick="switchAdminTab('fingerprints')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 font-bold text-xs flex items-center gap-1.5 transition">
-              <span>🎯</span>
-              <span>بصمات الراديو (Fingerprints)</span>
-              <span id="badgeTabFpCount" class="text-[10px] px-1.5 py-0.2 rounded-full bg-purple-500 text-white font-black">12</span>
-            </button>
-          </div>
+        <!-- Glassmorphic Tabs Navigation -->
+        <div class="glass-card rounded-2xl p-1.5 flex items-center gap-1 overflow-x-auto terminal-scroll shadow-lg">
+          <button id="tabBtnDevices" onclick="switchAdminTab('devices')" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>📱</span>
+            <span>الأجهزة والرصد RTLS</span>
+            <span id="badgeTabDeviceCount" class="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500 text-slate-950 font-black">0</span>
+          </button>
+          
+          <button id="tabBtnRooms" onclick="switchAdminTab('rooms')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>🚪</span>
+            <span>الغرف والأجنحة</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-bold">4 مبانٍ</span>
+          </button>
 
-          <!-- Quick Actions on Table -->
-          <div class="flex items-center gap-2">
-            <button onclick="purgeActiveDevices()" class="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1" title="مسح الأجهزة المخزنة مؤقتاً">
-              <span>🧹</span>
-              <span class="hidden sm:inline">مسح الأجهزة</span>
-            </button>
-          </div>
+          <button id="tabBtnHotspot" onclick="switchAdminTab('hotspot')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>📶</span>
+            <span>كارت الإنترنت</span>
+          </button>
+
+          <button id="tabBtnEmergency" onclick="switchAdminTab('emergency')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>🆘</span>
+            <span>طوارئ واستقبال</span>
+          </button>
+
+          <button id="tabBtnFacilities" onclick="switchAdminTab('facilities')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>🏖️</span>
+            <span>المرافق والمعالم</span>
+          </button>
+
+          <button id="tabBtnWeather" onclick="switchAdminTab('weather')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>☀️</span>
+            <span>راية الشاطئ والطقس</span>
+          </button>
+
+          <button id="tabBtnFingerprints" onclick="switchAdminTab('fingerprints')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>🎯</span>
+            <span>بصمات الراديو</span>
+          </button>
+
+          <button id="tabBtnLogs" onclick="switchAdminTab('logs')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0">
+            <span>📟</span>
+            <span>سجل الحزم</span>
+          </button>
         </div>
 
         <!-- Tab 1: Live Devices Table Panel -->
-        <div id="tabContentDevices" class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+        <div id="tabContentDevices" class="glass-card rounded-2xl overflow-hidden shadow-2xl space-y-0">
           
           <!-- Search & Filter Bar -->
-          <div class="p-3 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/60">
+          <div class="p-3 border-b border-white/10 flex items-center justify-between gap-3 bg-slate-900/60">
             <div class="relative flex-1">
               <span class="absolute inset-y-0 start-0 flex items-center ps-3 text-slate-400 text-xs">🔍</span>
               <input 
@@ -303,18 +364,22 @@
                 id="deviceSearchInput" 
                 oninput="renderDevicesTable()" 
                 placeholder="بحث بـ MAC Address أو اسم المنطقة (مثل: لوتس، سيرينا، الشاطئ)..."
-                class="w-full ps-8 pe-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                class="w-full ps-8 pe-3 py-1.5 rounded-xl glass-input text-xs text-white placeholder-slate-500 font-mono"
               >
             </div>
-            <div class="text-[11px] text-slate-400 shrink-0">
-              إجمالي: <span id="lblFilteredDeviceCount" class="font-bold text-cyan-400 font-mono">0</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-400">إجمالي: <span id="lblFilteredDeviceCount" class="font-bold text-cyan-400 font-mono">0</span></span>
+              <button onclick="purgeActiveDevices()" class="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1 tap-effect" title="مسح الأجهزة المخزنة مؤقتاً">
+                <span>🧹</span>
+                <span class="hidden sm:inline">مسح</span>
+              </button>
             </div>
           </div>
 
           <!-- Table Container -->
           <div class="overflow-x-auto max-h-[460px] terminal-scroll">
             <table class="w-full text-right text-xs">
-              <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] font-bold tracking-wider sticky top-0 z-10 border-b border-slate-800">
+              <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] font-bold tracking-wider sticky top-0 z-10 border-b border-white/10">
                 <tr>
                   <th class="py-2.5 px-3">الجهاز (MAC Address)</th>
                   <th class="py-2.5 px-3">المنطقة الحالية (Zone)</th>
@@ -324,8 +389,7 @@
                   <th class="py-2.5 px-3 text-center">الإجراء</th>
                 </tr>
               </thead>
-              <tbody id="devicesTableBody" class="divide-y divide-slate-800/60 font-medium">
-                <!-- Dynamically Populated -->
+              <tbody id="devicesTableBody" class="divide-y divide-white/5 font-medium">
                 <tr>
                   <td colspan="6" class="py-12 text-center text-slate-400">
                     <div class="text-3xl mb-2">📡</div>
@@ -336,16 +400,313 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Simulation & Quick Test Controls -->
+          <div class="p-3.5 bg-slate-950/60 border-t border-white/10 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🎮</span>
+                <span>محاكاة تجول واختبارات الإشارة الحية:</span>
+              </h4>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button onclick="startRoamingSimulation()" id="btnStartRoaming" class="tap-effect py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+                <span>🚶‍♂️</span>
+                <span id="lblRoamingText">محاكاة تجول جهاز</span>
+              </button>
+              <button onclick="sendQuickPing(283, 820, 'الاستقبال الرئيسي')" class="tap-effect py-2 px-2 rounded-xl glass-pill hover:bg-white/10 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1">
+                <span>🛎️</span>
+                <span>نبضة الاستقبال</span>
+              </button>
+              <button onclick="sendQuickPing(344, 665, 'مسبح لوتس')" class="tap-effect py-2 px-2 rounded-xl glass-pill hover:bg-white/10 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1">
+                <span>🏊‍♂️</span>
+                <span>نبضة المسبح</span>
+              </button>
+              <button onclick="sendQuickPing(381, 281, 'شاطئ البحر والمارينا')" class="tap-effect py-2 px-2 rounded-xl glass-pill hover:bg-white/10 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1">
+                <span>🏖️</span>
+                <span>نبضة الشاطئ</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Tab 2: Raw MikroTik Packet Stream Panel -->
-        <div id="tabContentLogs" class="glass-card rounded-2xl overflow-hidden shadow-2xl hidden">
-          <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+        <!-- Tab 2: Rooms & Wings Management Panel -->
+        <div id="tabContentRooms" class="hidden glass-card rounded-2xl p-4 sm:p-5 shadow-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🚪</span>
+              <div>
+                <h3 class="text-sm font-black text-white">إدارة وتوزيع أجنحة وغرف المنتجع (Room Finder Architecture)</h3>
+                <p class="text-xs text-slate-400">نطاقات الغرف، الطوابق، مداخل المباني، وإرشادات الممرات الذكية</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Live Room Tester -->
+          <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+            <div class="flex items-center gap-2 text-xs font-black text-amber-300">
+              <span>🧭</span>
+              <span>مختبر فحص مسار الغرف اللحظي (Test Room Lookup & Direction Engine):</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input 
+                type="text" 
+                id="adminTestRoomInput" 
+                placeholder="أدخل رقم الغرفة للتجربة (مثلاً: 2015 أو 1520 أو 1102)..." 
+                class="flex-1 px-3 py-2 rounded-xl glass-input text-xs text-white font-mono placeholder-slate-500"
+                onkeypress="if(event.key==='Enter') testAdminRoomLookup()"
+              >
+              <button onclick="testAdminRoomLookup()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow-md tap-effect">
+                فحص وملاحة 🔍
+              </button>
+            </div>
+            
+            <!-- Result Box -->
+            <div id="adminRoomLookupResult" class="hidden p-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-mono space-y-2">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Building Wings Overview Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="adminWingsGrid">
+            <!-- Populated via script -->
+          </div>
+        </div>
+
+        <!-- Tab 3: Hotspot & Captive Portal Config Panel -->
+        <div id="tabContentHotspot" class="hidden glass-card rounded-2xl p-4 sm:p-5 shadow-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">📶</span>
+              <div>
+                <h3 class="text-sm font-black text-white">بوابة كارت الإنترنت وشبكة MikroTik (Hotspot Portal)</h3>
+                <p class="text-xs text-slate-400">تكوين رابط الـ Captive Portal وإعدادات نقاط الوصول اللاسلكية</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Captive Portal URL Editor -->
+          <div class="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 space-y-3">
+            <div class="flex items-center gap-2 text-xs font-black text-teal-300">
+              <span>⚙️</span>
+              <span>رابط بوابة تسجيل الدخول MikroTik Captive Portal:</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input 
+                type="text" 
+                id="adminHotspotUrlInput" 
+                value="http://10.5.50.1/login"
+                placeholder="http://10.5.50.1/login" 
+                class="flex-1 px-3 py-2 rounded-xl glass-input text-xs text-teal-300 font-mono"
+              >
+              <button onclick="saveAdminHotspotUrl()" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs shadow-md tap-effect">
+                حفظ الرابط 💾
+              </button>
+              <a id="adminTestPortalBtn" href="http://10.5.50.1/login" target="_blank" class="px-3 py-2 rounded-xl glass-pill text-white font-bold text-xs tap-effect">
+                فتح 🌐
+              </a>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              💡 هذا الرابط سيتم توجيه النزلاء إليه تلقائياً عند النقر على "كارت الإنترنت" في التطبيق مع تمرير معرّف الجهاز (MAC).
+            </p>
+          </div>
+
+          <!-- Access Points Table (14 APs) -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-black text-white flex items-center gap-1.5">
+                <span>📡</span>
+                <span>نقاط الوصول اللاسلكية الموزعة بالمنتجع (14 Access Points):</span>
+              </h4>
+            </div>
+            <div class="overflow-x-auto max-h-72 terminal-scroll rounded-xl border border-white/10">
+              <table class="w-full text-right text-xs">
+                <thead class="bg-slate-950/90 text-slate-400 uppercase text-[10px] font-bold sticky top-0 border-b border-white/10">
+                  <tr>
+                    <th class="py-2 px-3">معرّف AP</th>
+                    <th class="py-2 px-3">الموقع / الاسم</th>
+                    <th class="py-2 px-3">BSSID / MAC</th>
+                    <th class="py-2 px-3 text-center">الإحداثيات</th>
+                    <th class="py-2 px-3 text-center">إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="adminApsTableBody" class="divide-y divide-white/5 font-mono text-[11px]">
+                  <!-- Populated via script -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Emergency Contacts Panel -->
+        <div id="tabContentEmergency" class="hidden glass-card rounded-2xl p-4 sm:p-5 shadow-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🆘</span>
+              <div>
+                <h3 class="text-sm font-black text-white">خطوط الطوارئ والاستقبال المباشرة (Emergency & Contacts)</h3>
+                <p class="text-xs text-slate-400">إدارة أرقام الاتصال السريع، التحويلات الداخلية، وبلاغات الواتساب</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emergency Contacts Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="adminContactsGrid">
+            <!-- Populated via script -->
+          </div>
+
+          <!-- WhatsApp Direct Alert Preview -->
+          <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-xs font-black text-emerald-300">
+                <span>💬</span>
+                <span>صيغة بلاغ النزيل المباشر عبر واتساب الاستقبال:</span>
+              </div>
+              <a href="https://wa.me/201099887701" target="_blank" class="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs tap-effect shadow">
+                تجربة إرسال بلاغ 📲
+              </a>
+            </div>
+            <pre class="p-3 rounded-xl bg-slate-950/80 border border-white/10 text-emerald-300 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">🚨 *بلاغ استفسار وطوارئ نزيل - منتجع مورينو هورايزون*
+🚪 رقم الغرفة: 2015
+📍 الموقع التقريبي الحالي: مسبح لوتس والبحيرة المركزية (X: 38.4%, Y: 55.4%)
+🗺️ رابط الخريطة المباشر: https://moreno-resort.com/?mac=AA:BB:CC:DD:EE:FF
+⏰ التوقيت: 12:45:00 م</pre>
+          </div>
+        </div>
+
+        <!-- Tab 5: Facilities & POIs Panel -->
+        <div id="tabContentFacilities" class="hidden glass-card rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🏖️</span>
+              <div>
+                <h3 class="text-sm font-black text-white">إدارة المرافق والمعالم والأنشطة (POIs & Amenities)</h3>
+                <p class="text-xs text-slate-400">التحكم في ساعات العمل، حالة التوفر (مفتوح / مغلق)، وإحداثيات المعالم</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Filter Bar -->
+          <div class="flex items-center gap-1.5 overflow-x-auto terminal-scroll pb-1" id="adminPoiCategoryFilter">
+            <button onclick="filterAdminPois('all')" class="px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 font-black text-xs">الكل</button>
+            <button onclick="filterAdminPois('dine')" class="px-2.5 py-1 rounded-lg glass-pill text-slate-300 hover:text-white text-xs font-bold">المطاعم</button>
+            <button onclick="filterAdminPois('relax')" class="px-2.5 py-1 rounded-lg glass-pill text-slate-300 hover:text-white text-xs font-bold">المسابح والشاطئ</button>
+            <button onclick="filterAdminPois('wellness')" class="px-2.5 py-1 rounded-lg glass-pill text-slate-300 hover:text-white text-xs font-bold">السبا والرياضة</button>
+            <button onclick="filterAdminPois('services')" class="px-2.5 py-1 rounded-lg glass-pill text-slate-300 hover:text-white text-xs font-bold">الخدمات</button>
+            <button onclick="filterAdminPois('buildings')" class="px-2.5 py-1 rounded-lg glass-pill text-slate-300 hover:text-white text-xs font-bold">المباني والأجنحة</button>
+          </div>
+
+          <!-- POIs Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[460px] overflow-y-auto terminal-scroll" id="adminPoisGrid">
+            <!-- Populated via script -->
+          </div>
+        </div>
+
+        <!-- Tab 6: Weather & Beach Flag Panel -->
+        <div id="tabContentWeather" class="hidden glass-card rounded-2xl p-4 sm:p-5 shadow-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">☀️</span>
+              <div>
+                <h3 class="text-sm font-black text-white">إدارة راية الشاطئ وحالة الطقس والتشميس (Beach & Sun Radar)</h3>
+                <p class="text-xs text-slate-400">تحديث راية السلامة البحرية، حرارة البحر، وساعات الذروة والظل</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Beach Safety Flag Control -->
+          <div class="p-4 rounded-2xl bg-slate-950/70 border border-white/10 space-y-3">
+            <h4 class="text-xs font-black text-white flex items-center gap-1.5">
+              <span>🚩</span>
+              <span>راية الشاطئ المعتمدة للنزلاء (Beach Safety Flag Status):</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <button onclick="setAdminBeachFlag('safe')" id="flagBtnSafe" class="p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect">
+                <span class="text-2xl">🟢</span>
+                <span class="font-black">راية خضراء (آمن)</span>
+                <span class="text-[10px] text-slate-400">السباحة والسنوركلينج آمن تماماً</span>
+              </button>
+              <button onclick="setAdminBeachFlag('caution')" id="flagBtnCaution" class="p-3 rounded-xl border border-amber-500/20 bg-slate-900 text-slate-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect">
+                <span class="text-2xl">🟡</span>
+                <span class="font-black">راية صفراء (حذر)</span>
+                <span class="text-[10px] text-slate-400">أمواج معتدلة مع أخذ الحيطة</span>
+              </button>
+              <button onclick="setAdminBeachFlag('danger')" id="flagBtnDanger" class="p-3 rounded-xl border border-rose-500/20 bg-slate-900 text-slate-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect">
+                <span class="text-2xl">🔴</span>
+                <span class="font-black">راية حمراء (محظور)</span>
+                <span class="text-[10px] text-slate-400">ممنوع السباحة لسلامة النزلاء</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Weather Conditions Monitor -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div class="p-3 rounded-xl glass-card text-center">
+              <span class="text-2xl block mb-1">🌡️</span>
+              <span class="text-[11px] text-slate-400 block">حرارة الجو</span>
+              <span class="text-lg font-black text-white">29°C</span>
+            </div>
+            <div class="p-3 rounded-xl glass-card text-center">
+              <span class="text-2xl block mb-1">🌊</span>
+              <span class="text-[11px] text-slate-400 block">حرارة البحر</span>
+              <span class="text-lg font-black text-cyan-300">26°C</span>
+            </div>
+            <div class="p-3 rounded-xl glass-card text-center">
+              <span class="text-2xl block mb-1">💨</span>
+              <span class="text-[11px] text-slate-400 block">سرعة الرياح</span>
+              <span class="text-lg font-black text-emerald-300">14 عقدة</span>
+            </div>
+            <div class="p-3 rounded-xl glass-card text-center">
+              <span class="text-2xl block mb-1">🌇</span>
+              <span class="text-[11px] text-slate-400 block">ساعة الغروب الذهبية</span>
+              <span class="text-lg font-black text-amber-300">05:25 م</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 7: Fingerprints Calibration Panel -->
+        <div id="tabContentFingerprints" class="hidden glass-card rounded-2xl overflow-hidden shadow-2xl">
+          <div class="p-3 border-b border-white/10 flex items-center justify-between gap-3 bg-slate-900/60">
+            <div class="flex items-center gap-2">
+              <span class="text-sm">🎯</span>
+              <h4 class="text-xs font-bold text-white">نقاط مسح البصمات الراديوية (Calibrated Radio Survey Points)</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold" id="lblFpCountBadge">12 نقطة</span>
+            </div>
+            <button onclick="promptManualFingerprint()" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1 shadow transition tap-effect">
+              <span>➕</span>
+              <span>إضافة نقطة مسح</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto max-h-[460px] terminal-scroll">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-900/90 text-slate-400 font-mono text-[11px] sticky top-0 z-10 border-b border-white/10">
+                <tr>
+                  <th class="py-2.5 px-3">معرّف النقطة</th>
+                  <th class="py-2.5 px-3">اسم الموقع</th>
+                  <th class="py-2.5 px-2 text-center">الإحداثيات</th>
+                  <th class="py-2.5 px-2 text-center">أجهزة AP المغطاة</th>
+                  <th class="py-2.5 px-3 text-center">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="fingerprintsTableBody" class="divide-y divide-white/5 font-mono text-[11px]">
+                <tr>
+                  <td colspan="5" class="py-6 text-center text-slate-500">جاري تحميل نقاط المسح...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 8: Raw MikroTik Packet Stream Panel -->
+        <div id="tabContentLogs" class="hidden glass-card rounded-2xl overflow-hidden shadow-2xl">
+          <div class="p-3 border-b border-white/10 flex items-center justify-between bg-slate-900/60">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
               <span class="text-xs font-bold text-white">Live Packet Ingestion Stream (/api/mikrotik/feed)</span>
             </div>
-            <button onclick="clearFeedLogs()" class="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 transition">
+            <button onclick="clearFeedLogs()" class="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded glass-pill transition">
               مسح السجل
             </button>
           </div>
@@ -355,76 +716,9 @@
           </div>
         </div>
 
-        <!-- Tab 3: Fingerprints Calibration Panel -->
-        <div id="tabContentFingerprints" class="hidden glass-card rounded-2xl overflow-hidden shadow-2xl">
-          <div class="p-3 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/60">
-            <div class="flex items-center gap-2">
-              <span class="text-sm">🎯</span>
-              <h4 class="text-xs font-bold text-white">نقاط مسح البصمات الراديوية (Calibrated Radio Survey Points)</h4>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold" id="lblFpCountBadge">12 نقطة</span>
-            </div>
-            <button onclick="promptManualFingerprint()" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1 shadow transition">
-              <span>➕</span>
-              <span>إضافة نقطة مسح</span>
-            </button>
-          </div>
-
-          <div class="overflow-x-auto max-h-[460px] terminal-scroll">
-            <table class="w-full text-right text-xs">
-              <thead class="bg-slate-900/90 text-slate-400 font-mono text-[11px] sticky top-0 z-10 border-b border-slate-800">
-                <tr>
-                  <th class="py-2.5 px-3">معرّف النقطة</th>
-                  <th class="py-2.5 px-3">اسم الموقع</th>
-                  <th class="py-2.5 px-2 text-center">الإحداثيات</th>
-                  <th class="py-2.5 px-2 text-center">أجهزة AP المغطاة</th>
-                  <th class="py-2.5 px-3 text-center">إجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="fingerprintsTableBody" class="divide-y divide-slate-800/60 font-mono text-[11px]">
-                <tr>
-                  <td colspan="5" class="py-6 text-center text-slate-500">جاري تحميل نقاط المسح...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Simulation & Quick Test Controls -->
-        <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
-              <span>🎮</span>
-              <span>أدوات المحاكاة والاختبار السريع (Simulation & Debugging)</span>
-            </h3>
-            <span class="text-[10px] text-slate-400">بدون الحاجة لراوتر فعلي</span>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button onclick="startRoamingSimulation()" id="btnStartRoaming" class="tap-effect py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition">
-              <span>🚶‍♂️</span>
-              <span id="lblRoamingText">محاكاة تجول جهاز</span>
-            </button>
-
-            <button onclick="sendQuickPing(283, 820, 'الاستقبال الرئيسي')" class="tap-effect py-2 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold border border-white/10 transition flex items-center justify-center gap-1">
-              <span>🛎️</span>
-              <span>نبضة الاستقبال</span>
-            </button>
-
-            <button onclick="sendQuickPing(344, 665, 'مسبح لوتس')" class="tap-effect py-2 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold border border-white/10 transition flex items-center justify-center gap-1">
-              <span>🏊‍♂️</span>
-              <span>نبضة مسبح لوتس</span>
-            </button>
-
-            <button onclick="sendQuickPing(381, 281, 'شاطئ البحر والمارينا')" class="tap-effect py-2 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold border border-white/10 transition flex items-center justify-center gap-1">
-              <span>🏖️</span>
-              <span>نبضة الشاطئ</span>
-            </button>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Right Column (5 cols): Embedded Mini Live Map -->
+      <!-- Right Column (5 cols): Embedded Mini Live Map & Spatial Focus -->
       <div class="lg:col-span-5 space-y-4">
         
         <div class="glass-card rounded-2xl p-3 sm:p-4 shadow-2xl flex flex-col">
@@ -433,7 +727,7 @@
           <div class="flex items-center justify-between gap-2 mb-3">
             <div class="flex items-center gap-2">
               <span class="text-sm">🗺️</span>
-              <h3 class="text-xs sm:text-sm font-bold text-white">الخريطة الحية (Live Spatial Overview)</h3>
+              <h3 class="text-xs sm:text-sm font-bold text-white">الخريطة الحية (Spatial Overview)</h3>
             </div>
 
             <!-- Heatmap, AP labels, and Fingerprint Calibration toggles -->
@@ -441,7 +735,7 @@
               <button 
                 id="btnRecordFingerprintMode" 
                 onclick="toggleRecordFingerprintMode()" 
-                class="px-2.5 py-1 rounded-lg bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-[11px] font-bold transition flex items-center gap-1"
+                class="px-2.5 py-1 rounded-lg glass-pill text-purple-300 hover:text-white border-purple-500/40 text-[11px] font-bold transition flex items-center gap-1 tap-effect"
                 title="تفعيل وضع تسجيل ومعايرة البصمة بالنقر على الخريطة"
               >
                 <span>🎯</span>
@@ -450,7 +744,7 @@
               <button 
                 id="btnToggleHeatmap" 
                 onclick="toggleHeatmap()" 
-                class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white border border-slate-700 text-[11px] font-bold transition flex items-center gap-1"
+                class="px-2.5 py-1 rounded-lg glass-pill text-slate-400 hover:text-white text-[11px] font-bold transition flex items-center gap-1 tap-effect"
                 title="تفعيل خريطة الكثافة الإشغالية (Occupancy Heatmap)"
               >
                 <span>🔥</span>
@@ -459,7 +753,7 @@
               <button 
                 id="btnToggleApPins" 
                 onclick="toggleApPins()" 
-                class="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition flex items-center gap-1"
+                class="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition flex items-center gap-1 tap-effect"
                 title="إظهار/إخفاء نقاط الـ AP"
               >
                 <span>📶</span>
@@ -469,7 +763,7 @@
           </div>
 
           <!-- Map Aspect Container (896x1200 Proportions) -->
-          <div class="relative w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[896/1200] max-h-[580px] select-none" id="miniMapContainer">
+          <div class="relative w-full rounded-2xl overflow-hidden border border-white/10 bg-slate-950 aspect-[896/1200] max-h-[580px] select-none shadow-2xl" id="miniMapContainer">
             
             <!-- Map Background Image -->
             <img 
@@ -490,6 +784,9 @@
               <g id="heatmapHalosGroup" class="hidden"></g>
             </svg>
 
+            <!-- Spotlight Ripple Focus Layer -->
+            <div id="miniMapSpotlightLayer" class="absolute inset-0 pointer-events-none z-15"></div>
+
             <!-- Access Points Overlay Layer -->
             <div id="miniMapApPinsLayer" class="absolute inset-0 pointer-events-auto z-20">
               <!-- Dynamically populated 14 APs -->
@@ -502,14 +799,14 @@
 
             <!-- Click to Ping Hint Tooltip -->
             <div class="absolute bottom-2 start-2 end-2 text-center pointer-events-none z-40">
-              <span class="inline-block px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur border border-white/10 text-[10px] text-slate-300 font-semibold shadow">
+              <span class="inline-block px-3 py-1 rounded-xl bg-slate-950/80 backdrop-blur-md border border-white/10 text-[10px] text-slate-300 font-semibold shadow-lg">
                 💡 انقر في أي مكان على الخريطة لإرسال نبضة تجريبية فورية
               </span>
             </div>
           </div>
 
           <!-- Selected Device Inspector Card -->
-          <div id="selectedDeviceCard" class="mt-3 p-3 rounded-xl bg-slate-900/90 border border-cyan-500/30 text-xs hidden animate-fadeIn">
+          <div id="selectedDeviceCard" class="mt-3 p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-500/30 text-xs hidden shadow-xl backdrop-blur-md">
             <div class="flex items-center justify-between mb-1">
               <span class="font-bold text-white flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
@@ -523,8 +820,8 @@
               <div>📐 الإحداثيات: <span id="inspectCoords" class="text-slate-200">--</span></div>
               <div>📶 أقوى AP: <span id="inspectAp" class="text-emerald-400 font-bold">--</span></div>
             </div>
-            <div class="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-end gap-2">
-              <a id="inspectLinkToMap" href="#" target="_blank" class="px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition">
+            <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-end gap-2">
+              <a id="inspectLinkToMap" href="#" target="_blank" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition tap-effect">
                 فتح تتبع النزيل في الخريطة 🗺️
               </a>
             </div>
@@ -539,14 +836,14 @@
   </main>
 
   <!-- MikroTik Script Generator Modal -->
-  <div id="mikrotikScriptModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-2xl max-w-2xl w-full p-5 border border-cyan-500/40 shadow-2xl relative">
-      <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+  <div id="mikrotikScriptModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-3xl max-w-2xl w-full p-5 sm:p-6 border border-cyan-500/40 shadow-2xl relative">
+      <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-3">
         <div class="flex items-center gap-2">
           <span class="text-2xl">📜</span>
           <h3 class="text-sm sm:text-base font-bold text-white">سكريبت تصدير إشارات MikroTik RouterOS</h3>
         </div>
-        <button onclick="toggleMikrotikScriptModal()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">✕</button>
+        <button onclick="toggleMikrotikScriptModal()" class="w-8 h-8 rounded-full glass-pill text-slate-300 flex items-center justify-center font-bold">✕</button>
       </div>
 
       <p class="text-xs text-slate-300 mb-3 leading-relaxed">
@@ -554,7 +851,7 @@
       </p>
 
       <div class="relative">
-        <pre class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-[11px] text-cyan-300 font-mono overflow-x-auto terminal-scroll max-h-64 leading-normal" id="mikrotikScriptCode"># MikroTik RouterOS v6/v7 Script for Moreno Horizon Resort RTLS
+        <pre class="bg-slate-950/90 border border-white/10 rounded-2xl p-3.5 text-[11px] text-cyan-300 font-mono overflow-x-auto terminal-scroll max-h-64 leading-normal" id="mikrotikScriptCode"># MikroTik RouterOS v6/v7 Script for Moreno Horizon Resort RTLS
 :local webhookUrl "http://YOUR-SERVER-IP:3000/api/mikrotik/feed"
 :local payload "["
 :local first true
@@ -575,21 +872,25 @@
 # Send HTTP POST to Ingestion Webhook
 /tool fetch http-method=post http-header-field="Content-Type: application/json" http-data=$payload url=$webhookUrl keep-result=no</pre>
 
-        <button onclick="copyMikrotikScript()" id="btnCopyScript" class="absolute top-2 end-2 px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs shadow transition">
+        <button onclick="copyMikrotikScript()" id="btnCopyScript" class="absolute top-2.5 end-2.5 px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs shadow transition tap-effect">
           نسخ الكود
         </button>
       </div>
 
       <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
         <span>💡 يدعم جميع أجهزة MikroTik cAP, hAP, RB Series.</span>
-        <button onclick="toggleMikrotikScriptModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+        <button onclick="toggleMikrotikScriptModal()" class="px-4 py-1.5 rounded-xl glass-pill hover:bg-white/15 text-white font-bold transition tap-effect">
           إغلاق
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Dashboard JavaScript Logic -->
+  <!-- Shared Data and Room-Finder Core Dependencies -->
+  <script src="js/data.js?v=41.0"></script>
+  <script src="js/room-finder.js?v=41.0"></script>
+
+  <!-- Dashboard JavaScript Controller -->
   <script>
     // State management
     let dashboardData = {
@@ -613,33 +914,25 @@
     let selectedDeviceMac = null;
     let isRecordFpMode = false;
     let fingerprintsList = [];
+    let activeAdminTab = 'devices';
+    let activePoiCategory = 'all';
 
     // Standard POI references for spatial zone lookup
-    const RESORT_ZONES = [
-      { id: '1', nameAr: 'شاطئ البحر والمارينا', nameEn: 'Beach & Marina Pier', x: 381, y: 281 },
-      { id: '2', nameAr: 'مركز الغوص والرياضات البحرية', nameEn: 'Diving Center', x: 256, y: 310 },
-      { id: '3', nameAr: 'أكوا بارك مورينو', nameEn: 'Moreno Aqua Park', x: 209, y: 500 },
-      { id: '4', nameAr: 'منطقة ألعاب الأطفال', nameEn: 'Kids Play Area', x: 266, y: 416 },
-      { id: '5', nameAr: 'بار الشاطئ والممشى الخشبي', nameEn: 'Beach Bar & Lounge', x: 428, y: 340 },
-      { id: '6', nameAr: 'المطعم الشرقي وسناك بار', nameEn: 'Oriental & Snack Bar', x: 442, y: 535 },
-      { id: '8', nameAr: 'مطعم لا ماما الإيطالي', nameEn: 'La Mama Italian', x: 348, y: 575 },
-      { id: '9', nameAr: 'النادي الصحي والسبا', nameEn: 'Health Club & Spa', x: 170, y: 750 },
-      { id: '10', nameAr: 'ملاعب التنس الاحترافية', nameEn: 'Pro Tennis Courts', x: 618, y: 732 },
-      { id: '11', nameAr: 'مسبح لوتس والبحيرة المركزية', nameEn: 'Lotus Pool & Lagoon', x: 344, y: 665 },
-      { id: '12', nameAr: 'مطعم سيرينا الرئيسي', nameEn: 'Sirena Buffet Restaurant', x: 310, y: 795 },
-      { id: 'M', nameAr: 'بهو الاستقبال الرئيسي M', nameEn: 'Main Lobby & Reception', x: 283, y: 820 },
-      { id: '15', nameAr: 'العيادة والصيدلية', nameEn: 'Clinic & Pharmacy', x: 370, y: 1049 },
-      { id: '16', nameAr: 'مسجد المنتجع', nameEn: 'Resort Mosque', x: 426, y: 1049 },
-      { id: 'MLS', nameAr: 'المبنى التجاري MLS', nameEn: 'Commercial Mall MLS', x: 163, y: 1037 }
+    const RESORT_ZONES = (typeof resortPois !== 'undefined') ? resortPois : [
+      { id: '1', nameAr: 'شاطئ البحر والمارينا', nameEn: 'Beach & Marina Pier', coords: { x: 42.52, y: 23.42 } },
+      { id: '3', nameAr: 'أكوا بارك مورينو', nameEn: 'Moreno Aqua Park', coords: { x: 23.33, y: 41.67 } },
+      { id: '11', nameAr: 'مسبح لوتس والبحيرة المركزية', nameEn: 'Lotus Pool & Lagoon', coords: { x: 38.39, y: 55.42 } },
+      { id: '12', nameAr: 'مطعم سيرينا الرئيسي', nameEn: 'Sirena Buffet Restaurant', coords: { x: 34.6, y: 66.25 } },
+      { id: 'M', nameAr: 'بهو الاستقبال الرئيسي M', nameEn: 'Main Lobby & Reception', coords: { x: 31.55, y: 68.36 } }
     ];
 
-    // Mock Roaming Path Coordinates (Reception -> Serena -> Lotus Pool -> Aqua Park -> Beach)
+    // Mock Roaming Path Coordinates
     const ROAMING_WAYPOINTS = [
-      { x: 283, y: 820, label: 'بهو الاستقبال الرئيسي' },
+      { x: 283, y: 820, label: 'بهو الاستقبال الرئيسي M' },
       { x: 310, y: 795, label: 'مطعم سيرينا' },
       { x: 344, y: 665, label: 'مسبح لوتس المركزي' },
       { x: 300, y: 550, label: 'ممشى الحديقة الوسطى' },
-      { x: 209, y: 500, label: 'أكوا بارك' },
+      { x: 209, y: 500, label: 'أكوا بارك مورينو' },
       { x: 256, y: 310, label: 'مركز الغوص' },
       { x: 381, y: 281, label: 'شاطئ البحر والمارينا' },
       { x: 428, y: 340, label: 'بار الشاطئ' },
@@ -654,6 +947,11 @@
       fetchFingerprints();
       startAutoRefresh();
       setupMiniMapClick();
+      initWingsCards();
+      initHotspotSettings();
+      initEmergencyContacts();
+      initFacilitiesGrid();
+      initWeatherControls();
     });
 
     function initWebhookUrl() {
@@ -662,7 +960,6 @@
       const el = document.getElementById('webhookUrlDisplay');
       if (el) el.textContent = webhookUrl;
 
-      // Update script sample with active host
       const scriptCode = document.getElementById('mikrotikScriptCode');
       if (scriptCode) {
         scriptCode.textContent = scriptCode.textContent.replace('http://YOUR-SERVER-IP:3000/api/mikrotik/feed', webhookUrl);
@@ -709,12 +1006,10 @@
     }
 
     function updateKpis() {
-      // 1. Devices Count
       const count = dashboardData.connectedDevicesCount || (dashboardData.activeDevices ? dashboardData.activeDevices.length : 0);
       document.getElementById('kpiDevicesCount').textContent = count;
       document.getElementById('badgeTabDeviceCount').textContent = count;
 
-      // 2. Feed Status
       const isFeedActive = dashboardData.feedStatus === 'active';
       const secAgo = dashboardData.lastFeedSecondsAgo;
       const kpiState = document.getElementById('kpiFeedState');
@@ -732,55 +1027,38 @@
         updateFeedStatusPill('idle', 'في انتظار حزم MikroTik');
       }
 
-      // 3. APs Count
       if (dashboardData.accessPointsCount) {
         document.getElementById('kpiApsCount').textContent = dashboardData.accessPointsCount;
-      }
-
-      // 4. Server Uptime
-      if (dashboardData.serverUptimeSec) {
-        const uptimeM = Math.floor(dashboardData.serverUptimeSec / 60);
-        const uptimeH = Math.floor(uptimeM / 60);
-        const uptimeText = uptimeH > 0 ? `${uptimeH}س ${uptimeM % 60}د` : `${uptimeM} دقيقة`;
-        document.getElementById('kpiServerUptime').textContent = uptimeText;
       }
     }
 
     function updateFeedStatusPill(status, text) {
       const dot = document.getElementById('feedStatusDot');
-      const lbl = document.getElementById('feedStatusText');
-      lbl.textContent = text;
+      const label = document.getElementById('feedStatusText');
+      if (!dot || !label) return;
 
+      label.textContent = text;
       if (status === 'active') {
         dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping';
-      } else if (status === 'idle') {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
-      } else {
+      } else if (status === 'error') {
         dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
       }
-    }
-
-    function resolveNearestZone(x, y) {
-      let nearest = { nameAr: 'الممرات المفتوحة', nameEn: 'Resort Pathways', dist: Infinity };
-      for (const z of RESORT_ZONES) {
-        const d = Math.hypot(z.x - x, z.y - y);
-        if (d < nearest.dist) {
-          nearest = { ...z, dist: d };
-        }
-      }
-      return nearest;
     }
 
     function renderDevicesTable() {
       const tbody = document.getElementById('devicesTableBody');
-      const filter = (document.getElementById('deviceSearchInput').value || '').trim().toLowerCase();
-      const devices = dashboardData.activeDevices || [];
+      const filterInput = document.getElementById('deviceSearchInput');
+      const query = (filterInput ? filterInput.value : '').toLowerCase().trim();
 
+      const devices = dashboardData.activeDevices || [];
       const filtered = devices.filter(d => {
-        if (!filter) return true;
-        const mac = (d.mac || '').toLowerCase();
+        if (!query) return true;
         const zone = resolveNearestZone(d.x, d.y);
-        return mac.includes(filter) || zone.nameAr.includes(filter) || zone.nameEn.toLowerCase().includes(filter);
+        return d.mac.toLowerCase().includes(query) || 
+               zone.nameAr.toLowerCase().includes(query) || 
+               zone.nameEn.toLowerCase().includes(query);
       });
 
       document.getElementById('lblFilteredDeviceCount').textContent = filtered.length;
@@ -788,101 +1066,86 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" class="py-10 text-center text-slate-400">
-              <div class="text-2xl mb-1">🔍</div>
-              <p class="font-bold">لا توجد أجهزة مطابقة للبحث</p>
+            <td colspan="6" class="py-12 text-center text-slate-400">
+              <div class="text-3xl mb-2">📡</div>
+              <p class="font-bold">${query ? 'لا توجد أجهزة مطابقة للبحث' : 'لا توجد أجهزة متصلة حالياً'}</p>
+              <p class="text-[11px] text-slate-500 mt-1">ابدأ محاكاة التجول بالأسفل أو أرسل حزمة من MikroTik.</p>
             </td>
           </tr>
         `;
         return;
       }
 
-      const now = Date.now();
-
       tbody.innerHTML = filtered.map(d => {
+        const isSelected = selectedDeviceMac === d.mac;
         const zone = resolveNearestZone(d.x, d.y);
-        const ageSec = Math.max(0, Math.round((now - (d.lastSeen || now)) / 1000));
         const strongestAp = (d.activeAps && d.activeAps.length > 0) ? d.activeAps[0] : null;
-        const rssi = strongestAp ? strongestAp.rssi : '--';
-        
-        let rssiBadgeColor = 'bg-slate-800 text-slate-400';
-        if (typeof rssi === 'number') {
-          if (rssi >= -65) rssiBadgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-          else if (rssi >= -78) rssiBadgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-          else rssiBadgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-        }
+        const timeAgo = Math.round((Date.now() - d.lastSeen) / 1000);
+        const rssi = strongestAp ? strongestAp.rssi : -99;
+        const signalColor = rssi >= -65 ? 'text-emerald-400' : (rssi >= -75 ? 'text-cyan-300' : 'text-amber-400');
 
         return `
-          <tr class="hover:bg-slate-900/60 transition cursor-pointer" onclick="selectDevice('${d.mac}')">
-            <td class="py-3 px-3">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0"></span>
-                <span class="font-mono font-bold text-white tracking-wide">${d.mac}</span>
-              </div>
+          <tr class="hover:bg-cyan-500/10 cursor-pointer transition ${isSelected ? 'bg-cyan-500/20 border-s-4 border-cyan-400' : ''}" onclick="selectDevice('${d.mac}')">
+            <td class="py-2.5 px-3 font-mono font-bold text-white flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full ${isSelected ? 'bg-amber-400 animate-ping' : 'bg-cyan-400'}"></span>
+              <span>${d.mac}</span>
             </td>
-            <td class="py-3 px-3">
-              <span class="px-2 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold text-[11px]">
-                ${zone.nameAr}
-              </span>
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-200">${currentAdminLang === 'ar' ? zone.nameAr : zone.nameEn}</div>
+              <div class="text-[10px] text-slate-400 font-mono">ID: ${zone.id}</div>
             </td>
-            <td class="py-3 px-3 font-mono text-[11px] text-slate-300">
-              X: <span class="text-white font-bold">${d.x}</span>, Y: <span class="text-white font-bold">${d.y}</span> 
-              <span class="text-slate-500">(${d.pctX}%, ${d.pctY}%)</span>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-300">
+              ${d.x}, ${d.y} <span class="text-slate-500">(${d.pctX}%, ${d.pctY}%)</span>
             </td>
-            <td class="py-3 px-3 font-mono">
-              <div class="flex items-center gap-1.5">
-                <span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ${rssiBadgeColor}">
-                  ${rssi} dBm
-                </span>
-                <span class="text-[10px] text-slate-400 truncate max-w-[80px]">${strongestAp ? strongestAp.id : '--'}</span>
-              </div>
+            <td class="py-2.5 px-3 font-mono">
+              <span class="font-bold ${signalColor}">${strongestAp ? `${strongestAp.id} (${strongestAp.rssi} dBm)` : '—'}</span>
             </td>
-            <td class="py-3 px-3 text-[11px] text-slate-400 font-mono">
-              ${ageSec === 0 ? 'الآن' : `منذ ${ageSec}ث`}
+            <td class="py-2.5 px-3 text-slate-400 text-[11px]">
+              منذ ${timeAgo} ث
             </td>
-            <td class="py-3 px-3 text-center">
-              <div class="flex items-center justify-center gap-1">
-                <button 
-                  onclick="event.stopPropagation(); inspectDeviceOnMap('${d.mac}')" 
-                  class="p-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 transition" 
-                  title="عرض على الخريطة المصغرة"
-                >
-                  🎯
-                </button>
-                <a 
-                  href="/?mac=${encodeURIComponent(d.mac)}&debug=true" 
-                  target="_blank" 
-                  onclick="event.stopPropagation()" 
-                  class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 transition" 
-                  title="فتح في دليل النزيل"
-                >
-                  🗺️
-                </a>
-              </div>
+            <td class="py-2.5 px-3 text-center">
+              <button onclick="event.stopPropagation(); inspectDeviceOnMap('${d.mac}')" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black text-[11px] transition tap-effect">
+                تحديد
+              </button>
             </td>
           </tr>
         `;
       }).join('');
     }
 
+    function resolveNearestZone(canvasX, canvasY) {
+      let nearest = RESORT_ZONES[0];
+      let minDist = Infinity;
+      RESORT_ZONES.forEach(z => {
+        const zX = z.canvasCoords ? z.canvasCoords.x : (z.coords ? (z.coords.x / 100) * 896 : (z.x || 0));
+        const zY = z.canvasCoords ? z.canvasCoords.y : (z.coords ? (z.coords.y / 100) * 1200 : (z.y || 0));
+        const dist = Math.hypot(zX - canvasX, zY - canvasY);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = z;
+        }
+      });
+      return nearest;
+    }
+
     function renderMiniMapPins() {
       const layer = document.getElementById('miniMapApPinsLayer');
-      if (!layer || layer.children.length > 0) return; // already rendered
+      if (!layer) return;
       const aps = dashboardData.accessPoints || [];
 
       layer.innerHTML = aps.map(ap => {
+        const pctX = (ap.x / 896) * 100;
+        const pctY = (ap.y / 1200) * 100;
+
         return `
           <div 
-            style="left: ${ap.pctX}%; top: ${ap.pctY}%;" 
-            class="ap-pin-badge absolute flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-            title="${ap.nameAr || ap.name} (${ap.id})"
+            class="ap-pin-badge absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 group"
+            style="left: ${pctX}%; top: ${pctY}%;"
+            title="${ap.nameAr} (${ap.id})"
+            onclick="spotlightCoordinate(${ap.x}, ${ap.y}, '${ap.nameAr}')"
           >
-            <div class="w-4 h-4 rounded-full bg-cyan-500 border-2 border-slate-950 shadow-lg flex items-center justify-center text-[8px] font-bold text-slate-950">
-              📡
-            </div>
-            <!-- AP Hover Tag -->
-            <div class="hidden group-hover:block absolute bottom-full mb-1 bg-slate-900/95 border border-cyan-500/40 text-cyan-300 text-[9px] px-2 py-0.5 rounded shadow-xl whitespace-nowrap z-50 pointer-events-none">
-              ${ap.id}
+            <div class="w-6 h-6 rounded-full bg-slate-950/80 backdrop-blur-md border border-cyan-400 text-cyan-300 font-mono text-[9px] font-black flex items-center justify-center shadow-lg group-hover:scale-125 transition">
+              ${ap.id.replace('AP-', '')}
             </div>
           </div>
         `;
@@ -924,7 +1187,7 @@
         const timeStr = new Date(l.timestamp).toLocaleTimeString();
         const sampleStr = JSON.stringify(l.sample || [], null, 2);
         return `
-          <div class="p-2 rounded bg-slate-900/80 border border-slate-800 text-[10px]">
+          <div class="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-[10px]">
             <div class="flex items-center justify-between text-slate-400 mb-1">
               <span class="text-cyan-400 font-bold">[${timeStr}] Ingestion Packet #${l.id}</span>
               <span class="text-emerald-400 font-bold">${l.count} records processed</span>
@@ -946,7 +1209,6 @@
       }
       group.classList.remove('hidden');
 
-      // Calculate density per facility
       const counts = {};
       devices.forEach(d => {
         const zone = resolveNearestZone(d.x, d.y);
@@ -956,8 +1218,10 @@
       group.innerHTML = RESORT_ZONES.map(z => {
         const count = counts[z.id] || 0;
         if (count === 0) return '';
-        const pctX = (z.x / 896) * 100;
-        const pctY = (z.y / 1200) * 100;
+        const zX = z.canvasCoords ? z.canvasCoords.x : (z.coords ? (z.coords.x / 100) * 896 : (z.x || 0));
+        const zY = z.canvasCoords ? z.canvasCoords.y : (z.coords ? (z.coords.y / 100) * 1200 : (z.y || 0));
+        const pctX = (zX / 896) * 100;
+        const pctY = (zY / 1200) * 100;
         const radius = Math.min(120, 35 + count * 22);
 
         return `
@@ -974,7 +1238,7 @@
       if (isHeatmapActive) {
         btn.className = 'px-2.5 py-1 rounded-lg bg-rose-500 text-white font-black text-[11px] shadow transition flex items-center gap-1';
       } else {
-        btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white border border-slate-700 text-[11px] font-bold transition flex items-center gap-1';
+        btn.className = 'px-2.5 py-1 rounded-lg glass-pill text-slate-400 hover:text-white text-[11px] font-bold transition flex items-center gap-1';
       }
       updateHeatmapHalos();
     }
@@ -988,36 +1252,319 @@
         btn.className = 'px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition flex items-center gap-1';
       } else {
         layer.style.display = 'none';
-        btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 text-[11px] font-bold transition flex items-center gap-1';
+        btn.className = 'px-2.5 py-1 rounded-lg glass-pill text-slate-500 text-[11px] font-bold transition flex items-center gap-1';
       }
     }
 
     function switchAdminTab(tab) {
-      const devContent = document.getElementById('tabContentDevices');
-      const logContent = document.getElementById('tabContentLogs');
-      const fpContent = document.getElementById('tabContentFingerprints');
-      const devBtn = document.getElementById('tabBtnDevices');
-      const logBtn = document.getElementById('tabBtnLogs');
-      const fpBtn = document.getElementById('tabBtnFingerprints');
-
-      [devContent, logContent, fpContent].forEach(el => el && el.classList.add('hidden'));
-      [devBtn, logBtn, fpBtn].forEach(el => {
-        if (el) el.className = 'px-3.5 py-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 font-bold text-xs flex items-center gap-1.5 transition';
+      activeAdminTab = tab;
+      const tabs = ['devices', 'rooms', 'hotspot', 'emergency', 'facilities', 'weather', 'fingerprints', 'logs'];
+      
+      tabs.forEach(t => {
+        const content = document.getElementById(`tabContent${capitalize(t)}`);
+        const btn = document.getElementById(`tabBtn${capitalize(t)}`);
+        if (content) content.classList.add('hidden');
+        if (btn) btn.className = 'px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0';
       });
 
-      if (tab === 'devices') {
-        if (devContent) devContent.classList.remove('hidden');
-        if (devBtn) devBtn.className = 'px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition';
-      } else if (tab === 'logs') {
-        if (logContent) logContent.classList.remove('hidden');
-        if (logBtn) logBtn.className = 'px-3.5 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition';
-      } else if (tab === 'fingerprints') {
-        if (fpContent) fpContent.classList.remove('hidden');
-        if (fpBtn) fpBtn.className = 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold text-xs flex items-center gap-1.5 transition';
-        renderFingerprintsTable();
+      const activeContent = document.getElementById(`tabContent${capitalize(tab)}`);
+      const activeBtn = document.getElementById(`tabBtn${capitalize(tab)}`);
+      if (activeContent) activeContent.classList.remove('hidden');
+      if (activeBtn) {
+        activeBtn.className = 'px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-xs flex items-center gap-1.5 transition shrink-0 shadow';
+      }
+
+      if (tab === 'fingerprints') renderFingerprintsTable();
+      if (tab === 'hotspot') renderAdminApsTable();
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // ==========================================
+    // Rooms & Wings Tab Logic
+    // ==========================================
+    function initWingsCards() {
+      const container = document.getElementById('adminWingsGrid');
+      if (!container) return;
+
+      const wings = (typeof RoomFinder !== 'undefined' && RoomFinder.WINGS) ? RoomFinder.WINGS : {
+        N: { id: 'N', nameAr: 'المبنى الشمالي (Wing N)', nameEn: 'North Building (Wing N)', coords: { x: 22.45, y: 55.18 }, canvasCoords: { x: 201, y: 662 }, floorsCount: 5, range: '1501-1948', badgeColor: 'bg-cyan-600' },
+        S: { id: 'S', nameAr: 'المبنى الجنوبي (Wing S)', nameEn: 'South Building (Wing S)', coords: { x: 63.11, y: 54.2 }, canvasCoords: { x: 565, y: 650 }, floorsCount: 5, range: '2001-2444', badgeColor: 'bg-amber-500' },
+        M: { id: 'M', nameAr: 'المبنى الرئيسي (Wing M)', nameEn: 'Main Building (Wing M)', coords: { x: 31.55, y: 68.36 }, canvasCoords: { x: 283, y: 820 }, floorsCount: 3, range: '1001-1260', badgeColor: 'bg-emerald-600' },
+        MLS: { id: 'MLS', nameAr: 'المبنى التجاري (Wing MLS)', nameEn: 'Commercial Mall (MLS)', coords: { x: 18.2, y: 86.43 }, canvasCoords: { x: 163, y: 1037 }, floorsCount: 4, range: '2601-2948', badgeColor: 'bg-purple-600' }
+      };
+
+      container.innerHTML = Object.values(wings).map(w => `
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2.5 glass-card-hover">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-white flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg ${w.badgeColor || 'bg-cyan-600'} text-white flex items-center justify-center text-xs font-black">${w.id}</span>
+              <span>${w.nameAr}</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 border border-white/10 text-cyan-300 font-mono font-bold">${w.range || 'الغرف'}</span>
+          </div>
+          <div class="text-[11px] text-slate-400 space-y-1">
+            <div class="flex justify-between">
+              <span>الطوابق المعتمدة:</span>
+              <span class="font-bold text-slate-200">${w.floors ? w.floors.length : (w.floorsCount || 4)} طوابق</span>
+            </div>
+            <div class="flex justify-between">
+              <span>إحداثيات مدخل المبنى:</span>
+              <span class="font-mono text-cyan-400">X: ${w.canvasCoords ? w.canvasCoords.x : 0}, Y: ${w.canvasCoords ? w.canvasCoords.y : 0}</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-end gap-2">
+            <button onclick="spotlightCoordinate(${w.canvasCoords ? w.canvasCoords.x : 200}, ${w.canvasCoords ? w.canvasCoords.y : 600}, '${w.nameAr}')" class="px-2.5 py-1 rounded-lg glass-pill text-cyan-300 text-xs font-bold tap-effect hover:bg-cyan-500/20">
+              تحديد المدخل 📍
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function testAdminRoomLookup() {
+      const input = document.getElementById('adminTestRoomInput');
+      const box = document.getElementById('adminRoomLookupResult');
+      if (!input || !box) return;
+
+      const q = input.value.trim();
+      if (!q) return;
+
+      if (typeof RoomFinder === 'undefined' || !RoomFinder.resolveRoom) {
+        box.classList.remove('hidden');
+        box.innerHTML = `<span class="text-rose-400">RoomFinder engine loading...</span>`;
+        return;
+      }
+
+      const res = RoomFinder.resolveRoom(q);
+      box.classList.remove('hidden');
+
+      if (!res) {
+        box.innerHTML = `
+          <div class="text-rose-400 font-bold">❌ رقم الغرفة (${q}) غير موجود ضمن نطاقات المنتجع المعتمدة (1001-2948).</div>
+        `;
+        return;
+      }
+
+      box.innerHTML = `
+        <div class="flex items-center justify-between text-white border-b border-white/10 pb-2">
+          <span class="font-black text-amber-300 text-sm">🚪 نتيجة الفحص: غرفة [${res.roomNumber}]</span>
+          <span class="px-2 py-0.5 rounded-full ${res.wing.badgeColor || 'bg-cyan-600'} text-white font-bold text-[10px]">${res.wing.nameAr}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-slate-300 text-[11px] pt-1">
+          <div>🏢 الطابق: <span class="font-bold text-white">${res.floor.nameAr}</span></div>
+          <div>🧭 الجانب: <span class="font-bold text-cyan-300">${res.isOdd ? 'جانب أيمن (مطل على البحر/المسبح)' : 'جانب أيسر (مطل على الحدائق)'}</span></div>
+          <div>📍 مدخل المبنى: <span class="font-mono text-slate-200">X: ${res.wing.canvasCoords.x}, Y: ${res.wing.canvasCoords.y}</span></div>
+          <div>🚶‍♂️ توجيه فوري: <span class="text-emerald-400 font-bold">Dijkstra Ready</span></div>
+        </div>
+        <div class="p-2 rounded bg-slate-900 border border-white/5 text-[11px] text-amber-200 mt-2">
+          🗣️ إرشادات الممر: ${res.instructions.ar}
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-1">
+          <button onclick="spotlightCoordinate(${res.wing.canvasCoords.x}, ${res.wing.canvasCoords.y}, '${res.wing.nameAr}')" class="px-3 py-1 rounded-lg glass-pill text-cyan-300 text-xs font-bold tap-effect">
+            تحديد المدخل بالخريطة 📍
+          </button>
+          <a href="/?room=${res.roomNumber}" target="_blank" class="px-3 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-xs tap-effect shadow">
+            فتح وملاحة في التطبيق 🗺️
+          </a>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // Hotspot & Portal Settings
+    // ==========================================
+    function initHotspotSettings() {
+      const saved = localStorage.getItem('moreno_hotspot_url') || 'http://10.5.50.1/login';
+      const input = document.getElementById('adminHotspotUrlInput');
+      const btn = document.getElementById('adminTestPortalBtn');
+      if (input) input.value = saved;
+      if (btn) btn.href = saved;
+    }
+
+    function saveAdminHotspotUrl() {
+      const input = document.getElementById('adminHotspotUrlInput');
+      if (!input) return;
+      const url = input.value.trim() || 'http://10.5.50.1/login';
+      localStorage.setItem('moreno_hotspot_url', url);
+      const btn = document.getElementById('adminTestPortalBtn');
+      if (btn) btn.href = url;
+      alert(`✅ تم حفظ رابط البوابة بنجاح:\n${url}`);
+    }
+
+    function renderAdminApsTable() {
+      const tbody = document.getElementById('adminApsTableBody');
+      if (!tbody) return;
+      const aps = dashboardData.accessPoints || [];
+
+      tbody.innerHTML = aps.map(ap => `
+        <tr class="hover:bg-cyan-500/10 transition">
+          <td class="py-2 px-3 font-bold text-cyan-300">${ap.id}</td>
+          <td class="py-2 px-3 text-white">${ap.nameAr}</td>
+          <td class="py-2 px-3 text-slate-400 font-mono text-[10px]">${ap.bssid}</td>
+          <td class="py-2 px-3 text-center text-slate-300 font-mono">${ap.x}, ${ap.y}</td>
+          <td class="py-2 px-3 text-center">
+            <button onclick="spotlightCoordinate(${ap.x}, ${ap.y}, '${ap.nameAr}')" class="px-2 py-0.5 rounded bg-cyan-600/30 hover:bg-cyan-600 text-cyan-200 hover:text-slate-950 text-[10px] font-bold tap-effect transition">
+              تركيز 🎯
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ==========================================
+    // Emergency Contacts Management
+    // ==========================================
+    function initEmergencyContacts() {
+      const container = document.getElementById('adminContactsGrid');
+      if (!container) return;
+
+      const contacts = (typeof resortContactConfig !== 'undefined' && resortContactConfig.contacts) ? resortContactConfig.contacts : [
+        { id: 'reception', nameAr: 'مكتب الاستقبال الرئيسي (Front Desk)', phone: '+201099887701', extension: '0 / 100', icon: '🛎️', badgeColor: 'bg-amber-500' },
+        { id: 'clinic', nameAr: 'عيادة المنتجع والطوارئ (Clinic)', phone: '+201099887703', extension: '150', icon: '🩺', badgeColor: 'bg-rose-600' },
+        { id: 'security', nameAr: 'الأمن والسلامة وحرس الشاطئ (Security)', phone: '+201099887702', extension: '200', icon: '🛡️', badgeColor: 'bg-blue-600' },
+        { id: 'room_service', nameAr: 'خدمة الغرف وعلاقات النزلاء (Room Service)', phone: '+201099887704', extension: '300', icon: '🛎️', badgeColor: 'bg-emerald-600' }
+      ];
+
+      container.innerHTML = contacts.map(c => `
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2.5 glass-card-hover">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${c.icon}</span>
+              <div>
+                <h4 class="text-xs font-black text-white">${c.nameAr}</h4>
+                <span class="text-[10px] text-slate-400">تحويلة داخلية: <strong class="text-amber-400">${c.extension}</strong></span>
+              </div>
+            </div>
+            <span class="w-3 h-3 rounded-full ${c.badgeColor} shadow-md"></span>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-white/10">
+            <span class="font-mono text-cyan-300 font-bold text-xs">${c.phone}</span>
+            <a href="tel:${c.phone}" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs tap-effect shadow flex items-center gap-1">
+              <span>📞</span>
+              <span>اتصال تجريبي</span>
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==========================================
+    // Facilities & POIs Management
+    // ==========================================
+    function initFacilitiesGrid() {
+      filterAdminPois('all');
+    }
+
+    function filterAdminPois(cat) {
+      activePoiCategory = cat;
+      const container = document.getElementById('adminPoisGrid');
+      if (!container) return;
+
+      const pois = (typeof resortPois !== 'undefined') ? resortPois : RESORT_ZONES;
+      const filtered = pois.filter(p => {
+        if (cat === 'all') return true;
+        return p.category === cat;
+      });
+
+      container.innerHTML = filtered.map(p => {
+        const pX = p.canvasCoords ? p.canvasCoords.x : (p.coords ? Math.round((p.coords.x / 100) * 896) : 300);
+        const pY = p.canvasCoords ? p.canvasCoords.y : (p.coords ? Math.round((p.coords.y / 100) * 1200) : 600);
+        const savedStatus = localStorage.getItem(`poi_status_${p.id}`) || 'open';
+        const isOpen = savedStatus === 'open';
+
+        return `
+          <div class="glass-card rounded-2xl p-3 border border-white/10 flex items-center justify-between gap-2 glass-card-hover">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-8 h-8 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-base shrink-0">${p.icon || '📍'}</span>
+              <div class="min-w-0">
+                <h4 class="text-xs font-bold text-white truncate">${p.nameAr}</h4>
+                <div class="text-[10px] text-slate-400 font-mono">X:${pX}, Y:${pY} • ${p.hours || 'متاح دائماً'}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="togglePoiOpenStatus('${p.id}')" id="poiStatusBtn_${p.id}" class="px-2 py-1 rounded-lg text-[10px] font-bold ${isOpen ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'} tap-effect">
+                ${isOpen ? 'مفتوح 🟢' : 'مغلق 🔴'}
+              </button>
+              <button onclick="spotlightCoordinate(${pX}, ${pY}, '${p.nameAr}')" class="px-2 py-1 rounded-lg glass-pill text-cyan-300 text-[10px] font-bold tap-effect">
+                🎯
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function togglePoiOpenStatus(id) {
+      const current = localStorage.getItem(`poi_status_${id}`) || 'open';
+      const next = current === 'open' ? 'closed' : 'open';
+      localStorage.setItem(`poi_status_${id}`, next);
+      filterAdminPois(activePoiCategory);
+    }
+
+    // ==========================================
+    // Beach Flag & Weather Controls
+    // ==========================================
+    function initWeatherControls() {
+      const flag = localStorage.getItem('moreno_beach_flag') || 'safe';
+      highlightBeachFlagBtn(flag);
+    }
+
+    function setAdminBeachFlag(flag) {
+      localStorage.setItem('moreno_beach_flag', flag);
+      highlightBeachFlagBtn(flag);
+      alert(`✅ تم تحديث راية الشاطئ إلى: [${flag.toUpperCase()}] بنجاح! تم حفظ الحالة لتظهر فوراً لجميع النزلاء.`);
+    }
+
+    function highlightBeachFlagBtn(flag) {
+      const safe = document.getElementById('flagBtnSafe');
+      const caution = document.getElementById('flagBtnCaution');
+      const danger = document.getElementById('flagBtnDanger');
+      if (!safe || !caution || !danger) return;
+
+      safe.className = 'p-3 rounded-xl border border-white/10 bg-slate-900 text-slate-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect';
+      caution.className = 'p-3 rounded-xl border border-white/10 bg-slate-900 text-slate-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect';
+      danger.className = 'p-3 rounded-xl border border-white/10 bg-slate-900 text-slate-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect';
+
+      if (flag === 'safe') {
+        safe.className = 'p-3 rounded-xl border border-emerald-500/50 bg-emerald-500/25 text-emerald-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect ring-2 ring-emerald-500';
+      } else if (flag === 'caution') {
+        caution.className = 'p-3 rounded-xl border border-amber-500/50 bg-amber-500/25 text-amber-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect ring-2 ring-amber-500';
+      } else if (flag === 'danger') {
+        danger.className = 'p-3 rounded-xl border border-rose-500/50 bg-rose-500/25 text-rose-300 text-xs font-bold flex flex-col items-center gap-1 transition tap-effect ring-2 ring-rose-500';
       }
     }
 
+    // Spotlight coordinate on mini map
+    function spotlightCoordinate(x, y, label) {
+      const layer = document.getElementById('miniMapSpotlightLayer');
+      if (!layer) return;
+
+      const pctX = (x / 896) * 100;
+      const pctY = (y / 1200) * 100;
+
+      layer.innerHTML = `
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none" style="left: ${pctX}%; top: ${pctY}%;">
+          <div class="radar-pulse-ring w-12 h-12 rounded-full bg-amber-400"></div>
+          <div class="w-4 h-4 rounded-full bg-amber-400 ring-4 ring-white shadow-2xl flex items-center justify-center">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-950"></span>
+          </div>
+          <div class="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-slate-950/90 text-white font-black text-[10px] whitespace-nowrap shadow-xl border border-amber-400">
+            ${label}
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        layer.innerHTML = '';
+      }, 5000);
+    }
+
+    // ==========================================
+    // Fingerprints Calibration
+    // ==========================================
     async function fetchFingerprints() {
       try {
         const res = await fetch('/api/admin/fingerprints');
@@ -1025,11 +1572,8 @@
         if (data && data.success) {
           fingerprintsList = data.fingerprints || [];
           const countBadge = document.getElementById('lblFpCountBadge');
-          const tabBadge = document.getElementById('badgeTabFpCount');
           if (countBadge) countBadge.textContent = `${fingerprintsList.length} نقطة`;
-          if (tabBadge) tabBadge.textContent = fingerprintsList.length;
           renderFingerprintsTable();
-          renderMiniMapFingerprints();
         }
       } catch (err) {
         console.error('[Admin] Failed to fetch fingerprints:', err);
@@ -1040,27 +1584,28 @@
       const tbody = document.getElementById('fingerprintsTableBody');
       if (!tbody) return;
 
-      if (!fingerprintsList || fingerprintsList.length === 0) {
+      if (fingerprintsList.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="py-8 text-center text-slate-500">
-              لا توجد نقاط مسح مسجلة حالياً. انقر "تسجيل بصمة" ثم انقر على الخريطة لحفظ نقطة جديدة.
-            </td>
+            <td colspan="5" class="py-8 text-center text-slate-500">لا توجد بصمات راديوية مسجلة بعد. انقر على "تسجيل بصمة" لبدء المعايرة.</td>
           </tr>
         `;
         return;
       }
 
       tbody.innerHTML = fingerprintsList.map(fp => {
-        const apKeys = Object.keys(fp.expectedRssi || {});
+        const apCount = fp.expectedRssi ? Object.keys(fp.expectedRssi).length : 0;
         return `
-          <tr class="border-b border-slate-800 hover:bg-white/5 transition">
-            <td class="py-2.5 px-3 font-bold text-purple-400">${fp.id}</td>
-            <td class="py-2.5 px-3 text-white font-sans font-semibold">${fp.label || fp.labelEn || '--'}</td>
-            <td class="py-2.5 px-2 text-center text-cyan-300 font-bold">X:${fp.x}, Y:${fp.y}</td>
-            <td class="py-2.5 px-2 text-center text-emerald-400 font-bold">${apKeys.length} APs</td>
-            <td class="py-2.5 px-3 text-center">
-              <button onclick="deleteFingerprint('${fp.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold transition">
+          <tr class="hover:bg-purple-500/10 transition">
+            <td class="py-2.5 px-3 font-bold text-purple-300">${fp.id}</td>
+            <td class="py-2.5 px-3 text-slate-200 font-bold">${fp.label}</td>
+            <td class="py-2.5 px-2 text-center text-slate-400">${fp.x}, ${fp.y}</td>
+            <td class="py-2.5 px-2 text-center text-emerald-400 font-bold">${apCount} APs</td>
+            <td class="py-2.5 px-3 text-center space-x-1">
+              <button onclick="spotlightCoordinate(${fp.x}, ${fp.y}, '${fp.label}')" class="px-2 py-0.5 rounded bg-purple-600/30 text-purple-300 text-[10px] font-bold tap-effect">
+                معاينة 🎯
+              </button>
+              <button onclick="deleteFingerprint('${fp.id}')" class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold tap-effect">
                 حذف ✕
               </button>
             </td>
@@ -1069,36 +1614,16 @@
       }).join('');
     }
 
-    function renderMiniMapFingerprints() {
-      document.querySelectorAll('.fp-pin-marker').forEach(el => el.remove());
-      const container = document.getElementById('miniMapContainer');
-      if (!container) return;
-
-      fingerprintsList.forEach(fp => {
-        const pin = document.createElement('div');
-        pin.className = 'fp-pin-marker absolute -translate-x-1/2 -translate-y-1/2 z-25 cursor-pointer';
-        pin.style.left = `${fp.pctX}%`;
-        pin.style.top = `${fp.pctY}%`;
-        pin.title = `🎯 ${fp.label} (${fp.id})`;
-        pin.innerHTML = `
-          <div class="w-3.5 h-3.5 rounded-full bg-purple-500 border border-white shadow-md flex items-center justify-center text-[7px] text-white font-bold" title="${fp.label}">
-            🎯
-          </div>
-        `;
-        container.appendChild(pin);
-      });
-    }
-
     function toggleRecordFingerprintMode() {
       isRecordFpMode = !isRecordFpMode;
       const btn = document.getElementById('btnRecordFingerprintMode');
       const lbl = document.getElementById('lblRecordFp');
       if (isRecordFpMode) {
-        btn.className = 'px-2.5 py-1 rounded-lg bg-purple-600 text-white font-black text-[11px] shadow-lg transition flex items-center gap-1 animate-pulse';
-        lbl.textContent = '🎯 انقر على الخريطة لتسجيل البصمة';
-        switchAdminTab('fingerprints');
+        btn.className = 'px-2.5 py-1 rounded-lg bg-purple-600 text-white font-black text-[11px] shadow transition flex items-center gap-1 animate-pulse';
+        lbl.textContent = 'انقر بالخريطة للتسجيل 🎯';
+        alert('🎯 تم تفعيل وضع المعايرة: انقر على أي نقطة في الخريطة المصغرة لتسجيل بصمتها الراديوية فوراً.');
       } else {
-        btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-[11px] font-bold transition flex items-center gap-1';
+        btn.className = 'px-2.5 py-1 rounded-lg glass-pill text-purple-300 hover:text-white border-purple-500/40 text-[11px] font-bold transition flex items-center gap-1';
         lbl.textContent = 'تسجيل بصمة';
       }
     }
@@ -1116,7 +1641,6 @@
       const label = customLabel || prompt(`تسجيل بصمة راديوية عند (${canvasX}, ${canvasY}): أدخل اسم النقطة:`, `نقطة مسح (${canvasX}, ${canvasY})`);
       if (!label) return;
 
-      // Sample active RSSIs from all configured APs based on path loss
       const expectedRssi = {};
       const aps = dashboardData.accessPoints || [];
       aps.forEach(ap => {
@@ -1167,6 +1691,9 @@
       }
     }
 
+    // ==========================================
+    // Device Inspection & Mini Map Setup
+    // ==========================================
     function selectDevice(mac) {
       selectedDeviceMac = mac;
       renderDevicesTable();
@@ -1212,8 +1739,7 @@
       if (!container) return;
 
       container.addEventListener('click', (e) => {
-        // Prevent click if clicking marker pin
-        if (e.target.closest('.device-dot-marker') || e.target.closest('.ap-pin-marker') || e.target.closest('.fp-pin-marker')) return;
+        if (e.target.closest('.device-dot-marker') || e.target.closest('.ap-pin-badge')) return;
 
         const rect = container.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
@@ -1261,9 +1787,7 @@
       document.getElementById('lblRoamingText').textContent = 'إيقاف التجول ⏸️';
       document.getElementById('btnStartRoaming').className = 'tap-effect py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition';
 
-      const mockMac = 'B8:27:EB:55:44:33';
       roamingStepIdx = 0;
-
       const runStep = () => {
         const wp = ROAMING_WAYPOINTS[roamingStepIdx % ROAMING_WAYPOINTS.length];
         roamingStepIdx++;
