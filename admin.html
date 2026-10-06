@@ -496,14 +496,14 @@
               <input 
                 type="text" 
                 id="adminHotspotUrlInput" 
-                value="http://10.5.50.1/login"
-                placeholder="http://10.5.50.1/login" 
+                value="http://192.1.1.1/login"
+                placeholder="http://192.1.1.1/login" 
                 class="flex-1 px-3 py-2 rounded-xl glass-input text-xs text-teal-300 font-mono"
               >
               <button onclick="saveAdminHotspotUrl()" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs shadow-md tap-effect">
                 حفظ الرابط 💾
               </button>
-              <a id="adminTestPortalBtn" href="http://10.5.50.1/login" target="_blank" class="px-3 py-2 rounded-xl glass-pill text-white font-bold text-xs tap-effect">
+              <a id="adminTestPortalBtn" href="http://192.1.1.1/login" target="_blank" class="px-3 py-2 rounded-xl glass-pill text-white font-bold text-xs tap-effect">
                 فتح 🌐
               </a>
             </div>
@@ -1377,7 +1377,7 @@
     // Hotspot & Portal Settings
     // ==========================================
     function initHotspotSettings() {
-      const saved = localStorage.getItem('moreno_hotspot_url') || 'http://10.5.50.1/login';
+      const saved = localStorage.getItem('moreno_hotspot_url') || 'http://192.1.1.1/login';
       const input = document.getElementById('adminHotspotUrlInput');
       const btn = document.getElementById('adminTestPortalBtn');
       if (input) input.value = saved;
@@ -1387,7 +1387,7 @@
     function saveAdminHotspotUrl() {
       const input = document.getElementById('adminHotspotUrlInput');
       if (!input) return;
-      const url = input.value.trim() || 'http://10.5.50.1/login';
+      const url = input.value.trim() || 'http://192.1.1.1/login';
       localStorage.setItem('moreno_hotspot_url', url);
       const btn = document.getElementById('adminTestPortalBtn');
       if (btn) btn.href = url;

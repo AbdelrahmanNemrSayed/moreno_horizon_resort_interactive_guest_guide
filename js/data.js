@@ -3197,7 +3197,7 @@ function generateTurnByTurnSteps(originPoi, targetPoi, lang = 'ar', isStepFree =
 
 // Resort Emergency, Reception & Captive Portal Configuration
 const resortContactConfig = {
-  hotspotLoginUrl: 'http://10.5.50.1/login',
+  hotspotLoginUrl: 'http://192.1.1.1/login',
   emergencyContacts: [
     {
       id: 'reception',
