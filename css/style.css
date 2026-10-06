@@ -241,25 +241,30 @@ header:not(.dark),
 /* Glass Pills, Chips & Quick Landmarks */
 .glass-pill,
 .landmark-preset-btn,
-.voice-chip-btn,
-.map-layer-pill {
+.voice-chip-btn {
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
   transition: all 0.2s ease !important;
 }
 .dark .glass-pill,
-.dark .landmark-preset-btn,
-.dark .voice-chip-btn,
-.dark .map-layer-pill {
+.dark .landmark-preset-btn:not(.bg-amber-500),
+.dark .voice-chip-btn {
   background: rgba(255, 255, 255, 0.06) !important;
+  color: #E2E8F0 !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 .glass-pill:not(.dark),
-.landmark-preset-btn:not(.dark),
-.voice-chip-btn:not(.dark),
-.map-layer-pill:not(.dark) {
-  background: rgba(255, 255, 255, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+.landmark-preset-btn:not(.bg-amber-500):not(.dark),
+.voice-chip-btn:not(.dark) {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #1E293B !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+.landmark-preset-btn.bg-amber-500,
+.landmark-preset-btn.bg-amber-500 * {
+  background: #F59E0B !important;
+  color: #0F172A !important;
+  border-color: #FBBF24 !important;
 }
 
 /* Glass Inputs, Search Bars, Selects */
@@ -1848,50 +1853,83 @@ main {
 
 /* Layer Switcher Pill Buttons */
 .map-layer-pill {
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 9999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   cursor: pointer;
-  border: 1px solid transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  line-height: 1.3;
 }
 
+/* ACTIVE STATE - LIGHT MODE */
 .map-layer-pill.active {
-  background: #0b2545;
-  color: #ffffff;
-  border-color: rgba(221, 161, 94, 0.6);
-  box-shadow: 0 2px 8px rgba(11, 37, 69, 0.35);
+  background: #0B2545 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #DDA15E !important;
+  box-shadow: 0 4px 14px rgba(11, 37, 69, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+.map-layer-pill.active,
+.map-layer-pill.active * {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
 }
 
+/* ACTIVE STATE - DARK MODE */
 .dark .map-layer-pill.active {
-  background: linear-gradient(135deg, #dda15e 0%, #b8860b 100%);
-  color: #0b2545;
-  border-color: #dda15e;
+  background: linear-gradient(135deg, #DDA15E 0%, #B8860B 100%) !important;
+  color: #06101E !important;
+  border: 1px solid #F59E0B !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35) !important;
+}
+.dark .map-layer-pill.active,
+.dark .map-layer-pill.active * {
+  color: #06101E !important;
+  fill: #06101E !important;
 }
 
+/* INACTIVE STATE - LIGHT MODE */
 .map-layer-pill:not(.active) {
-  background: rgba(241, 245, 249, 0.9);
-  color: #475569;
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #1E293B !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+.map-layer-pill:not(.active),
+.map-layer-pill:not(.active) * {
+  color: #1E293B !important;
 }
 
+/* INACTIVE STATE - DARK MODE */
 .dark .map-layer-pill:not(.active) {
-  background: rgba(30, 41, 59, 0.85);
-  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.75) !important;
+  color: #E2E8F0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+.dark .map-layer-pill:not(.active),
+.dark .map-layer-pill:not(.active) * {
+  color: #E2E8F0 !important;
 }
 
+/* HOVER STATES */
 .map-layer-pill:not(.active):hover {
-  background: rgba(226, 232, 240, 1);
-  color: #0b2545;
+  background: #F1F5F9 !important;
+  color: #0B2545 !important;
+  border-color: rgba(221, 161, 94, 0.5) !important;
+  transform: translateY(-1px);
 }
-
 .dark .map-layer-pill:not(.active):hover {
-  background: rgba(51, 65, 85, 0.95);
-  color: #ffffff;
+  background: rgba(30, 41, 59, 0.9) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  transform: translateY(-1px);
 }
 
 /* ================= LIVING VIRTUAL RESORT GAME WORLD STYLES ================= */
