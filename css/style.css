@@ -27,57 +27,397 @@ html, body {
 }
 
 /* ========================================================
-   Ultra-Luxury Glassmorphism System
+   Ultra-Luxury Comprehensive Glassmorphic Theme Engine
    ======================================================== */
+body.dark {
+  background-color: #060E1A !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.16) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.1) 0px, transparent 60%),
+    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(244, 63, 94, 0.1) 0px, transparent 50%) !important;
+  background-attachment: fixed !important;
+}
+
+body:not(.dark) {
+  background-color: #F8FAFC !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.08) 0px, transparent 60%),
+    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.09) 0px, transparent 50%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Glass Header & Navbar */
+header,
 .glass-nav {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
 }
+.dark header,
 .dark .glass-nav {
-  background: rgba(7, 16, 30, 0.78);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  background: rgba(6, 14, 26, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+header:not(.dark),
+.glass-nav:not(.dark) {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06), inset 0 -1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+/* Glass Main Page Major Sections */
+#wayfinder-section,
+#map-section,
+#guestDashboardSection,
+#home > section:first-of-type,
+#home > section.grid > div,
+#home > div[onclick*="openSunShadeModal"] {
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
-.dark .glass-card {
-  background: rgba(11, 23, 41, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+.dark #wayfinder-section,
+.dark #map-section,
+.dark #guestDashboardSection,
+.dark #home > section:first-of-type,
+.dark #home > section.grid > div,
+.dark #home > div[onclick*="openSunShadeModal"] {
+  background: rgba(10, 22, 38, 0.74) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 15px 45px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+#wayfinder-section:not(.dark),
+#map-section:not(.dark),
+#guestDashboardSection:not(.dark),
+#home > section:first-of-type:not(.dark),
+#home > section.grid > div:not(.dark),
+#home > div[onclick*="openSunShadeModal"]:not(.dark) {
+  background: rgba(255, 255, 255, 0.84) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 10px 35px 0 rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
-.glass-pill {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-.dark .glass-pill {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+/* Personal Guest Hub & Meal Tracker Glass Slots */
+#guestDashboardSection div[id^="mealSlot"] {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
-.glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+/* Glass Modals, Action Sheets & Full Drawers */
+.modal > div,
+#smartHubModal > div,
+#guestProfileModal > div,
+#detailModal > div,
+#tableBookingModal > div,
+#guestServicesModal > div,
+#aiChatModal > div,
+#aiItineraryModal > div,
+#promoVideoModal > div,
+#sunShadeModal > div,
+#voiceNavModal > div,
+#hotspotLoginModal > div,
+#emergencyDrawer > div {
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  border-radius: 1.75rem !important;
 }
-.dark .glass-panel {
-  background: rgba(10, 20, 36, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+.dark .modal > div,
+.dark #smartHubModal > div,
+.dark #guestProfileModal > div,
+.dark #detailModal > div,
+.dark #tableBookingModal > div,
+.dark #guestServicesModal > div,
+.dark #aiChatModal > div,
+.dark #aiItineraryModal > div,
+.dark #promoVideoModal > div,
+.dark #sunShadeModal > div,
+.dark #voiceNavModal > div,
+.dark #hotspotLoginModal > div,
+.dark #emergencyDrawer > div {
+  background: rgba(7, 16, 30, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+.modal > div:not(.dark),
+#smartHubModal > div:not(.dark),
+#guestProfileModal > div:not(.dark),
+#detailModal > div:not(.dark),
+#tableBookingModal > div:not(.dark),
+#guestServicesModal > div:not(.dark),
+#aiChatModal > div:not(.dark),
+#aiItineraryModal > div:not(.dark),
+#promoVideoModal > div:not(.dark),
+#sunShadeModal > div:not(.dark),
+#voiceNavModal > div:not(.dark),
+#hotspotLoginModal > div:not(.dark),
+#emergencyDrawer > div:not(.dark) {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Glass Buttons & Cards inside Modals & Hubs */
+#smartHubModal button,
+#emergencyDrawer a.tap-effect,
+#guestServicesModal button.tap-effect,
+#aiChatModal #chatMessages > div,
+#hotspotLoginModal .p-4.rounded-2xl {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-radius: 1rem !important;
+}
+.dark #smartHubModal button:not(#pwaInstallBtn),
+.dark #emergencyDrawer a.tap-effect,
+.dark #guestServicesModal button.tap-effect,
+.dark #aiChatModal #chatMessages > div,
+.dark #hotspotLoginModal .p-4.rounded-2xl {
+  background: rgba(12, 24, 42, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+#smartHubModal button:not(#pwaInstallBtn):not(.dark),
+#emergencyDrawer a.tap-effect:not(.dark),
+#guestServicesModal button.tap-effect:not(.dark),
+#aiChatModal #chatMessages > div:not(.dark),
+#hotspotLoginModal .p-4.rounded-2xl:not(.dark) {
+  background: rgba(248, 250, 252, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Glass Cards and Content Sections */
+.glass-card,
+.poi-card,
+.restaurant-card,
+.facility-card,
+.activity-card,
+.excursion-card,
+.room-card,
+.service-card {
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-radius: 1.5rem !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.dark .glass-card,
+.dark .poi-card,
+.dark .restaurant-card,
+.dark .facility-card,
+.dark .activity-card,
+.dark .excursion-card,
+.dark .room-card,
+.dark .service-card {
+  background: rgba(11, 23, 41, 0.76) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+.glass-card:not(.dark),
+.poi-card:not(.dark),
+.restaurant-card:not(.dark),
+.facility-card:not(.dark),
+.activity-card:not(.dark),
+.excursion-card:not(.dark),
+.room-card:not(.dark),
+.service-card:not(.dark) {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 10px 35px 0 rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Hover Shine on Glass Cards */
+.glass-card:hover,
+.poi-card:hover,
+.restaurant-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Glass Pills, Chips & Quick Landmarks */
+.glass-pill,
+.landmark-preset-btn,
+.voice-chip-btn,
+.map-layer-pill {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  transition: all 0.2s ease !important;
+}
+.dark .glass-pill,
+.dark .landmark-preset-btn,
+.dark .voice-chip-btn,
+.dark .map-layer-pill {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+.glass-pill:not(.dark),
+.landmark-preset-btn:not(.dark),
+.voice-chip-btn:not(.dark),
+.map-layer-pill:not(.dark) {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Glass Inputs, Search Bars, Selects */
+input[type="text"],
+input[type="search"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  transition: all 0.25s ease !important;
+}
+.dark input[type="text"],
+.dark input[type="search"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark select,
+.dark textarea {
+  background: rgba(7, 15, 28, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #F8FAFC !important;
+}
+input[type="text"]:not(.dark),
+input[type="search"]:not(.dark),
+input[type="number"]:not(.dark),
+input[type="date"]:not(.dark),
+select:not(.dark),
+textarea:not(.dark) {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  color: #0F172A !important;
+}
+.dark input[type="text"]:focus,
+.dark input[type="search"]:focus,
+.dark input[type="number"]:focus,
+.dark input[type="date"]:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: rgba(245, 158, 11, 0.7) !important;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.3) !important;
+  background: rgba(8, 18, 34, 0.9) !important;
+}
+
+/* Glass Dropdowns & Autocomplete Menus */
+#mapPoiSearchResults,
+#roomSuggestionsBox,
+#spotlightResults {
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 1.25rem !important;
+}
+.dark #mapPoiSearchResults,
+.dark #roomSuggestionsBox,
+.dark #spotlightResults {
+  background: rgba(7, 16, 30, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+#mapPoiSearchResults:not(.dark),
+#roomSuggestionsBox:not(.dark),
+#spotlightResults:not(.dark) {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Glass Map Viewport Controls Bar & Telemetry HUD */
+.earth-camera-controls,
+.earth-hud-pill,
+.mini-map-radar,
+.turn-nav-bar {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 1rem !important;
+}
+.dark .earth-hud-pill,
+.dark .mini-map-radar,
+.dark .turn-nav-bar {
+  background: rgba(7, 16, 30, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Glass Map Header Toolbars */
+#map-section .bg-slate-100,
+#map-section .dark\:bg-slate-800 {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+.dark #map-section .dark\:bg-slate-800 {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Glass Mobile Bottom Nav */
+.mobile-bottom-nav {
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+}
+.dark .mobile-bottom-nav {
+  background: rgba(6, 14, 26, 0.82) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 -8px 35px rgba(0, 0, 0, 0.5) !important;
+}
+.mobile-bottom-nav:not(.dark) {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.07) !important;
+}
+
+/* Glass Smart Floating Hub Menu */
+.smart-fab-menu {
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  background: rgba(7, 16, 30, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Glass Route Summary Banner */
+.room-route-banner,
+#roomRouteBanner,
+#routeResultBanner {
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border-radius: 1.25rem !important;
+}
+.dark .room-route-banner,
+.dark #roomRouteBanner,
+.dark #routeResultBanner {
+  background: rgba(9, 19, 35, 0.88) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Glass Floating Voice Guide */
+.voice-nav-fab {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Glass Toast Alerts */
+.toast-msg {
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-radius: 1.25rem !important;
+}
+.dark .toast-msg {
+  background: rgba(8, 18, 34, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6) !important;
+}
+.toast-msg:not(.dark) {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15) !important;
 }
 
 .gold-gradient-border {
