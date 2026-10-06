@@ -96,6 +96,18 @@
           <kbd class="hidden xl:inline text-[9px] px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-400">Ctrl+K</kbd>
         </button>
 
+        <!-- Quick Hotspot Internet Voucher Portal Trigger -->
+        <button onclick="App.openHotspotLoginModal()" title="تسجيل الدخول لشبكة الإنترنت / Hotspot Login" aria-label="تسجيل الدخول لشبكة الإنترنت" data-i18n-title="nav_hotspot_title" class="tap-effect flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border border-teal-500/40 bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-bold hover:bg-teal-500/25">
+          <span>📶</span>
+          <span class="hidden sm:inline" data-i18n="nav_hotspot">كارت الإنترنت</span>
+        </button>
+
+        <!-- Emergency & Reception Quick-Contact Trigger -->
+        <button onclick="App.openEmergencyDrawer()" title="طوارئ واستقبال المنتجع / Emergency & Reception" aria-label="طوارئ واستقبال المنتجع" data-i18n-title="nav_emergency_title" class="tap-effect flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-500/25">
+          <span>🆘</span>
+          <span class="hidden sm:inline" data-i18n="nav_emergency">طوارئ واستقبال</span>
+        </button>
+
         <!-- Cinematic Promo Video Trigger (Mobile + Desktop) -->
         <button onclick="App.openCinematicPromoVideo()" title="فيديو ترويجي وسينمائي للمنتجع" aria-label="فيديو ترويجي وسينمائي للمنتجع" data-i18n-title="nav_promo_video_title" class="tap-effect flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-bold hover:bg-amber-500/25">
           <span>🎬</span>
@@ -609,6 +621,34 @@
 
           <!-- Live POI Search Results Dropdown -->
           <div id="mapPoiSearchResults" class="hidden absolute top-full start-0 end-0 mt-1.5 p-1.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-30 max-h-64 overflow-y-auto space-y-1">
+          </div>
+        </div>
+
+        <!-- Room Number Quick Finder Search Bar -->
+        <div class="relative">
+          <div class="relative flex items-center">
+            <span class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none text-amber-500 font-bold text-sm">
+              🚪
+            </span>
+            <input 
+              type="text" 
+              id="roomSearchInput" 
+              placeholder="أدخل رقم الغرفة (مثال: 2015) / Enter Room Number" 
+              data-i18n-ph="room_search_placeholder"
+              class="w-full ps-10 pe-20 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs transition"
+              onkeypress="if(event.key==='Enter') RoomFinder.navigateToRoom(this.value)"
+            >
+            <div class="absolute inset-y-0 end-0 pe-2 flex items-center">
+              <button 
+                type="button"
+                onclick="RoomFinder.navigateToRoom(document.getElementById('roomSearchInput').value)" 
+                class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-brand-gold hover:brightness-110 text-slate-950 font-black text-xs transition tap-effect flex items-center gap-1 shadow-sm"
+                title="تحديد مسار الغرفة فوراً"
+              >
+                <span>🧭</span>
+                <span data-i18n="room_search_btn">دخول</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1428,6 +1468,203 @@
     </div>
   </div>
 
+  <!-- Hotspot Internet Voucher Login Modal -->
+  <div id="hotspotLoginModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="relative w-full max-w-md bg-white dark:bg-brand-cardDark rounded-3xl shadow-2xl border border-teal-500/30 overflow-hidden flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-teal-500/20 via-emerald-500/15 to-amber-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-teal-500 text-white font-black text-xl flex items-center justify-center shadow-md">
+            📶
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white" data-i18n="hotspot_modal_title">
+              بوابة إنترنت النزلاء (Wi-Fi Voucher)
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="hotspot_modal_sub">
+              أدخل بيانات كارت الإنترنت لتفعيل التصفح الكامل
+            </p>
+          </div>
+        </div>
+        <button onclick="App.closeModal('hotspotLoginModal')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center font-bold text-sm transition tap-effect" aria-label="إغلاق">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 sm:p-6 space-y-4">
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+            <span>🎫</span>
+            <span data-i18n="hotspot_hint">أدخل اسم المستخدم وكلمة المرور المطبوعة على كارت الإنترنت لتفعيل التصفح الكامل.</span>
+          </div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            <span class="block font-semibold mb-1">💡 خطوات التفعيل السريعة:</span>
+            <ul class="list-disc list-inside space-y-0.5">
+              <li>تأكد من الاتصال بشبكة <strong>Moreno-Guest-WiFi</strong></li>
+              <li>انقر على الزر بالأسفل للانتقال لصفحة التسجيل MikroTik</li>
+              <li>اكتب كود الكارت وسيتم تفعيل الإنترنت فوراً لجميع المواقع</li>
+            </ul>
+          </div>
+          <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px]">
+            <span class="text-slate-400">معرف جهازك (MAC):</span>
+            <span id="hotspotMacDisplay" class="font-mono font-bold text-teal-600 dark:text-teal-400 text-[10px]">جاري الكشف التلقائي...</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-2 pt-1">
+          <button onclick="App.openMikrotikPortal()" class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600 text-slate-950 font-black text-sm shadow-lg flex items-center justify-center gap-2 tap-effect hover:brightness-105 transition">
+            <span>🌐</span>
+            <span data-i18n="hotspot_btn_open">فتح صفحة تسجيل الدخول (Captive Portal)</span>
+          </button>
+          <button onclick="App.closeModal('hotspotLoginModal')" class="w-full py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs tap-effect">
+            إغلاق
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency & Reception Quick-Contact Drawer -->
+  <div id="emergencyDrawer" class="modal fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="relative w-full max-w-lg bg-white dark:bg-brand-cardDark rounded-t-3xl sm:rounded-3xl shadow-2xl border border-rose-500/30 overflow-hidden flex flex-col max-h-[92vh]">
+      <!-- Header -->
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-rose-500/20 via-rose-600/15 to-amber-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white font-black text-xl flex items-center justify-center shadow-md animate-pulse">
+            🆘
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white" data-i18n="emergency_drawer_title">
+              الاستقبال وخطوط الطوارئ 24/7
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="emergency_drawer_sub">
+              اتصال مباشر ومساعدة فورية على مدار الساعة
+            </p>
+          </div>
+        </div>
+        <button onclick="App.closeModal('emergencyDrawer')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center font-bold text-sm transition tap-effect" aria-label="إغلاق">
+          ✕
+        </button>
+      </div>
+
+      <!-- Quick Action: Share My Coordinates -->
+      <div class="p-3 sm:px-5 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-base">📍</span>
+          <div>
+            <div class="text-xs font-black text-slate-900 dark:text-white">موقعي الحالي في المنتجع</div>
+            <div class="text-[10px] text-slate-500 dark:text-slate-400">شارك موقعك التقريبي فوراً مع طاقم الخدمة للوصول إليك</div>
+          </div>
+        </div>
+        <button onclick="App.shareGuestCoordinates()" class="tap-effect px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm shrink-0">
+          <span>📋</span>
+          <span data-i18n="emergency_share_coords">نسخ موقعي</span>
+        </button>
+      </div>
+
+      <!-- Emergency Contacts List -->
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-2.5">
+        <!-- Reception Desk -->
+        <a href="tel:+201099887701" class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-amber-500 transition group">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xl flex items-center justify-center font-bold">
+              🛎️
+            </div>
+            <div>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                مكتب الاستقبال الرئيسي (Front Desk)
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">داخلي: 0 / 100</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">استفسارات عامة، المغادرة، خدمة الأمتعة والتسجيل</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-black text-xs shadow-sm group-hover:scale-105 transition shrink-0">
+            <span>📞</span>
+            <span>اتصال</span>
+          </div>
+        </a>
+
+        <!-- Clinic & Medical Emergency -->
+        <a href="tel:+201099887703" class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-rose-500/5 dark:bg-rose-950/20 border border-rose-500/20 hover:border-rose-500 transition group">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xl flex items-center justify-center font-bold">
+              🩺
+            </div>
+            <div>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                عيادة المنتجع والإسعاف (Clinic)
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold">داخلي: 150</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">طبيب مقيم 24 ساعة، إسعافات أولية، طوارئ صحية</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 text-white font-black text-xs shadow-sm group-hover:scale-105 transition shrink-0">
+            <span>📞</span>
+            <span>طوارئ</span>
+          </div>
+        </a>
+
+        <!-- Security & Lost & Found -->
+        <a href="tel:+201099887702" class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-blue-500 transition group">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 text-xl flex items-center justify-center font-bold">
+              🛡️
+            </div>
+            <div>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                الأمن والسلامة وحرس الشاطئ (Security)
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold">داخلي: 200</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">دوريات أمنية مدار الساعة، مفقودات، سلامة الشاطئ والمسبح</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 text-white font-black text-xs shadow-sm group-hover:scale-105 transition shrink-0">
+            <span>📞</span>
+            <span>اتصال</span>
+          </div>
+        </a>
+
+        <!-- Room Service & Butler -->
+        <a href="tel:+201099887704" class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-teal-500 transition group">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xl flex items-center justify-center font-bold">
+              🛎️
+            </div>
+            <div>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                خدمة الغرف وعلاقات النزلاء (Room Service)
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">داخلي: 300</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">طلبات الطعام للغرفة، النظافة الفورية، الصيانة والتجهيز</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-black text-xs shadow-sm group-hover:scale-105 transition shrink-0">
+            <span>📞</span>
+            <span>اتصال</span>
+          </div>
+        </a>
+
+        <!-- WhatsApp direct alert action -->
+        <div class="pt-2">
+          <a id="emergencyDrawerWaBtn" href="https://wa.me/201099887701?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%20%D9%81%D9%86%D8%AF%D9%82%20%D9%85%D9%88%D8%B1%D9%8A%D9%86%D9%88%20%D9%87%D9%88%D8%B1%D8%A7%D9%8A%D8%B2%D9%88%D9%86%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D8%B9%D8%A7%D8%AC%D9%84%D8%A9" target="_blank" rel="noopener noreferrer" class="tap-effect w-full py-2.5 px-3 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-black flex items-center justify-center gap-2 transition">
+            <span>💬</span>
+            <span data-i18n="emergency_whatsapp_btn">إرسال بلاغ واتساب مباشر للاستقبال</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Emergency & Reception Quick-Contact Button -->
+  <button onclick="App.openEmergencyDrawer()" id="fabEmergencyHelp" class="emergency-fab tap-effect px-3.5 py-2.5 rounded-full bg-gradient-to-r from-rose-600 via-rose-500 to-rose-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 border border-white/30 shadow-2xl" title="الاستقبال وخطوط الطوارئ المباشرة 24/7 (Emergency & Reception)">
+    <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+    <span class="text-base sm:text-lg">🆘</span>
+    <span class="hidden sm:inline" data-i18n="nav_emergency">طوارئ واستقبال</span>
+    <span class="sm:hidden">طوارئ</span>
+  </button>
+
   <!-- Floating AI Voice Concierge & Wayfinder Button -->
   <button onclick="openVoiceNavigator()" id="fabVoiceGuide" class="voice-nav-fab tap-effect px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 border border-white/30 shadow-2xl" title="تحدث مع المرشد الصوتي الذكي (Voice Wayfinder)">
     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
@@ -1443,6 +1680,7 @@
   <script src="js/map-engine.js?v=41.0"></script>
   <script src="js/voice-concierge.js?v=41.0"></script>
   <script src="js/wayfinder.js?v=41.0"></script>
+  <script src="js/room-finder.js?v=41.0"></script>
   <script src="js/app.js?v=41.0"></script>
 </body>
 </html>

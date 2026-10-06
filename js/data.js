@@ -25,6 +25,20 @@ const i18n = {
     srv_room: "رقم الغرفة:",
     nav_dark_mode_title: "تبديل المظهر الداكن / الفاتح",
     nav_lang_title: "اختيار لغة العرض",
+    nav_hotspot: "كارت الإنترنت",
+    nav_hotspot_title: "تسجيل الدخول لشبكة الإنترنت (Wi-Fi Voucher)",
+    hotspot_modal_title: "بوابة إنترنت النزلاء (Wi-Fi Voucher)",
+    hotspot_modal_sub: "أدخل اسم المستخدم وكلمة المرور المطبوعة على كارت الإنترنت لتفعيل التصفح الكامل.",
+    hotspot_btn_open: "فتح صفحة تسجيل الدخول 🌐",
+    hotspot_hint: "ستفتح صفحة الدخول الخاصة بالشبكة (MikroTik Captive Portal). عند إتمام تسجيل الدخول، ستتمكن من تصفح الإنترنت بحرية.",
+    nav_emergency: "طوارئ واستقبال",
+    nav_emergency_title: "أرقام الطوارئ والاستقبال المباشرة",
+    emergency_drawer_title: "الاستقبال وخطوط الطوارئ 24/7",
+    emergency_drawer_sub: "اتصال مباشر بكافة أقسام المنتجع والمساعدة الفورية",
+    emergency_share_coords: "نسخ ومشاركة موقعي الحالي 📍",
+    emergency_whatsapp_btn: "إرسال بلاغ واتساب للاستقبال 💬",
+    room_search_placeholder: "أدخل رقم الغرفة (مثال: 2015) / Room No.",
+    room_search_btn: "دخول 🧭",
 
     // Audio Concierge
     audio_concierge_title: "المرشد الصوتي الذكي",
@@ -495,6 +509,20 @@ const i18n = {
     srv_room: "Room number:",
     nav_dark_mode_title: "Toggle Dark / Light Mode",
     nav_lang_title: "Select display language",
+    nav_hotspot: "Internet Access",
+    nav_hotspot_title: "Internet Access & Voucher Login",
+    hotspot_modal_title: "Guest Internet Access (Wi-Fi Voucher)",
+    hotspot_modal_sub: "Enter your username & password printed on your internet voucher to unlock full web access.",
+    hotspot_btn_open: "Open Login Page 🌐",
+    hotspot_hint: "This opens the MikroTik captive portal. Once logged in, you will have full high-speed web access.",
+    nav_emergency: "Emergency & Desk",
+    nav_emergency_title: "Emergency & Front Desk Direct Contacts",
+    emergency_drawer_title: "Emergency & Reception 24/7",
+    emergency_drawer_sub: "Direct one-tap contact to all resort departments and urgent assistance",
+    emergency_share_coords: "Share My Coordinates 📍",
+    emergency_whatsapp_btn: "Send WhatsApp Alert to Front Desk 💬",
+    room_search_placeholder: "Enter Room Number (e.g. 2015) / أدخل رقم الغرفة",
+    room_search_btn: "Go 🧭",
 
     // Audio Concierge
     audio_concierge_title: "AI Concierge Audio Guide",
@@ -963,6 +991,22 @@ const i18n = {
     nav_audio: "Звук",
     wf_live_walk_btn: "Начать симуляцию маршрута 🚶‍♂️",
     srv_room: "Номер комнаты:",
+    nav_dark_mode_title: "Сменить тему (Темная / Светлая)",
+    nav_lang_title: "Выбрать язык интерфейса",
+    nav_hotspot: "Интернет",
+    nav_hotspot_title: "Вход в интернет по ваучеру",
+    hotspot_modal_title: "Гостевой интернет (Wi-Fi Voucher)",
+    hotspot_modal_sub: "Введите имя пользователя и пароль, указанные на вашем интернет-ваучере.",
+    hotspot_btn_open: "Открыть страницу входа 🌐",
+    hotspot_hint: "Открывается портал MikroTik. После авторизации вам будет доступен полный доступ в интернет.",
+    nav_emergency: "Экстренные службы",
+    nav_emergency_title: "Экстренные контакты и ресепшн",
+    emergency_drawer_title: "Ресепшн и экстренная помощь 24/7",
+    emergency_drawer_sub: "Прямая связь со всеми службами отеля в одно касание",
+    emergency_share_coords: "Поделиться координатами 📍",
+    emergency_whatsapp_btn: "Отправить сообщение в WhatsApp 💬",
+    room_search_placeholder: "Номер комнаты (напр. 2015)",
+    room_search_btn: "Найти 🧭",
     nav_dark_mode_title: "Переключить темную / светлую тему",
     nav_lang_title: "Выбор языка интерфейса",
 
@@ -1433,6 +1477,22 @@ const i18n = {
     nav_audio: "Ton",
     wf_live_walk_btn: "Gehsimulation starten 🚶‍♂️",
     srv_room: "Zimmernummer:",
+    nav_dark_mode_title: "Dunkel-/Hellmodus umschalten",
+    nav_lang_title: "Anzeigesprache auswählen",
+    nav_hotspot: "Internet-Zugang",
+    nav_hotspot_title: "WLAN-Voucher Login",
+    hotspot_modal_title: "Gäste-Internetzugang (WLAN-Voucher)",
+    hotspot_modal_sub: "Geben Sie Benutzername und Passwort von Ihrem Internet-Gutschein ein.",
+    hotspot_btn_open: "Anmeldeseite öffnen 🌐",
+    hotspot_hint: "Öffnet das MikroTik Captive Portal. Nach dem Login steht der volle Internetzugang zur Verfügung.",
+    nav_emergency: "Notruf & Rezeption",
+    nav_emergency_title: "Direkte Notfall- und Rezeptionskontakte",
+    emergency_drawer_title: "Notruf & Rezeption 24/7",
+    emergency_drawer_sub: "Direktkontakt zu allen Resort-Abteilungen rund um die Uhr",
+    emergency_share_coords: "Meine Koordinaten teilen 📍",
+    emergency_whatsapp_btn: "Notfallmeldung per WhatsApp 💬",
+    room_search_placeholder: "Zimmernummer eingeben (z.B. 2015)",
+    room_search_btn: "Route 🧭",
     nav_dark_mode_title: "Dunkel-/Hellmodus umschalten",
     nav_lang_title: "Sprache auswählen",
 
@@ -3133,4 +3193,67 @@ function generateTurnByTurnSteps(originPoi, targetPoi, lang = 'ar', isStepFree =
   }
 
   return steps;
+}
+
+// Resort Emergency, Reception & Captive Portal Configuration
+const resortContactConfig = {
+  hotspotLoginUrl: 'http://10.5.50.1/login',
+  emergencyContacts: [
+    {
+      id: 'reception',
+      nameAr: 'مكتب الاستقبال الرئيسي والكونسيرج',
+      nameEn: 'Reception Desk & Concierge',
+      nameRu: 'Стойка регистрации и консьерж',
+      nameDe: 'Hauptrezeption & Concierge',
+      icon: '🏛️',
+      roleAr: 'استفسارات عامة، طلبات النزلاء، تسجيل المغادرة',
+      roleEn: 'General inquiries, checkout, luggage service',
+      phone: '+201099887701',
+      extension: '0 / 100',
+      badgeColor: 'bg-amber-500'
+    },
+    {
+      id: 'clinic',
+      nameAr: 'عيادة المنتجع والطوارئ الطبية',
+      nameEn: 'Resort Clinic & Medical Emergency',
+      nameRu: 'Клиника курорта и скорая помощь',
+      nameDe: 'Resort-Klinik & Medizinischer Notdienst',
+      icon: '🩺',
+      roleAr: 'طبيب مقيم 24 ساعة، إسعافات أولية، طوارئ صحية',
+      roleEn: 'Resident doctor 24/7, first aid, medical care',
+      phone: '+201099887703',
+      extension: '150',
+      badgeColor: 'bg-rose-600'
+    },
+    {
+      id: 'security',
+      nameAr: 'الأمن والسلامة وحرس الشاطئ',
+      nameEn: 'Security & Beach Lifeguards',
+      nameRu: 'Служба безопасности и спасатели',
+      nameDe: 'Sicherheitsdienst & Strandrettung',
+      icon: '🛡️',
+      roleAr: 'دوريات أمنية مدار الساعة، مفقودات، سلامة الشاطئ',
+      roleEn: '24/7 Security patrol, lost & found, beach safety',
+      phone: '+201099887702',
+      extension: '200',
+      badgeColor: 'bg-blue-600'
+    },
+    {
+      id: 'room_service',
+      nameAr: 'خدمة الغرف وعلاقات النزلاء',
+      nameEn: 'In-Room Dining & Guest Relations',
+      nameRu: 'Обслуживание в номерах и сервис',
+      nameDe: 'Zimmerservice & Gästebetreuung',
+      icon: '🛎️',
+      roleAr: 'قائمة الطعام بالغرفة، صيانة، تنظيف الغرف',
+      roleEn: 'Room dining orders, housekeeping, maintenance',
+      phone: '+201099887704',
+      extension: '300',
+      badgeColor: 'bg-emerald-600'
+    }
+  ]
+};
+
+if (typeof window !== 'undefined') {
+  window.resortContactConfig = resortContactConfig;
 }

@@ -1464,6 +1464,121 @@ const App = {
     this.openModal('detailModal');
   },
 
+  showToast(msg) {
+    let toast = document.getElementById('appGlobalToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'appGlobalToast';
+      toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-slate-900/95 text-white text-xs font-bold border border-amber-500/40 shadow-2xl backdrop-blur-md pointer-events-none transition-all duration-300 opacity-0 translate-y-3';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.remove('opacity-0', 'translate-y-3');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'translate-y-3');
+    }, 2800);
+  },
+
+  openHotspotLoginModal() {
+    this.playBeep(650);
+    this.openModal('hotspotLoginModal');
+    const urlParams = new URLSearchParams(window.location.search);
+    const mac = urlParams.get('mac') || localStorage.getItem('moreno_guest_mac') || '';
+    const macDisplay = document.getElementById('hotspotMacDisplay');
+    if (macDisplay) {
+      macDisplay.textContent = mac ? `MAC: ${mac}` : (this.currentLang === 'ar' ? 'يتم الكشف التلقائي عبر الشبكة' : 'Detected via network');
+    }
+  },
+
+  closeHotspotLoginModal() {
+    this.closeModal('hotspotLoginModal');
+  },
+
+  openMikrotikPortal() {
+    this.playBeep(800);
+    const configUrl = (window.resortContactConfig && window.resortContactConfig.hotspotLoginUrl) || 'http://10.5.50.1/login';
+    const urlParams = new URLSearchParams(window.location.search);
+    const mac = urlParams.get('mac') || localStorage.getItem('moreno_guest_mac') || '';
+    try {
+      const target = new URL(configUrl, window.location.origin);
+      if (mac) target.searchParams.set('mac', mac);
+      target.searchParams.set('dst', window.location.href);
+      window.location.href = target.toString();
+    } catch {
+      window.location.href = configUrl;
+    }
+  },
+
+  openEmergencyDrawer() {
+    this.playBeep(520);
+    this.openModal('emergencyDrawer');
+  },
+
+  closeEmergencyDrawer() {
+    this.closeModal('emergencyDrawer');
+  },
+
+  async shareGuestCoordinates() {
+    this.playBeep(750);
+    const lang = this.currentLang || 'ar';
+    let room = localStorage.getItem('moreno_guest_room') || (lang === 'ar' ? 'غير مسجل' : 'Not set');
+    let zoneName = (lang === 'ar') ? 'مباني المنتجع والممشى الرئيسي' : 'Main Resort Walkways';
+    let coordsText = '';
+
+    if (window.MapEngine && MapEngine.lastGuestPosition) {
+      const pos = MapEngine.lastGuestPosition;
+      coordsText = `(X: ${pos.x.toFixed(1)}%, Y: ${pos.y.toFixed(1)}%)`;
+      if (window.GeofenceService && typeof GeofenceService.findCurrentZone === 'function') {
+        const zone = GeofenceService.findCurrentZone(pos.x, pos.y);
+        if (zone) {
+          zoneName = zone.nameAr || zone.nameEn || zone.id;
+        }
+      }
+    }
+
+    const shareUrl = window.location.href;
+    const alertMessageAr = `🚨 *بلاغ استفسار وطوارئ نزيل - منتجع مورينو هورايزون*\n` +
+      `🚪 رقم الغرفة: ${room}\n` +
+      `📍 الموقع التقريبي الحالي: ${zoneName} ${coordsText}\n` +
+      `🗺️ رابط الخريطة المباشر: ${shareUrl}\n` +
+      `⏰ التوقيت: ${new Date().toLocaleTimeString('ar-EG')}`;
+
+    const alertMessageEn = `🚨 *Guest Assistance & Emergency Notice - Moreno Horizon Resort*\n` +
+      `🚪 Room Number: ${room}\n` +
+      `📍 Approximate Location: ${zoneName} ${coordsText}\n` +
+      `🗺️ Live Map Link: ${shareUrl}\n` +
+      `⏰ Time: ${new Date().toLocaleTimeString('en-US')}`;
+
+    const textToCopy = (lang === 'ar') ? alertMessageAr : alertMessageEn;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(textToCopy);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = textToCopy;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      this.showToast((lang === 'ar') ? '✅ تم نسخ موقعك وإحداثياتك للمشاركة مع الاستقبال!' : '✅ Location & coordinates copied to clipboard!');
+    } catch (e) {
+      console.warn('[Emergency] Clipboard write failed:', e);
+      this.showToast((lang === 'ar') ? 'تم تحديد الموقع' : 'Location ready');
+    }
+
+    // Dynamic WhatsApp update
+    const waBtn = document.getElementById('emergencyDrawerWaBtn');
+    if (waBtn) {
+      const waNumber = '201099887701';
+      waBtn.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(textToCopy)}`;
+    }
+  },
+
   // Language Switcher
   changeLanguage(lang) {
     this.currentLang = lang;
@@ -3097,6 +3212,12 @@ function scrollToSection(id) {
 function openWhereAmIModal() { App.openWhereAmIModal(); }
 function openWifiModal() { App.openWifiModal(); }
 function openWhatsAppDirect() { App.openWhatsAppDirect(); }
+function openHotspotLoginModal() { App.openHotspotLoginModal(); }
+function closeHotspotLoginModal() { App.closeHotspotLoginModal(); }
+function openMikrotikPortal() { App.openMikrotikPortal(); }
+function openEmergencyDrawer() { App.openEmergencyDrawer(); }
+function closeEmergencyDrawer() { App.closeEmergencyDrawer(); }
+function shareGuestCoordinates() { App.shareGuestCoordinates(); }
 // ========================================================
 // LUXURY WEB AUDIO SYNTHESIS ENGINE (0 EXTERNAL DEPENDENCIES)
 // ========================================================
@@ -4329,6 +4450,12 @@ if (typeof window !== 'undefined') {
   window.toggleAudio = toggleAudio;
   window.changeLanguage = changeLanguage;
   window.openVoiceNavigator = openVoiceNavigator;
+  window.openHotspotLoginModal = openHotspotLoginModal;
+  window.closeHotspotLoginModal = closeHotspotLoginModal;
+  window.openMikrotikPortal = openMikrotikPortal;
+  window.openEmergencyDrawer = openEmergencyDrawer;
+  window.closeEmergencyDrawer = closeEmergencyDrawer;
+  window.shareGuestCoordinates = shareGuestCoordinates;
 }
 
 // Boot Application on DOM Ready
