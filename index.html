@@ -1207,6 +1207,14 @@
   <div class="smart-fab-container" id="smartFabContainer">
     <!-- Radial Pop-out Menu -->
     <div class="smart-fab-menu" id="smartFabMenu">
+      <button onclick="toggleSmartFab(); App.openEmergencyDrawer();" class="smart-fab-item tap-effect !bg-rose-600/90 hover:!bg-rose-500 !text-white !border-rose-400" title="الاستقبال وخطوط الطوارئ 24/7">
+        <span>🆘</span>
+        <span data-i18n="nav_emergency">طوارئ واستقبال 24/7</span>
+      </button>
+      <button onclick="toggleSmartFab(); App.openHotspotLoginModal();" class="smart-fab-item tap-effect !bg-teal-600/90 hover:!bg-teal-500 !text-white !border-teal-400" title="تسجيل الدخول لكارت الإنترنت">
+        <span>📶</span>
+        <span data-i18n="nav_hotspot">كارت الإنترنت</span>
+      </button>
       <button onclick="takeMeToMyRoom()" class="smart-fab-item tap-effect" title="العودة لغرفتي فوراً">
         <span>🏠</span>
         <span data-i18n="fab_my_room">خذني إلى غرفتي 🏠</span>
@@ -1214,10 +1222,6 @@
       <button onclick="openWhereAmIModal()" class="smart-fab-item tap-effect" title="اختر أقرب معلم؛ لا يستخدم تحديد GPS" data-i18n-title="wai_sub">
         <span>📍</span>
         <span data-i18n="fab_where_am_i">أين أنا الآن؟ 📍</span>
-      </button>
-      <button onclick="openWifiModal()" class="smart-fab-item tap-effect" title="واي فاي المنتجع السريع">
-        <span>📶</span>
-        <span data-i18n="fab_wifi">واي فاي المنتجع 📶</span>
       </button>
       <button onclick="toggleSmartFab(); App.openCinematicPromoVideo();" class="smart-fab-item tap-effect" title="فيديو ترويجي وسينمائي للمنتجع">
         <span>🎬</span>
@@ -1656,14 +1660,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Floating Emergency & Reception Quick-Contact Button -->
-  <button onclick="App.openEmergencyDrawer()" id="fabEmergencyHelp" class="emergency-fab tap-effect px-3.5 py-2.5 rounded-full bg-gradient-to-r from-rose-600 via-rose-500 to-rose-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 border border-white/30 shadow-2xl" title="الاستقبال وخطوط الطوارئ المباشرة 24/7 (Emergency & Reception)">
-    <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
-    <span class="text-base sm:text-lg">🆘</span>
-    <span class="hidden sm:inline" data-i18n="nav_emergency">طوارئ واستقبال</span>
-    <span class="sm:hidden">طوارئ</span>
-  </button>
 
   <!-- Floating AI Voice Concierge & Wayfinder Button -->
   <button onclick="openVoiceNavigator()" id="fabVoiceGuide" class="voice-nav-fab tap-effect px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 border border-white/30 shadow-2xl" title="تحدث مع المرشد الصوتي الذكي (Voice Wayfinder)">

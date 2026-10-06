@@ -77,7 +77,8 @@ const VoiceConcierge = {
   init() {
     if (this.isInitialized) return;
     this.setupSpeechRecognition();
-    this.createFloatingUi();
+    const existing = document.getElementById('voiceConciergeFloatingBar');
+    if (existing) existing.remove();
     this.bindEvents();
     this.isInitialized = true;
     console.log('[VoiceConcierge] AI Voice Concierge & Audio Navigation initialized.');
