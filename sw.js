@@ -3,7 +3,7 @@
  * Network-First Strategy with Offline Cache Fallback
  */
 
-const CACHE_NAME = 'moreno-guide-v52';
+const CACHE_NAME = 'moreno-guide-v53';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -18,7 +18,7 @@ const ASSETS_TO_CACHE = [
   './assets/icons/favicon-32x32.png',
   './assets/icons/favicon-16x16.png',
   './css/style.css',
-  './css/style.css?v=43.0',
+  './css/style.css?v=44.0',
   './js/data.js?v=42.0',
   './js/virtual-resort-map.js?v=42.0',
   './js/geofence-service.js?v=42.0',
