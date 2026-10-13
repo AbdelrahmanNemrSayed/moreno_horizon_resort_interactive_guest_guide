@@ -1,6 +1,6 @@
 /**
  * Moreno Horizon Spa & Resort - Voice-Driven AI Concierge & Audio Navigation
- * 
+ *
  * Capabilities:
  * 1. Multilingual Speech Recognition (Web Speech API - SpeechRecognition / webkitSpeechRecognition):
  *    - Arabic (ar-EG / ar-SA), English (en-US), Russian (ru-RU), German (de-DE)
@@ -21,80 +21,105 @@ const VoiceConcierge = {
   isListening: false,
   isMuted: false,
   recognition: null,
-  activeLanguage: 'ar-EG',
-  lastSpokenText: '',
+  activeLanguage: "ar-EG",
+  lastSpokenText: "",
   lastSpokenStepIdx: -1,
   audioCtx: null,
 
   // Multilingual voice locale mapping
   LANG_MAP: {
-    ar: 'ar-EG',
-    en: 'en-US',
-    ru: 'ru-RU',
-    de: 'de-DE'
+    ar: "ar-EG",
+    en: "en-US",
+    ru: "ru-RU",
+    de: "de-DE",
   },
 
   // Language responses dictionary
   RESPONSES: {
     ar: {
-      listening: 'أنا أستمع إليك الآن... تحدث بوجهتك أو سؤالك 🎙️',
-      processing: 'جاري فهم طلبك...',
-      unrecognized: 'عذراً، لم أستطع تحديد الوجهة بدقة. يرجى ذكر اسم المكان مثل (مطعم سيرينا، مسبح لوتس، الشاطئ، الاستقبال).',
-      routeStart: (name, meters) => `بدء الملاحة إلى ${name}، المسافة ${meters} متراً.`,
-      arrival: (name) => `لقد وصلت بنجاح إلى ${name}! نتمنى لك قضاء وقت ممتع في مورينو هورايزون.`,
-      micDenied: 'يرجى السماح بالوصول للميكروفون من إعدادات المتصفح للاستفادة من المرشد الصوتي.',
-      unsupported: 'خاصية التعرف على الصوت غير مدعومة في متصفحك الحالي.'
+      listening: "أنا سامعك يا فندم، اتفضل قول رايح فين... 🎙️",
+      processing: "ثواني وبشوف لحضرتك المكان...",
+      unrecognized:
+        "معلش، مسمعتش المكان كويس. تحب تروح فين يا فندم؟ زي: مطعم سيرينا، حمام سباحة لوتس، البحر، أو الاستقبال.",
+      routeStart: (name, meters) =>
+        `يلا بينا! رايحين دلوقتي لـ ${name}، قدامنا حوالي ${meters} متر.`,
+      arrival: (name) =>
+        `حمد الله ع السلامة! نورت ${name}، اتفضل استمتع بوقتك في مورينو هورايزون.`,
+      micDenied:
+        "يا ريت تفعل إذن الميكروفون من إعدادات المتصفح علشان أقدر أسمعك.",
+      unsupported: "خاصية التعرف على الصوت مش مدعومة في المتصفح ده.",
     },
     en: {
-      listening: 'Listening... Say your destination or question 🎙️',
-      processing: 'Processing your request...',
-      unrecognized: 'Sorry, I could not recognize that location. Try saying Sirena Restaurant, Lotus Pool, Beach, or Reception.',
-      routeStart: (name, meters) => `Starting navigation to ${name}, distance is ${meters} meters.`,
-      arrival: (name) => `You have arrived at ${name}! Enjoy your time at Moreno Horizon Resort.`,
-      micDenied: 'Please allow microphone access in your browser settings to use the voice concierge.',
-      unsupported: 'Speech recognition is not supported in this browser.'
+      listening: "Listening... Say your destination or question 🎙️",
+      processing: "Processing your request...",
+      unrecognized:
+        "Sorry, I could not recognize that location. Try saying Sirena Restaurant, Lotus Pool, Beach, or Reception.",
+      routeStart: (name, meters) =>
+        `Starting navigation to ${name}, distance is ${meters} meters.`,
+      arrival: (name) =>
+        `You have arrived at ${name}! Enjoy your time at Moreno Horizon Resort.`,
+      micDenied:
+        "Please allow microphone access in your browser settings to use the voice concierge.",
+      unsupported: "Speech recognition is not supported in this browser.",
     },
     ru: {
-      listening: 'Слушаю вас... Назовите место назначения 🎙️',
-      processing: 'Обработка вашего запроса...',
-      unrecognized: 'Извините, не удалось определить место. Попробуйте сказать: Ресторан Сирена, Бассейн Лотос, Пляж или Ресепшн.',
-      routeStart: (name, meters) => `Начало навигации к ${name}, расстояние ${meters} метров.`,
-      arrival: (name) => `Вы успешно прибыли в ${name}! Приятного отдыха в Moreno Horizon.`,
-      micDenied: 'Пожалуйста, разрешите доступ к микрофону в настройках браузера.',
-      unsupported: 'Распознавание речи не поддерживается в этом браузере.'
+      listening: "Слушаю вас... Назовите место назначения 🎙️",
+      processing: "Обработка вашего запроса...",
+      unrecognized:
+        "Извините, не удалось определить место. Попробуйте сказать: Ресторан Сирена, Бассейн Лотос, Пляж или Ресепшн.",
+      routeStart: (name, meters) =>
+        `Начало навигации к ${name}, расстояние ${meters} метров.`,
+      arrival: (name) =>
+        `Вы успешно прибыли в ${name}! Приятного отдыха в Moreno Horizon.`,
+      micDenied:
+        "Пожалуйста, разрешите доступ к микрофону в настройках браузера.",
+      unsupported: "Распознавание речи не поддерживается в этом браузере.",
     },
     de: {
-      listening: 'Ich höre zu... Nennen Sie Ihr Ziel 🎙️',
-      processing: 'Verarbeite Ihre Anfrage...',
-      unrecognized: 'Entschuldigung, ich konnte das Ziel nicht erkennen. Versuchen Sie Sirena Restaurant, Lotus Pool, Strand oder Rezeption.',
-      routeStart: (name, meters) => `Navigation zu ${name} gestartet, Entfernung beträgt ${meters} Meter.`,
-      arrival: (name) => `Sie haben Ihr Ziel ${name} erreicht! Einen schönen Aufenthalt im Moreno Horizon.`,
-      micDenied: 'Bitte erlauben Sie den Mikrofonzugriff in Ihren Browsereinstellungen.',
-      unsupported: 'Spracherkennung wird in diesem Browser nicht unterstützt.'
-    }
+      listening: "Ich höre zu... Nennen Sie Ihr Ziel 🎙️",
+      processing: "Verarbeite Ihre Anfrage...",
+      unrecognized:
+        "Entschuldigung, ich konnte das Ziel nicht erkennen. Versuchen Sie Sirena Restaurant, Lotus Pool, Strand oder Rezeption.",
+      routeStart: (name, meters) =>
+        `Navigation zu ${name} gestartet, Entfernung beträgt ${meters} Meter.`,
+      arrival: (name) =>
+        `Sie haben Ihr Ziel ${name} erreicht! Einen schönen Aufenthalt im Moreno Horizon.`,
+      micDenied:
+        "Bitte erlauben Sie den Mikrofonzugriff in Ihren Browsereinstellungen.",
+      unsupported: "Spracherkennung wird in diesem Browser nicht unterstützt.",
+    },
   },
 
   init() {
     if (this.isInitialized) return;
     this.setupSpeechRecognition();
-    const existing = document.getElementById('voiceConciergeFloatingBar');
+    const existing = document.getElementById("voiceConciergeFloatingBar");
     if (existing) existing.remove();
     this.bindEvents();
     this.isInitialized = true;
-    console.log('[VoiceConcierge] AI Voice Concierge & Audio Navigation initialized.');
+    console.log(
+      "[VoiceConcierge] AI Voice Concierge & Audio Navigation initialized.",
+    );
   },
 
   getCurrentLangKey() {
-    if (typeof App !== 'undefined' && App.currentLang && this.LANG_MAP[App.currentLang]) {
+    if (
+      typeof App !== "undefined" &&
+      App.currentLang &&
+      this.LANG_MAP[App.currentLang]
+    ) {
       return App.currentLang;
     }
-    return 'ar';
+    return "ar";
   },
 
   setupSpeechRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      console.warn('[VoiceConcierge] Web Speech API SpeechRecognition is not supported in this browser.');
+      console.warn(
+        "[VoiceConcierge] Web Speech API SpeechRecognition is not supported in this browser.",
+      );
       this.recognition = null;
       return;
     }
@@ -107,32 +132,35 @@ const VoiceConcierge = {
 
       this.recognition.onstart = () => {
         this.isListening = true;
-        this.updateUiState('listening');
+        this.updateUiState("listening");
       };
 
       this.recognition.onresult = (event) => {
         if (!event.results || event.results.length === 0) return;
         const transcript = event.results[0][0].transcript;
-        console.log('[VoiceConcierge] Transcribed speech:', transcript);
+        console.log("[VoiceConcierge] Transcribed speech:", transcript);
         this.updateTranscriptUi(transcript);
         this.handleSpokenQuery(transcript);
       };
 
       this.recognition.onerror = (event) => {
-        console.warn('[VoiceConcierge] Recognition event:', event.error);
+        console.warn("[VoiceConcierge] Recognition event:", event.error);
         this.isListening = false;
-        this.updateUiState('idle');
-        if (event.error === 'not-allowed') {
-          this.showToast(this.getLocalizedText('micDenied'));
+        this.updateUiState("idle");
+        if (event.error === "not-allowed") {
+          this.showToast(this.getLocalizedText("micDenied"));
         }
       };
 
       this.recognition.onend = () => {
         this.isListening = false;
-        this.updateUiState('idle');
+        this.updateUiState("idle");
       };
     } catch (err) {
-      console.warn('[VoiceConcierge] Speech recognition initialization failed:', err);
+      console.warn(
+        "[VoiceConcierge] Speech recognition initialization failed:",
+        err,
+      );
       this.recognition = null;
     }
   },
@@ -140,12 +168,12 @@ const VoiceConcierge = {
   getLocalizedText(key) {
     const lang = this.getCurrentLangKey();
     const dict = this.RESPONSES[lang] || this.RESPONSES.ar;
-    return dict[key] || '';
+    return dict[key] || "";
   },
 
   toggleListening() {
     if (!this.recognition) {
-      this.showToast(this.getLocalizedText('unsupported'));
+      this.showToast(this.getLocalizedText("unsupported"));
       return;
     }
 
@@ -156,17 +184,17 @@ const VoiceConcierge = {
         // Safe catch
       }
       this.isListening = false;
-      this.updateUiState('idle');
+      this.updateUiState("idle");
     } else {
       const langKey = this.getCurrentLangKey();
-      this.recognition.lang = this.LANG_MAP[langKey] || 'ar-EG';
+      this.recognition.lang = this.LANG_MAP[langKey] || "ar-EG";
       try {
         this.recognition.start();
-        this.showToast(this.getLocalizedText('listening'));
+        this.showToast(this.getLocalizedText("listening"));
       } catch (err) {
-        console.warn('[VoiceConcierge] Could not start recognition:', err);
+        console.warn("[VoiceConcierge] Could not start recognition:", err);
         this.isListening = false;
-        this.updateUiState('idle');
+        this.updateUiState("idle");
       }
     }
   },
@@ -176,15 +204,19 @@ const VoiceConcierge = {
     if (this.isMuted && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
-    const btnMute = document.getElementById('voiceConciergeMuteBtn');
+    const btnMute = document.getElementById("voiceConciergeMuteBtn");
     if (btnMute) {
-      btnMute.innerHTML = this.isMuted ? '🔇' : '🔊';
-      btnMute.classList.toggle('opacity-50', this.isMuted);
+      btnMute.innerHTML = this.isMuted ? "🔇" : "🔊";
+      btnMute.classList.toggle("opacity-50", this.isMuted);
     }
     const lang = this.getCurrentLangKey();
     const msg = this.isMuted
-      ? (lang === 'ar' ? 'تم كتم الصوت الإرشادي 🔇' : 'Audio guidance muted 🔇')
-      : (lang === 'ar' ? 'تم تفعيل الصوت الإرشادي 🔊' : 'Audio guidance enabled 🔊');
+      ? lang === "ar"
+        ? "تم كتم الصوت الإرشادي 🔇"
+        : "Audio guidance muted 🔇"
+      : lang === "ar"
+        ? "تم تفعيل الصوت الإرشادي 🔊"
+        : "Audio guidance enabled 🔊";
     this.showToast(msg);
   },
 
@@ -193,17 +225,17 @@ const VoiceConcierge = {
    * Maps natural language questions to POIs in resortPois
    */
   handleSpokenQuery(rawTranscript) {
-    if (!rawTranscript || typeof rawTranscript !== 'string') return;
+    if (!rawTranscript || typeof rawTranscript !== "string") return;
     const query = rawTranscript.trim();
-    this.updateUiState('processing');
+    this.updateUiState("processing");
 
     const matchedPoi = this.parseQueryIntent(query);
 
     if (matchedPoi) {
       this.executeNavigationIntent(matchedPoi);
     } else {
-      this.speak(this.getLocalizedText('unrecognized'));
-      this.updateTranscriptUi(query, this.getLocalizedText('unrecognized'));
+      this.speak(this.getLocalizedText("unrecognized"));
+      this.updateTranscriptUi(query, this.getLocalizedText("unrecognized"));
     }
   },
 
@@ -211,98 +243,224 @@ const VoiceConcierge = {
    * Normalizes Arabic & multilingual search strings
    */
   normalizeText(str) {
-    if (!str) return '';
+    if (!str) return "";
     return str
       .toLowerCase()
-      .replace(/[أإآ]/g, 'ا')
-      .replace(/[ى]/g, 'ي')
-      .replace(/[ة]/g, 'ه')
-      .replace(/[ؤئ]/g, 'ء')
-      .replace(/[^\w\s\u0600-\u06FF]/gi, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/[أإآ]/g, "ا")
+      .replace(/[ى]/g, "ي")
+      .replace(/[ة]/g, "ه")
+      .replace(/[ؤئ]/g, "ء")
+      .replace(/[^\w\s\u0600-\u06FF]/gi, " ")
+      .replace(/\s+/g, " ")
       .trim();
   },
 
   parseQueryIntent(query) {
-    if (typeof resortPois === 'undefined' || !Array.isArray(resortPois)) return null;
+    if (typeof resortPois === "undefined" || !Array.isArray(resortPois))
+      return null;
 
     const normQuery = this.normalizeText(query);
-    const words = normQuery.split(' ');
+    const words = normQuery.split(" ");
 
     // 1. Category heuristics
     // Restroom / WC
-    const wcKeywords = ['حمام', 'حمامات', 'تواليت', 'دوره مياه', 'دورات مياه', 'toilet', 'restroom', 'wc', 'туалет', 'klosett'];
-    if (wcKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return this.findClosestPoiByCategory(['wc', 'restroom']) || resortPois.find(p => p.id === '11' || p.id === '12');
+    const wcKeywords = [
+      "حمام",
+      "حمامات",
+      "تواليت",
+      "دوره مياه",
+      "دورات مياه",
+      "toilet",
+      "restroom",
+      "wc",
+      "туалет",
+      "klosett",
+    ];
+    if (wcKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return (
+        this.findClosestPoiByCategory(["wc", "restroom"]) ||
+        resortPois.find((p) => p.id === "11" || p.id === "12")
+      );
     }
 
     // Swimming Pool
-    const poolKeywords = ['مسبح', 'حمامات سباحه', 'بسين', 'حمام سباحه', 'pool', 'swimming pool', 'бассейн', 'schwimmbad'];
-    if (poolKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      if (normQuery.includes('واحه') || normQuery.includes('oasis')) {
-        return resortPois.find(p => p.id === '16') || resortPois.find(p => p.id === '11');
+    const poolKeywords = [
+      "مسبح",
+      "حمامات سباحه",
+      "بسين",
+      "حمام سباحه",
+      "pool",
+      "swimming pool",
+      "бассейн",
+      "schwimmbad",
+    ];
+    if (poolKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      if (normQuery.includes("واحه") || normQuery.includes("oasis")) {
+        return (
+          resortPois.find((p) => p.id === "16") ||
+          resortPois.find((p) => p.id === "11")
+        );
       }
-      return resortPois.find(p => p.id === '11') || resortPois.find(p => p.category === 'pool');
+      return (
+        resortPois.find((p) => p.id === "11") ||
+        resortPois.find((p) => p.category === "pool")
+      );
     }
 
     // Beach & Marina
-    const beachKeywords = ['شاطيء', 'شاطي', 'بحر', 'مارينا', 'مرسى', 'beach', 'marina', 'sea', 'пляж', 'strand'];
-    if (beachKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '1');
+    const beachKeywords = [
+      "شاطيء",
+      "شاطي",
+      "بحر",
+      "مارينا",
+      "مرسى",
+      "beach",
+      "marina",
+      "sea",
+      "пляж",
+      "strand",
+    ];
+    if (beachKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "1");
     }
 
     // Lobby & Reception
-    const lobbyKeywords = ['استقبال', 'لوبي', 'ريسبشن', 'مكتب الاستقبال', 'lobby', 'reception', 'ресепшн', 'rezeption'];
-    if (lobbyKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === 'M');
+    const lobbyKeywords = [
+      "استقبال",
+      "لوبي",
+      "ريسبشن",
+      "مكتب الاستقبال",
+      "lobby",
+      "reception",
+      "ресепшн",
+      "rezeption",
+    ];
+    if (lobbyKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "M");
     }
 
     // Clinic & Pharmacy
-    const clinicKeywords = ['عياده', 'دكتور', 'طبيب', 'صيدليه', 'اسعاف', 'clinic', 'doctor', 'pharmacy', 'клиника', 'arzt'];
-    if (clinicKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '15');
+    const clinicKeywords = [
+      "عياده",
+      "دكتور",
+      "طبيب",
+      "صيدليه",
+      "اسعاف",
+      "clinic",
+      "doctor",
+      "pharmacy",
+      "клиника",
+      "arzt",
+    ];
+    if (clinicKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "15");
     }
 
     // Aqua park
-    const aquaKeywords = ['اكوا بارك', 'اكوابارك', 'زحاليق', 'العاب مائيه', 'aqua park', 'water park', 'аквапарк', 'rutschen'];
-    if (aquaKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '3');
+    const aquaKeywords = [
+      "اكوا بارك",
+      "اكوابارك",
+      "زحاليق",
+      "العاب مائيه",
+      "aqua park",
+      "water park",
+      "аквапарк",
+      "rutschen",
+    ];
+    if (aquaKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "3");
     }
 
     // Tennis & Sports
-    const tennisKeywords = ['تنس', 'ملاعب تنس', 'كوره', 'tennis', 'tennis court', 'теннис'];
-    if (tennisKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '10');
+    const tennisKeywords = [
+      "تنس",
+      "ملاعب تنس",
+      "كوره",
+      "tennis",
+      "tennis court",
+      "теннис",
+    ];
+    if (tennisKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "10");
     }
 
     // Spa & Gym
-    const spaKeywords = ['سبا', 'مساج', 'جيم', 'لياقه', 'جاكوزي', 'سونا', 'spa', 'gym', 'wellness', 'спа', 'sauna'];
-    if (spaKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '9');
+    const spaKeywords = [
+      "سبا",
+      "مساج",
+      "جيم",
+      "لياقه",
+      "جاكوزي",
+      "سونا",
+      "spa",
+      "gym",
+      "wellness",
+      "спа",
+      "sauna",
+    ];
+    if (spaKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "9");
     }
 
     // Diving Center
-    const divingKeywords = ['غوص', 'سنوركلينج', 'غطس', 'diving', 'scuba', 'дайвинг', 'tauchen'];
-    if (divingKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '2');
+    const divingKeywords = [
+      "غوص",
+      "سنوركلينج",
+      "غطس",
+      "diving",
+      "scuba",
+      "дайвинг",
+      "tauchen",
+    ];
+    if (divingKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "2");
     }
 
     // Italian Restaurant / La Mama
-    const mamaKeywords = ['ايطالي', 'لا ماما', 'بيتزا', 'باستا', 'la mama', 'italian', 'итальянский', 'italienisch'];
-    if (mamaKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '8');
+    const mamaKeywords = [
+      "ايطالي",
+      "لا ماما",
+      "بيتزا",
+      "باستا",
+      "la mama",
+      "italian",
+      "итальянский",
+      "italienisch",
+    ];
+    if (mamaKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "8");
     }
 
     // Oriental Grill
-    const grillKeywords = ['شرقي', 'مشويات', 'مشاوي', 'شواء', 'oriental', 'grill', 'гриль', 'kebab'];
-    if (grillKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '6');
+    const grillKeywords = [
+      "شرقي",
+      "مشويات",
+      "مشاوي",
+      "شواء",
+      "oriental",
+      "grill",
+      "гриль",
+      "kebab",
+    ];
+    if (grillKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "6");
     }
 
     // Sirena Restaurant
-    const sirenaKeywords = ['سيرينا', 'مطعم رئيسي', 'بوفيه', 'اكل', 'عشاء', 'غداء', 'افطار', 'sirena', 'buffet', 'restaurant'];
-    if (sirenaKeywords.some(k => normQuery.includes(this.normalizeText(k)))) {
-      return resortPois.find(p => p.id === '12');
+    const sirenaKeywords = [
+      "سيرينا",
+      "مطعم رئيسي",
+      "بوفيه",
+      "اكل",
+      "عشاء",
+      "غداء",
+      "افطار",
+      "sirena",
+      "buffet",
+      "restaurant",
+    ];
+    if (sirenaKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "12");
     }
 
     // 2. Direct string & keyword matching against all POIs
@@ -317,7 +475,7 @@ const VoiceConcierge = {
         this.normalizeText(poi.nameRu),
         this.normalizeText(poi.nameDe),
         this.normalizeText(poi.tagAr),
-        this.normalizeText(poi.category)
+        this.normalizeText(poi.category),
       ].filter(Boolean);
 
       for (const name of names) {
@@ -348,12 +506,14 @@ const VoiceConcierge = {
   },
 
   findClosestPoiByCategory(cats) {
-    if (typeof resortPois === 'undefined') return null;
-    const candidates = resortPois.filter(p => cats.includes(p.category) || cats.includes(p.id));
+    if (typeof resortPois === "undefined") return null;
+    const candidates = resortPois.filter(
+      (p) => cats.includes(p.category) || cats.includes(p.id),
+    );
     if (candidates.length === 0) return null;
 
     // If live location is known, pick closest by Euclidean distance
-    if (typeof MapEngine !== 'undefined' && MapEngine.lastGuestPosition) {
+    if (typeof MapEngine !== "undefined" && MapEngine.lastGuestPosition) {
       const gX = MapEngine.lastGuestPosition.pctX;
       const gY = MapEngine.lastGuestPosition.pctY;
       let closest = candidates[0];
@@ -377,48 +537,81 @@ const VoiceConcierge = {
    */
   executeNavigationIntent(poi) {
     const lang = this.getCurrentLangKey();
-    const locPoi = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr };
+    const locPoi =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(poi, lang)
+        : { name: poi.nameAr };
     const poiName = locPoi.name || poi.nameAr;
 
-    this.updateTranscriptUi(`وجهتك: ${poiName}`, 'جاري رسم المسار...');
+    this.updateTranscriptUi(`وجهتك: ${poiName}`, "جاري رسم المسار...");
 
-    if (typeof MapEngine !== 'undefined') {
+    if (typeof MapEngine !== "undefined") {
       // Center camera
       if (poi.coords) {
         MapEngine.focusCoordinate(poi.coords.x, poi.coords.y, 1.45, true);
       }
 
       // Trigger navigation
-      if (typeof MapEngine.navigateDirectTo === 'function') {
+      if (typeof MapEngine.navigateDirectTo === "function") {
         MapEngine.navigateDirectTo(poi.id);
       }
     }
 
-    if (typeof App !== 'undefined' && App.selectPoi) {
+    if (typeof App !== "undefined" && App.selectPoi) {
       App.selectPoi(poi);
     }
   },
 
   /**
-   * Web Speech Synthesis (TTS)
+   * Web Speech Synthesis (TTS) - Powered by ConciergeAudioGuide Neural HD Engine
    */
   speak(text) {
-    if (this.isMuted) return;
-    if (!('speechSynthesis' in window)) return;
+    if (this.isMuted || !text) return;
+
+    // Use unified HD Neural Audio Guide engine if available
+    if (
+      typeof ConciergeAudioGuide !== "undefined" &&
+      ConciergeAudioGuide.speak
+    ) {
+      ConciergeAudioGuide.speak(text, this.getCurrentLangKey());
+      this.lastSpokenText = text;
+      return;
+    }
+
+    if (!("speechSynthesis" in window)) return;
 
     try {
       window.speechSynthesis.cancel(); // Stop any pending speech
 
-      const utterance = new SpeechSynthesisUtterance(text);
       const langKey = this.getCurrentLangKey();
-      utterance.lang = this.LANG_MAP[langKey] || 'ar-EG';
-      utterance.rate = 0.96;
-      utterance.pitch = 1.0;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = this.LANG_MAP[langKey] || "ar-EG";
+      utterance.rate = langKey === "ar" ? 0.9 : 0.95;
+      utterance.pitch = langKey === "ar" ? 1.02 : 1.0;
 
-      // Select matching voice if available
+      // Select natural Egyptian voice if available
       const voices = window.speechSynthesis.getVoices();
       if (voices && voices.length > 0) {
-        const matchVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(langKey));
+        const matchVoice =
+          voices.find((v) => {
+            const l = (v.lang || "").toLowerCase();
+            const n = (v.name || "").toLowerCase();
+            return (
+              (l.includes("eg") ||
+                n.includes("egypt") ||
+                n.includes("salma") ||
+                n.includes("shakir") ||
+                n.includes("maged")) &&
+              !n.includes("hoda") &&
+              !n.includes("desktop")
+            );
+          }) ||
+          voices.find(
+            (v) =>
+              (v.lang || "").toLowerCase().startsWith(langKey) &&
+              !(v.name || "").toLowerCase().includes("hoda"),
+          );
+
         if (matchVoice) {
           utterance.voice = matchVoice;
         }
@@ -427,7 +620,7 @@ const VoiceConcierge = {
       window.speechSynthesis.speak(utterance);
       this.lastSpokenText = text;
     } catch (err) {
-      console.warn('[VoiceConcierge] Speech synthesis failed:', err);
+      console.warn("[VoiceConcierge] Speech synthesis failed:", err);
     }
   },
 
@@ -439,12 +632,15 @@ const VoiceConcierge = {
     const lang = this.getCurrentLangKey();
     const dict = this.RESPONSES[lang] || this.RESPONSES.ar;
     const message = dict.routeStart(destTitle, meters);
+    this.lastSpokenStepIdx = 0; // Mark step 0 as handled by routeStart so it doesn't collide
     this.speak(message);
     this.showToast(`🧭 ${message}`);
   },
 
   onTurnStep(step, stepIdx, totalSteps) {
     if (this.isMuted) return;
+    // Skip step 0 (already announced in routeStart) and last step (handled on arrival)
+    if (stepIdx === 0 || (totalSteps && stepIdx >= totalSteps - 1)) return;
     if (this.lastSpokenStepIdx === stepIdx) return;
     this.lastSpokenStepIdx = stepIdx;
 
@@ -457,8 +653,13 @@ const VoiceConcierge = {
     this.playArrivalChime();
     const lang = this.getCurrentLangKey();
     const dict = this.RESPONSES[lang] || this.RESPONSES.ar;
-    const message = dict.arrival(destName || destPoi.nameAr);
-    this.speak(message);
+    const targetName =
+      destName || (destPoi ? destPoi.nameAr || destPoi.name : "");
+    const message = dict.arrival(targetName);
+    // Let chime ring for 300ms before speaking congratulatory arrival
+    setTimeout(() => {
+      this.speak(message);
+    }, 320);
     this.showToast(`🎉 ${message}`);
   },
 
@@ -467,15 +668,15 @@ const VoiceConcierge = {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
       if (!this.audioCtx) this.audioCtx = new AudioCtx();
-      if (this.audioCtx.state === 'suspended') {
+      if (this.audioCtx.state === "suspended") {
         this.audioCtx.resume();
       }
 
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 arpeggio
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6 arpeggio
       notes.forEach((freq, idx) => {
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
-        osc.type = 'sine';
+        osc.type = "sine";
         osc.frequency.value = freq;
         const startTime = this.audioCtx.currentTime + idx * 0.12;
         gain.gain.setValueAtTime(0.001, startTime);
@@ -495,11 +696,12 @@ const VoiceConcierge = {
    * Floating UI Elements
    */
   createFloatingUi() {
-    if (document.getElementById('voiceConciergeFloatingBar')) return;
+    if (document.getElementById("voiceConciergeFloatingBar")) return;
 
-    const bar = document.createElement('div');
-    bar.id = 'voiceConciergeFloatingBar';
-    bar.className = 'fixed bottom-24 end-4 z-40 flex flex-col items-center gap-2 select-none';
+    const bar = document.createElement("div");
+    bar.id = "voiceConciergeFloatingBar";
+    bar.className =
+      "fixed bottom-24 end-4 z-40 flex flex-col items-center gap-2 select-none";
 
     bar.innerHTML = `
       <!-- Speech Transcript Mini Toast -->
@@ -527,69 +729,79 @@ const VoiceConcierge = {
   },
 
   updateUiState(state) {
-    const micBtn = document.getElementById('voiceConciergeMicBtn');
-    const pulseRing = document.getElementById('voiceMicPulseRing');
-    const bubble = document.getElementById('voiceTranscriptBubble');
-    const body = document.getElementById('voiceTranscriptBody');
+    const micBtn = document.getElementById("voiceConciergeMicBtn");
+    const pulseRing = document.getElementById("voiceMicPulseRing");
+    const bubble = document.getElementById("voiceTranscriptBubble");
+    const body = document.getElementById("voiceTranscriptBody");
 
     if (!micBtn) return;
 
-    if (state === 'listening') {
-      micBtn.classList.add('ring-4', 'ring-cyan-400/50', 'from-rose-500', 'to-amber-500');
-      if (pulseRing) pulseRing.classList.remove('hidden');
+    if (state === "listening") {
+      micBtn.classList.add(
+        "ring-4",
+        "ring-cyan-400/50",
+        "from-rose-500",
+        "to-amber-500",
+      );
+      if (pulseRing) pulseRing.classList.remove("hidden");
       if (bubble) {
-        bubble.classList.remove('hidden');
-        if (body) body.textContent = this.getLocalizedText('listening');
+        bubble.classList.remove("hidden");
+        if (body) body.textContent = this.getLocalizedText("listening");
       }
-    } else if (state === 'processing') {
-      if (pulseRing) pulseRing.classList.add('hidden');
-      if (body) body.textContent = this.getLocalizedText('processing');
+    } else if (state === "processing") {
+      if (pulseRing) pulseRing.classList.add("hidden");
+      if (body) body.textContent = this.getLocalizedText("processing");
     } else {
-      micBtn.classList.remove('ring-4', 'ring-cyan-400/50', 'from-rose-500', 'to-amber-500');
-      if (pulseRing) pulseRing.classList.add('hidden');
+      micBtn.classList.remove(
+        "ring-4",
+        "ring-cyan-400/50",
+        "from-rose-500",
+        "to-amber-500",
+      );
+      if (pulseRing) pulseRing.classList.add("hidden");
       setTimeout(() => {
         if (!this.isListening && bubble) {
-          bubble.classList.add('hidden');
+          bubble.classList.add("hidden");
         }
       }, 3500);
     }
   },
 
   updateTranscriptUi(transcript, responseText = null) {
-    const bubble = document.getElementById('voiceTranscriptBubble');
-    const body = document.getElementById('voiceTranscriptBody');
+    const bubble = document.getElementById("voiceTranscriptBubble");
+    const body = document.getElementById("voiceTranscriptBody");
     if (!bubble || !body) return;
 
-    bubble.classList.remove('hidden');
+    bubble.classList.remove("hidden");
     body.innerHTML = `
       <span class="text-cyan-300 font-bold">"${transcript}"</span>
-      ${responseText ? `<div class="mt-1 text-slate-300 text-[10px]">${responseText}</div>` : ''}
+      ${responseText ? `<div class="mt-1 text-slate-300 text-[10px]">${responseText}</div>` : ""}
     `;
   },
 
   showToast(message) {
-    if (typeof App !== 'undefined' && App.showToast) {
+    if (typeof App !== "undefined" && App.showToast) {
       App.showToast(message);
     } else {
-      console.log('[VoiceConcierge]', message);
+      console.log("[VoiceConcierge]", message);
     }
   },
 
   bindEvents() {
     // Re-check voices when available
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.onvoiceschanged = () => {
         window.speechSynthesis.getVoices();
       };
     }
-  }
+  },
 };
 
 // Global registration
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.VoiceConcierge = VoiceConcierge;
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => VoiceConcierge.init());
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => VoiceConcierge.init());
   } else {
     VoiceConcierge.init();
   }

@@ -1,6 +1,6 @@
 /**
  * Moreno Horizon Spa & Resort - Indoor Mathematical Positioning Engine
- * 
+ *
  * Features:
  * 1. Log-Distance Path Loss Model (RSSI -> Distance in meters & pixels)
  * 2. Robust 2D Trilateration via Weighted Least Squares (WLS) & Gauss-Newton Optimization
@@ -8,10 +8,19 @@
  * 4. Coordinate Transformation between canvas pixels (896x1200) and percentages (0..100)
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import PositioningCore from "../../shared/positioning-core.js";
+import envConfig from "../../config/env.js";
 
-const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '../config/accessPoints.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const DEFAULT_CONFIG_PATH = path.resolve(
+  __dirname,
+  "../../config/accessPoints.json",
+);
 
 class PositioningEngine {
   constructor(configPath = DEFAULT_CONFIG_PATH) {
@@ -21,14 +30,86 @@ class PositioningEngine {
     // EMA smoothing state per client MAC: mac -> { pixelX, pixelY, pctX, pctY, accuracyRadiusMeters, lastTime, sampleCount }
     this.filterState = new Map();
 
+    // Packet Cache for the last 100 Mikrotik packets
+    this.packetCache = [];
+    this.MAX_CACHE_SIZE = envConfig.mikrotik.maxPacketCache || 100;
+
+    // AP Stats: AP_ID -> { connectedDevices: Set, lastRssiSamples: Array, load: Number }
+    this.apStats = new Map();
+
+    // Last successful Mikrotik update timestamp
+    this.lastSuccessfulUpdate = 0;
+    this.connectionTimeoutSeconds = envConfig.mikrotik.connectionTimeoutSeconds || 30;
+
     // Configurable EMA smoothing factor (alpha ~ 0.35)
     this.alpha = 0.35;
+  }
+
+  /**
+   * Log advanced packet and check for connection alerts
+   */
+  logPacket(packet) {
+    this.packetCache.push({ ...packet, receivedAt: Date.now() });
+    if (this.packetCache.length > this.MAX_CACHE_SIZE) {
+      this.packetCache.shift();
+    }
+    this.lastSuccessfulUpdate = Date.now();
+  }
+
+  /**
+   * Check for connection timeout
+   */
+  isConnectionLost() {
+    if (this.lastSuccessfulUpdate === 0) return false;
+    return (Date.now() - this.lastSuccessfulUpdate) / 1000 > this.connectionTimeoutSeconds;
+  }
+
+  /**
+   * Update AP metrics
+   */
+  updateApStats(apId, mac, rssi, snr = null) {
+    if (!this.apStats.has(apId)) {
+      this.apStats.set(apId, {
+        connectedDevices: new Set(),
+        rssiSamples: [],
+        snrSamples: [],
+        load: 0,
+      });
+    }
+    const stats = this.apStats.get(apId);
+    stats.connectedDevices.add(mac);
+
+    // Maintain a small sliding window of RSSI/SNR for load/quality calculation
+    stats.rssiSamples.push(rssi);
+    if (snr !== null) stats.snrSamples.push(snr);
+
+    if (stats.rssiSamples.length > 20) stats.rssiSamples.shift();
+    if (stats.snrSamples.length > 20) stats.snrSamples.shift();
+
+    // Load is a heuristic: number of devices + signal density
+    stats.load = stats.connectedDevices.size;
+  }
+
+  /**
+   * Prune stale devices from AP stats periodically
+   */
+  pruneApStats() {
+    const now = Date.now();
+    const ttl = 60000; // 1 minute
+    for (const [apId, stats] of this.apStats.entries()) {
+      // In a real implementation we'd need timestamps per device in the Set
+      // For now, let's just clear if we haven't seen updates for a while
+      if (now - this.lastSuccessfulUpdate > ttl) {
+        stats.connectedDevices.clear();
+        stats.load = 0;
+      }
+    }
   }
 
   loadConfig() {
     try {
       if (fs.existsSync(this.configPath)) {
-        const raw = fs.readFileSync(this.configPath, 'utf8');
+        const raw = fs.readFileSync(this.configPath, "utf8");
         this.config = JSON.parse(raw);
       } else {
         this.config = {
@@ -38,49 +119,58 @@ class PositioningEngine {
           pixelsToMetersRatio: 0.42,
           defaultTxPower: -41.0,
           defaultPathLossExponent: 2.4,
-          accessPoints: []
+          accessPoints: [],
         };
       }
 
       this.canvasWidth = this.config.canvasWidth || 896;
       this.canvasHeight = this.config.canvasHeight || 1200;
       this.metersToPixelsRatio = this.config.metersToPixelsRatio || 2.381; // 1 m = 2.381 px
-      this.pixelsToMetersRatio = this.config.pixelsToMetersRatio || 0.42;  // 1 px = 0.42 m
+      this.pixelsToMetersRatio = this.config.pixelsToMetersRatio || 0.42; // 1 px = 0.42 m
       this.defaultTxPower = this.config.defaultTxPower || -41.0;
       this.defaultPathLossExponent = this.config.defaultPathLossExponent || 2.4;
 
       // Index Access Points by BSSID and ID
       this.apMap = new Map();
-      for (const ap of (this.config.accessPoints || [])) {
+      for (const ap of this.config.accessPoints || []) {
         if (!ap.enabled) continue;
         const normBssid = this.normalizeMac(ap.bssid);
         const normId = String(ap.id).toUpperCase();
 
         const enrichedAp = {
           ...ap,
-          pixelX: ap.pixelX != null ? ap.pixelX : Math.round((ap.xPct / 100) * this.canvasWidth),
-          pixelY: ap.pixelY != null ? ap.pixelY : Math.round((ap.yPct / 100) * this.canvasHeight),
+          pixelX:
+            ap.pixelX != null
+              ? ap.pixelX
+              : Math.round((ap.xPct / 100) * this.canvasWidth),
+          pixelY:
+            ap.pixelY != null
+              ? ap.pixelY
+              : Math.round((ap.yPct / 100) * this.canvasHeight),
           txPower: ap.txPower != null ? ap.txPower : this.defaultTxPower,
-          pathLossExponent: ap.pathLossExponent != null ? ap.pathLossExponent : this.defaultPathLossExponent
+          pathLossExponent:
+            ap.pathLossExponent != null
+              ? ap.pathLossExponent
+              : this.defaultPathLossExponent,
         };
 
         this.apMap.set(normBssid, enrichedAp);
         this.apMap.set(normId, enrichedAp);
       }
     } catch (err) {
-      console.error('[PositioningEngine] Failed to load config:', err);
+      console.error("[PositioningEngine] Failed to load config:", err);
     }
   }
 
   normalizeMac(mac) {
-    if (!mac) return '';
-    return String(mac).trim().toLowerCase().replace(/[:-]/g, ':');
+    if (!mac) return "";
+    return String(mac).trim().toLowerCase().replace(/[:-]/g, ":");
   }
 
   /**
    * 1. Log-Distance Path Loss Formula
    * distanceInMeters = 10 ** ((txPower - rssi) / (10 * n))
-   * 
+   *
    * @param {number} rssi - Measured signal strength in dBm
    * @param {number} txPower - Calibrated RSSI at 1 meter (default -41.0 dBm)
    * @param {number} pathLossExponent - Environmental path loss factor (default 2.4)
@@ -88,16 +178,11 @@ class PositioningEngine {
    */
   rssiToDistance(rssi, txPower = null, pathLossExponent = null) {
     const p0 = txPower != null ? Number(txPower) : this.defaultTxPower;
-    const n = pathLossExponent != null ? Number(pathLossExponent) : this.defaultPathLossExponent;
-
-    // Sanitize RSSI value (-110 dBm to -15 dBm)
-    const cleanRssi = Math.min(-15, Math.max(-110, Number(rssi)));
-
-    const exponent = (p0 - cleanRssi) / (10.0 * n);
-    const distanceMeters = Math.pow(10.0, exponent);
-
-    // Clamp between realistic bounds (0.3m to 120m)
-    return Math.min(120.0, Math.max(0.3, distanceMeters));
+    const n =
+      pathLossExponent != null
+        ? Number(pathLossExponent)
+        : this.defaultPathLossExponent;
+    return PositioningCore.rssiToDistance(rssi, p0, n);
   }
 
   /**
@@ -119,12 +204,12 @@ class PositioningEngine {
    * Computes intersecting point (pixelX, pixelY) from Access Point measurements.
    * If >= 3 APs: uses Weighted Least Squares (WLS) where weight = 1 / distance,
    * followed by Gauss-Newton non-linear refinement for sub-meter convergence.
-   * 
+   *
    * @param {Array<{apId: string, bssid: string, x: number, y: number, distanceInMeters: number, distanceInPixels: number, weight?: number}>} aps
    */
   trilaterate(aps) {
     if (!Array.isArray(aps) || aps.length === 0) {
-      return { success: false, reason: 'no_ap_signals', apCount: 0 };
+      return { success: false, reason: "no_ap_signals", apCount: 0 };
     }
 
     // Single AP: Proximity estimate
@@ -135,8 +220,8 @@ class PositioningEngine {
         pixelX: p.x,
         pixelY: p.y,
         accuracyRadiusMeters: Number(p.distanceInMeters.toFixed(1)),
-        method: 'single_ap_proximity',
-        apCount: 1
+        method: "single_ap_proximity",
+        apCount: 1,
       };
     }
 
@@ -149,27 +234,35 @@ class PositioningEngine {
 
       const x = (p1.x * w1 + p2.x * w2) / sumW;
       const y = (p1.y * w1 + p2.y * w2) / sumW;
-      const baselineMeters = Math.hypot(p2.x - p1.x, p2.y - p1.y) * this.pixelsToMetersRatio;
-      const accuracy = Math.max(p1.distanceInMeters, p2.distanceInMeters, baselineMeters * 0.5);
+      const baselineMeters =
+        Math.hypot(p2.x - p1.x, p2.y - p1.y) * this.pixelsToMetersRatio;
+      const accuracy = Math.max(
+        p1.distanceInMeters,
+        p2.distanceInMeters,
+        baselineMeters * 0.5,
+      );
 
       return {
         success: true,
         pixelX: Math.round(x),
         pixelY: Math.round(y),
         accuracyRadiusMeters: Number(accuracy.toFixed(1)),
-        method: 'barycenter_2ap',
-        apCount: 2
+        method: "barycenter_2ap",
+        apCount: 2,
       };
     }
 
     // 3+ APs: Weighted Least Squares (WLS)
     // Weight inversely proportional to distance: weight = 1 / distance
-    const apList = aps.map(ap => ({
+    const apList = aps.map((ap) => ({
       x: ap.x,
       y: ap.y,
       d: ap.distanceInPixels,
       dMeters: ap.distanceInMeters,
-      weight: ap.weight != null ? ap.weight : (1.0 / Math.max(0.5, ap.distanceInMeters))
+      weight:
+        ap.weight != null
+          ? ap.weight
+          : 1.0 / Math.max(0.5, ap.distanceInMeters),
     }));
 
     // Choose reference AP as the one with smallest distance (strongest signal)
@@ -185,22 +278,29 @@ class PositioningEngine {
 
     // Linear system: A * [x, y]^T = b
     // 2*(x_i - x_ref)*x + 2*(y_i - y_ref)*y = (x_i^2 - x_ref^2) + (y_i^2 - y_ref^2) + (d_ref^2 - d_i^2)
-    let m11 = 0, m12 = 0, m22 = 0;
-    let v1 = 0, v2 = 0;
+    let m11 = 0,
+      m12 = 0,
+      m22 = 0;
+    let v1 = 0,
+      v2 = 0;
 
     for (let i = 0; i < apList.length; i++) {
       if (i === refIdx) continue;
       const p = apList[i];
       const a1 = 2 * (p.x - ref.x);
       const a2 = 2 * (p.y - ref.y);
-      const b = (p.x * p.x - ref.x * ref.x) + (p.y * p.y - ref.y * ref.y) + (ref.d * ref.d - p.d * p.d);
+      const b =
+        p.x * p.x -
+        ref.x * ref.x +
+        (p.y * p.y - ref.y * ref.y) +
+        (ref.d * ref.d - p.d * p.d);
       const w = Math.sqrt(p.weight * ref.weight);
 
-      m11 += (a1 * a1) * w;
-      m12 += (a1 * a2) * w;
-      m22 += (a2 * a2) * w;
-      v1 += (a1 * b) * w;
-      v2 += (a2 * b) * w;
+      m11 += a1 * a1 * w;
+      m12 += a1 * a2 * w;
+      m22 += a2 * a2 * w;
+      v1 += a1 * b * w;
+      v2 += a2 * b * w;
     }
 
     const det = m11 * m22 - m12 * m12;
@@ -212,7 +312,9 @@ class PositioningEngine {
       estY = (m11 * v2 - m12 * v1) / det;
     } else {
       // Degenerate/collinear case: fallback to weighted centroid
-      let sumW = 0, sumX = 0, sumY = 0;
+      let sumW = 0,
+        sumX = 0,
+        sumY = 0;
       for (const p of apList) {
         sumW += p.weight;
         sumX += p.x * p.weight;
@@ -231,8 +333,11 @@ class PositioningEngine {
     let curY = estY;
 
     for (let iter = 0; iter < 4; iter++) {
-      let j11 = 0, j12 = 0, j22 = 0;
-      let r1 = 0, r2 = 0;
+      let j11 = 0,
+        j12 = 0,
+        j22 = 0;
+      let r1 = 0,
+        r2 = 0;
 
       for (const p of apList) {
         const dx = curX - p.x;
@@ -244,12 +349,12 @@ class PositioningEngine {
         const u2 = dy / dist;
         const w = p.weight;
 
-        j11 += (u1 * u1) * w;
-        j12 += (u1 * u2) * w;
-        j22 += (u2 * u2) * w;
+        j11 += u1 * u1 * w;
+        j12 += u1 * u2 * w;
+        j22 += u2 * u2 * w;
 
-        r1 += (u1 * residual) * w;
-        r2 += (u2 * residual) * w;
+        r1 += u1 * residual * w;
+        r2 += u2 * residual * w;
       }
 
       // Levenberg-Marquardt damping factor
@@ -275,12 +380,15 @@ class PositioningEngine {
     // Calculate Root Mean Square Error (RMSE) in meters
     let sumSqErr = 0;
     for (const p of apList) {
-      const calcDistMeters = Math.hypot(curX - p.x, curY - p.y) * this.pixelsToMetersRatio;
+      const calcDistMeters =
+        Math.hypot(curX - p.x, curY - p.y) * this.pixelsToMetersRatio;
       const diff = calcDistMeters - p.dMeters;
       sumSqErr += diff * diff;
     }
     const rmseMeters = Math.sqrt(sumSqErr / apList.length);
-    const accuracyRadiusMeters = Number(Math.max(1.5, Math.min(25.0, rmseMeters * 1.2)).toFixed(1));
+    const accuracyRadiusMeters = Number(
+      Math.max(1.5, Math.min(25.0, rmseMeters * 1.2)).toFixed(1),
+    );
 
     return {
       success: true,
@@ -288,14 +396,14 @@ class PositioningEngine {
       pixelY: Math.round(curY),
       accuracyRadiusMeters,
       method: `wls_trilateration_${apList.length}ap`,
-      apCount: apList.length
+      apCount: apList.length,
     };
   }
 
   /**
    * 3. Exponential Moving Average (EMA) & Velocity Clamping Filter
    * currentPos = alpha * newPos + (1 - alpha) * prevPos (alpha ~ 0.35)
-   * 
+   *
    * @param {string} mac - Normalized device MAC address
    * @param {number} rawX - Calculated raw pixel X
    * @param {number} rawY - Calculated raw pixel Y
@@ -317,7 +425,7 @@ class PositioningEngine {
         accuracyRadiusMeters,
         lastTime: timestamp,
         firstTime: timestamp,
-        sampleCount: 1
+        sampleCount: 1,
       };
       this.filterState.set(normMac, state);
       return state;
@@ -350,14 +458,18 @@ class PositioningEngine {
     state.pctY = Number(((state.pixelY / this.canvasHeight) * 100).toFixed(2));
 
     // Smooth accuracy
-    state.accuracyRadiusMeters = Number((state.accuracyRadiusMeters * 0.7 + accuracyRadiusMeters * 0.3).toFixed(1));
+    state.accuracyRadiusMeters = Number(
+      (state.accuracyRadiusMeters * 0.7 + accuracyRadiusMeters * 0.3).toFixed(
+        1,
+      ),
+    );
 
     return state;
   }
 
   /**
    * 4. Full Pipeline: Resolve client position from raw MikroTik signal readings
-   * 
+   *
    * @param {string} mac - Client device MAC address
    * @param {Array<{bssid?: string, apId?: string, rssi: number|string}>} rawReadings
    * @param {number} timestamp - Observation timestamp
@@ -372,8 +484,10 @@ class PositioningEngine {
     const mappedAps = [];
 
     for (const r of rawReadings) {
-      const bssid = this.normalizeMac(r.bssid || r['ap-bssid']);
-      const apId = String(r.apId || r.ap || r['ap-id'] || '').toUpperCase();
+      this.logPacket(r); // Log to cache
+
+      const bssid = this.normalizeMac(r.bssid || r["ap-bssid"]);
+      const apId = String(r.apId || r.ap || r["ap-id"] || "").toUpperCase();
 
       let ap = this.apMap.get(bssid);
       if (!ap && apId) {
@@ -383,13 +497,32 @@ class PositioningEngine {
       if (!ap) continue;
 
       // Extract RSSI integer
-      const rssiStr = String(r.rssi != null ? r.rssi : r['signal-strength'] || '-90');
+      const rssiStr = String(
+        r.rssi != null ? r.rssi : r["signal-strength"] || "-90",
+      );
       const match = rssiStr.match(/(-?\d+)/);
       if (!match) continue;
       const rssi = parseInt(match[1], 10);
-      if (isNaN(rssi) || rssi < -110 || rssi > -10) continue;
 
-      const distanceInMeters = this.rssiToDistance(rssi, ap.txPower, ap.pathLossExponent);
+      // RSSI Validation: Ignore extreme outliers
+      if (isNaN(rssi) || rssi < -105 || rssi > -15) continue;
+
+      // Extract SNR if available (Mikrotik sometimes provides signal-to-noise)
+      let snr = null;
+      if (r["signal-to-noise"]) {
+        snr = parseInt(r["signal-to-noise"], 10);
+      } else if (r.snr) {
+        snr = parseInt(r.snr, 10);
+      }
+
+      // Update AP statistics
+      this.updateApStats(ap.id, normMac, rssi, snr);
+
+      const distanceInMeters = this.rssiToDistance(
+        rssi,
+        ap.txPower,
+        ap.pathLossExponent,
+      );
       const distanceInPixels = this.distanceToPixels(distanceInMeters);
 
       mappedAps.push({
@@ -401,7 +534,7 @@ class PositioningEngine {
         rssi,
         distanceInMeters,
         distanceInPixels,
-        weight: 1.0 / Math.max(0.5, distanceInMeters)
+        weight: 1.0 / Math.max(0.5, distanceInMeters),
       });
     }
 
@@ -420,7 +553,13 @@ class PositioningEngine {
     }
 
     // Run EMA jitter smoothing filter
-    const smoothed = this.applyFilter(normMac, triResult.pixelX, triResult.pixelY, triResult.accuracyRadiusMeters, timestamp);
+    const smoothed = this.applyFilter(
+      normMac,
+      triResult.pixelX,
+      triResult.pixelY,
+      triResult.accuracyRadiusMeters,
+      timestamp,
+    );
 
     return {
       mac: normMac,
@@ -432,11 +571,40 @@ class PositioningEngine {
       apCount: activeAps.length,
       method: triResult.method,
       timestamp,
-      activeAps: activeAps.map(a => ({
-        id: a.apId,
-        rssi: a.rssi,
-        distanceMeters: Number(a.distanceInMeters.toFixed(1))
-      }))
+      isConnectionLost: this.isConnectionLost(),
+      activeAps: activeAps.map((a) => {
+        const stats = this.apStats.get(a.apId);
+        return {
+          id: a.apId,
+          rssi: a.rssi,
+          distanceMeters: Number(a.distanceInMeters.toFixed(1)),
+          load: stats ? stats.load : 0,
+          snr: stats && stats.snrSamples.length > 0 ? stats.snrSamples[stats.snrSamples.length - 1] : null
+        };
+      }),
+    };
+  }
+
+  /**
+   * Return overall system statistics and connection status
+   */
+  getSystemStats() {
+    const aps = [];
+    for (const [id, stats] of this.apStats.entries()) {
+      aps.push({
+        id,
+        load: stats.load,
+        avgRssi: stats.rssiSamples.length > 0 ? (stats.rssiSamples.reduce((a, b) => a + b, 0) / stats.rssiSamples.length).toFixed(1) : null,
+        avgSnr: stats.snrSamples.length > 0 ? (stats.snrSamples.reduce((a, b) => a + b, 0) / stats.snrSamples.length).toFixed(1) : null
+      });
+    }
+
+    return {
+      isConnectionLost: this.isConnectionLost(),
+      lastUpdate: this.lastSuccessfulUpdate,
+      activeDevices: this.filterState.size,
+      packetCacheCount: this.packetCache.length,
+      apStats: aps
     };
   }
 
@@ -456,7 +624,7 @@ class PositioningEngine {
       pctY: state.pctY,
       accuracyRadiusMeters: state.accuracyRadiusMeters,
       timestamp: state.lastTime,
-      sampleCount: state.sampleCount
+      sampleCount: state.sampleCount,
     };
   }
 
@@ -475,7 +643,5 @@ class PositioningEngine {
 // Export class & default singleton instance
 const positioningEngine = new PositioningEngine();
 
-module.exports = {
-  PositioningEngine,
-  positioningEngine
-};
+export { PositioningEngine, positioningEngine };
+export default positioningEngine;

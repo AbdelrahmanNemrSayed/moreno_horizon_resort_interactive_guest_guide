@@ -1,0 +1,43 @@
+import globals from 'globals';
+
+export default [
+    {
+        files: ['**/*.{js,mjs,cjs}'],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: 'module',
+            globals: {
+                ...globals.browser,
+                ...globals.node,
+                window: 'readonly',
+                document: 'readonly',
+                App: 'readonly',
+                MapEngine: 'readonly',
+                VoiceConcierge: 'readonly',
+                GeofenceService: 'readonly',
+                RoomFinder: 'readonly',
+                I18nEngine: 'readonly',
+                PositioningCore: 'readonly',
+                ViewTemplates: 'readonly',
+                i18n: 'readonly',
+                resortPois: 'readonly',
+                resortExcursions: 'readonly',
+                resortActivities: 'readonly',
+                buildingWings: 'readonly',
+                ConciergeAudioGuide: 'readonly',
+                VoiceNavigator: 'readonly',
+            },
+        },
+        rules: {
+            'no-unused-vars': 'warn',
+            'no-undef': 'warn',
+            'no-console': 'off',
+            'prefer-const': 'warn',
+            'no-var': 'warn',
+            'eqeqeq': 'warn',
+            'semi': ['warn', 'always'],
+            'no-multiple-empty-lines': ['warn', { max: 2 }],
+            'prefer-arrow-callback': 'off',
+        },
+    },
+];

@@ -1,7 +1,7 @@
 /**
  * Moreno Horizon Spa & Resort - WiFi Indoor Positioning Service
  * Based on MikroTik RouterOS RSSI data (/interface/wireless/registration-table)
- * 
+ *
  * Features:
  * 1. Log-Distance Path Loss Model (RSSI -> distance in meters & canvas pixels)
  * 2. Weighted Linear Least Squares + Gauss-Newton 2D Trilateration (N >= 3 APs)
@@ -9,18 +9,31 @@
  * 4. MikroTik Registration-Table Batch Ingestion & Device State Store
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import PositioningCore from "../shared/positioning-core.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Default AP and Fingerprint configuration paths
-const CONFIG_PATH = path.resolve(__dirname, '../config/accessPoints.json');
-const FINGERPRINTS_PATH = path.resolve(__dirname, '../server/data/fingerprints.json');
-const ALT_FINGERPRINTS_PATH = path.resolve(__dirname, '../data/fingerprints.json');
+const CONFIG_PATH = path.resolve(__dirname, "../config/accessPoints.json");
+const FINGERPRINTS_PATH = path.resolve(
+  __dirname,
+  "../server/data/fingerprints.json",
+);
+const ALT_FINGERPRINTS_PATH = path.resolve(
+  __dirname,
+  "../data/fingerprints.json",
+);
 
 class IndoorLocationService {
   constructor(configPath = CONFIG_PATH) {
     this.configPath = configPath;
-    this.fingerprintsPath = fs.existsSync(FINGERPRINTS_PATH) ? FINGERPRINTS_PATH : ALT_FINGERPRINTS_PATH;
+    this.fingerprintsPath = fs.existsSync(FINGERPRINTS_PATH)
+      ? FINGERPRINTS_PATH
+      : ALT_FINGERPRINTS_PATH;
     this.loadConfig();
     this.loadFingerprints();
 
@@ -31,7 +44,10 @@ class IndoorLocationService {
     this.subscribers = new Set();
 
     // Periodically clean up devices inactive for > 15 minutes
-    this.cleanupInterval = setInterval(() => this.pruneInactiveDevices(), 60000);
+    this.cleanupInterval = setInterval(
+      () => this.pruneInactiveDevices(),
+      60000,
+    );
   }
 
   /**
@@ -40,10 +56,12 @@ class IndoorLocationService {
   loadConfig() {
     try {
       if (fs.existsSync(this.configPath)) {
-        const raw = fs.readFileSync(this.configPath, 'utf8');
+        const raw = fs.readFileSync(this.configPath, "utf8");
         this.config = JSON.parse(raw);
       } else {
-        console.warn(`[IndoorLocation] Config not found at ${this.configPath}, using defaults.`);
+        console.warn(
+          `[IndoorLocation] Config not found at ${this.configPath}, using defaults.`,
+        );
         this.config = {
           mapWidth: 896,
           mapHeight: 1200,
@@ -53,9 +71,9 @@ class IndoorLocationService {
             refRssi1m: -48.0,
             pathLossN: 2.75,
             minDistanceMeters: 0.5,
-            maxDistanceMeters: 120.0
+            maxDistanceMeters: 120.0,
           },
-          accessPoints: []
+          accessPoints: [],
         };
       }
 
@@ -68,65 +86,72 @@ class IndoorLocationService {
       this.apByBssid = new Map();
       this.apById = new Map();
 
-      for (const ap of (this.config.accessPoints || [])) {
+      for (const ap of this.config.accessPoints || []) {
         if (!ap.enabled) continue;
         const normBssid = this.normalizeMac(ap.bssid);
         this.apByBssid.set(normBssid, ap);
         this.apById.set(ap.id.toUpperCase(), ap);
       }
 
-      console.log(`[IndoorLocation] Loaded ${this.apByBssid.size} active Access Points for resort map.`);
+      console.log(
+        `[IndoorLocation] Loaded ${this.apByBssid.size} active Access Points for resort map.`,
+      );
     } catch (err) {
-      console.error('[IndoorLocation] Failed to load AP configuration:', err);
+      console.error("[IndoorLocation] Failed to load AP configuration:", err);
     }
   }
 
   normalizeMac(mac) {
-    if (!mac) return '';
-    return String(mac).trim().toLowerCase().replace(/[:-]/g, ':');
+    if (!mac) return "";
+    return String(mac).trim().toLowerCase().replace(/[:-]/g, ":");
   }
 
   /**
    * 1. Log-Distance Path Loss Model
    * RSSI = A - 10 * n * log10(d)
    * => d = 10 ^ ((A - RSSI) / (10 * n))
-   * 
+   *
    * @param {number} rssi - Signal strength in dBm (e.g. -65)
    * @param {number} refRssi1m - Reference RSSI at 1 meter (A, e.g. -48 dBm)
    * @param {number} pathLossN - Path loss exponent (n, e.g. 2.75)
    * @returns {number} distance in meters
    */
   rssiToDistance(rssi, refRssi1m = null, pathLossN = null) {
-    const A = refRssi1m != null ? refRssi1m : (this.config.defaultModel.refRssi1m || -48.0);
-    const n = pathLossN != null ? pathLossN : (this.config.defaultModel.pathLossN || 2.75);
-    const minD = this.config.defaultModel.minDistanceMeters || 0.5;
-    const maxD = this.config.defaultModel.maxDistanceMeters || 120.0;
-
-    // Safety checks for abnormal signal readings
-    const cleanRssi = Math.min(-15, Math.max(-110, Number(rssi)));
-
-    // Power calculation
-    const exponent = (A - cleanRssi) / (10.0 * n);
-    const distMeters = Math.pow(10.0, exponent);
-
-    return Math.min(maxD, Math.max(minD, distMeters));
+    const A =
+      refRssi1m != null
+        ? refRssi1m
+        : this.config.defaultModel?.refRssi1m ||
+          PositioningCore.DEFAULT_REF_RSSI_1M;
+    const n =
+      pathLossN != null
+        ? pathLossN
+        : this.config.defaultModel?.pathLossN ||
+          PositioningCore.DEFAULT_PATH_LOSS_N;
+    return PositioningCore.rssiToDistance(rssi, A, n);
   }
 
   /**
    * Inverse path loss (useful for synthetic testing and validation)
    */
   distanceToRssi(distMeters, refRssi1m = null, pathLossN = null) {
-    const A = refRssi1m != null ? refRssi1m : (this.config.defaultModel.refRssi1m || -48.0);
-    const n = pathLossN != null ? pathLossN : (this.config.defaultModel.pathLossN || 2.75);
-    const d = Math.max(0.2, Number(distMeters));
-    return A - 10.0 * n * Math.log10(d);
+    const A =
+      refRssi1m != null
+        ? refRssi1m
+        : this.config.defaultModel?.refRssi1m ||
+          PositioningCore.DEFAULT_REF_RSSI_1M;
+    const n =
+      pathLossN != null
+        ? pathLossN
+        : this.config.defaultModel?.pathLossN ||
+          PositioningCore.DEFAULT_PATH_LOSS_N;
+    return PositioningCore.distanceToRssi(distMeters, A, n);
   }
 
   /**
    * 2. Robust 2D Trilateration
    * Calculates (x, y) coordinates on the 896x1200 resort map from 3+ Access Points.
    * Uses Weighted Linear Least Squares followed by Gauss-Newton optimization.
-   * 
+   *
    * @param {Array<{x: number, y: number, distanceMeters: number, weight?: number, id?: string}>} points
    * @returns {{x: number, y: number, pctX: number, pctY: number, accuracyMeters: number, method: string}}
    */
@@ -144,7 +169,7 @@ class IndoorLocationService {
         pctX: Number(((p.x / this.mapWidth) * 100).toFixed(2)),
         pctY: Number(((p.y / this.mapHeight) * 100).toFixed(2)),
         accuracyMeters: Number(p.distanceMeters.toFixed(1)),
-        method: 'single_ap_proximity'
+        method: "single_ap_proximity",
       };
     }
 
@@ -159,7 +184,8 @@ class IndoorLocationService {
 
       const x = (p1.x * w1 + p2.x * w2) / sumW;
       const y = (p1.y * w1 + p2.y * w2) / sumW;
-      const baseline = Math.hypot(p2.x - p1.x, p2.y - p1.y) * this.metersPerPixel;
+      const baseline =
+        Math.hypot(p2.x - p1.x, p2.y - p1.y) * this.metersPerPixel;
       const accuracy = Math.max(d1, d2, baseline * 0.5);
 
       return {
@@ -168,19 +194,19 @@ class IndoorLocationService {
         pctX: Number(((x / this.mapWidth) * 100).toFixed(2)),
         pctY: Number(((y / this.mapHeight) * 100).toFixed(2)),
         accuracyMeters: Number(accuracy.toFixed(1)),
-        method: 'weighted_barycenter_2ap'
+        method: "weighted_barycenter_2ap",
       };
     }
 
     // 3+ APs: Full Trilateration
     // Convert distance from meters to canvas pixels: dPx = dMeters * pixelsPerMeter
     const ppm = this.pixelsPerMeter;
-    const apList = points.map(pt => ({
+    const apList = points.map((pt) => ({
       x: pt.x,
       y: pt.y,
       d: pt.distanceMeters * ppm,
       dMeters: pt.distanceMeters,
-      weight: pt.weight || (1.0 / Math.max(1.0, Math.pow(pt.distanceMeters, 2)))
+      weight: pt.weight || 1.0 / Math.max(1.0, Math.pow(pt.distanceMeters, 2)),
     }));
 
     // Step A: Linearized Weighted Least Squares (Reference AP is chosen as the strongest signal = smallest d)
@@ -203,24 +229,29 @@ class IndoorLocationService {
       const p = apList[i];
       const a1 = 2 * (p.x - refAP.x);
       const a2 = 2 * (p.y - refAP.y);
-      const b = (p.x * p.x - refAP.x * refAP.x) +
-                (p.y * p.y - refAP.y * refAP.y) +
-                (refAP.d * refAP.d - p.d * p.d);
+      const b =
+        p.x * p.x -
+        refAP.x * refAP.x +
+        (p.y * p.y - refAP.y * refAP.y) +
+        (refAP.d * refAP.d - p.d * p.d);
       const w = Math.sqrt(p.weight * refAP.weight);
       rows.push({ a1, a2, b, w });
     }
 
     // Solve (A^T * W * A) * [x, y]^T = A^T * W * b
-    let m11 = 0, m12 = 0, m22 = 0;
-    let v1 = 0, v2 = 0;
+    let m11 = 0,
+      m12 = 0,
+      m22 = 0;
+    let v1 = 0,
+      v2 = 0;
 
     for (const r of rows) {
       const w = r.w;
-      m11 += (r.a1 * r.a1) * w;
-      m12 += (r.a1 * r.a2) * w;
-      m22 += (r.a2 * r.a2) * w;
-      v1 += (r.a1 * r.b) * w;
-      v2 += (r.a2 * r.b) * w;
+      m11 += r.a1 * r.a1 * w;
+      m12 += r.a1 * r.a2 * w;
+      m22 += r.a2 * r.a2 * w;
+      v1 += r.a1 * r.b * w;
+      v2 += r.a2 * r.b * w;
     }
 
     const det = m11 * m22 - m12 * m12;
@@ -233,7 +264,9 @@ class IndoorLocationService {
       initY = (m11 * v2 - m12 * v1) / det;
     } else {
       // Fallback if APs are collinear: weighted centroid
-      let sumW = 0, sumX = 0, sumY = 0;
+      let sumW = 0,
+        sumX = 0,
+        sumY = 0;
       for (const p of apList) {
         sumW += p.weight;
         sumX += p.x * p.weight;
@@ -252,8 +285,11 @@ class IndoorLocationService {
     let curY = initY;
 
     for (let iter = 0; iter < 4; iter++) {
-      let j11 = 0, j12 = 0, j22 = 0;
-      let res1 = 0, res2 = 0;
+      let j11 = 0,
+        j12 = 0,
+        j22 = 0;
+      let res1 = 0,
+        res2 = 0;
 
       for (const p of apList) {
         const dx = curX - p.x;
@@ -265,12 +301,12 @@ class IndoorLocationService {
         const u2 = dy / calcDist; // Jacobian wrt y
         const w = p.weight;
 
-        j11 += (u1 * u1) * w;
-        j12 += (u1 * u2) * w;
-        j22 += (u2 * u2) * w;
+        j11 += u1 * u1 * w;
+        j12 += u1 * u2 * w;
+        j22 += u2 * u2 * w;
 
-        res1 += (u1 * residual) * w;
-        res2 += (u2 * residual) * w;
+        res1 += u1 * residual * w;
+        res2 += u2 * residual * w;
       }
 
       // Levenberg-Marquardt damping factor for stability
@@ -297,12 +333,15 @@ class IndoorLocationService {
     // Calculate Root Mean Square Error (RMSE) in meters as accuracy metric
     let sumSqErr = 0;
     for (const p of apList) {
-      const dCalculated = Math.hypot(curX - p.x, curY - p.y) * this.metersPerPixel;
+      const dCalculated =
+        Math.hypot(curX - p.x, curY - p.y) * this.metersPerPixel;
       const err = dCalculated - p.dMeters;
       sumSqErr += err * err;
     }
     const rmseMeters = Math.sqrt(sumSqErr / apList.length);
-    const accuracyMeters = Number(Math.max(1.5, Math.min(25.0, rmseMeters * 1.25)).toFixed(1));
+    const accuracyMeters = Number(
+      Math.max(1.5, Math.min(25.0, rmseMeters * 1.25)).toFixed(1),
+    );
 
     return {
       x: Math.round(curX),
@@ -310,7 +349,7 @@ class IndoorLocationService {
       pctX: Number(((curX / this.mapWidth) * 100).toFixed(2)),
       pctY: Number(((curY / this.mapHeight) * 100).toFixed(2)),
       accuracyMeters,
-      method: `trilateration_${apList.length}ap`
+      method: `trilateration_${apList.length}ap`,
     };
   }
 
@@ -320,14 +359,16 @@ class IndoorLocationService {
   loadFingerprints() {
     try {
       if (fs.existsSync(this.fingerprintsPath)) {
-        const raw = fs.readFileSync(this.fingerprintsPath, 'utf8');
+        const raw = fs.readFileSync(this.fingerprintsPath, "utf8");
         this.fingerprints = JSON.parse(raw);
       } else {
         this.fingerprints = [];
       }
-      console.log(`[IndoorLocation] Loaded ${this.fingerprints.length} radio survey fingerprints.`);
+      console.log(
+        `[IndoorLocation] Loaded ${this.fingerprints.length} radio survey fingerprints.`,
+      );
     } catch (err) {
-      console.error('[IndoorLocation] Failed to load fingerprints:', err);
+      console.error("[IndoorLocation] Failed to load fingerprints:", err);
       this.fingerprints = [];
     }
   }
@@ -341,10 +382,14 @@ class IndoorLocationService {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      fs.writeFileSync(this.fingerprintsPath, JSON.stringify(this.fingerprints, null, 2), 'utf8');
+      fs.writeFileSync(
+        this.fingerprintsPath,
+        JSON.stringify(this.fingerprints, null, 2),
+        "utf8",
+      );
       return true;
     } catch (err) {
-      console.error('[IndoorLocation] Failed to save fingerprints:', err);
+      console.error("[IndoorLocation] Failed to save fingerprints:", err);
       return false;
     }
   }
@@ -354,13 +399,15 @@ class IndoorLocationService {
   }
 
   addFingerprint(data) {
-    if (!data || typeof data !== 'object') throw new Error('Invalid fingerprint payload');
+    if (!data || typeof data !== "object")
+      throw new Error("Invalid fingerprint payload");
     const x = Number(data.x);
     const y = Number(data.y);
-    if (isNaN(x) || isNaN(y)) throw new Error('Coordinates (x, y) are required');
+    if (isNaN(x) || isNaN(y))
+      throw new Error("Coordinates (x, y) are required");
 
     const expectedRssi = {};
-    if (data.expectedRssi && typeof data.expectedRssi === 'object') {
+    if (data.expectedRssi && typeof data.expectedRssi === "object") {
       for (const [bssid, val] of Object.entries(data.expectedRssi)) {
         const norm = this.normalizeMac(bssid);
         const rssiNum = Number(val);
@@ -383,11 +430,11 @@ class IndoorLocationService {
       pctX,
       pctY,
       expectedRssi,
-      recordedAt: new Date().toISOString()
+      recordedAt: new Date().toISOString(),
     };
 
     // Update existing if same ID, or push new
-    const idx = this.fingerprints.findIndex(f => f.id === id);
+    const idx = this.fingerprints.findIndex((f) => f.id === id);
     if (idx >= 0) {
       this.fingerprints[idx] = fp;
     } else {
@@ -400,7 +447,7 @@ class IndoorLocationService {
 
   deleteFingerprint(id) {
     const initLen = this.fingerprints.length;
-    this.fingerprints = this.fingerprints.filter(f => f.id !== id);
+    this.fingerprints = this.fingerprints.filter((f) => f.id !== id);
     if (this.fingerprints.length !== initLen) {
       this.saveFingerprints();
       return true;
@@ -413,7 +460,12 @@ class IndoorLocationService {
    * Distance = sqrt( sum( (measuredRssi_i - recordedRssi_i)^2 ) )
    */
   estimatePositionByFingerprints(measurements, k = 3) {
-    if (!this.fingerprints || this.fingerprints.length === 0 || !measurements || measurements.length === 0) {
+    if (
+      !this.fingerprints ||
+      this.fingerprints.length === 0 ||
+      !measurements ||
+      measurements.length === 0
+    ) {
       return null;
     }
 
@@ -454,7 +506,7 @@ class IndoorLocationService {
       for (const [measBssid] of measMap.entries()) {
         if (!fp.expectedRssi[measBssid]) {
           totalApsEvaluated++;
-          sumSq += (missingApPenalty * 0.75) * (missingApPenalty * 0.75);
+          sumSq += missingApPenalty * 0.75 * (missingApPenalty * 0.75);
         }
       }
 
@@ -487,7 +539,9 @@ class IndoorLocationService {
 
     const estX = Math.round(weightedX / totalWeight);
     const estY = Math.round(weightedY / totalWeight);
-    const accuracyMeters = Number(Math.max(1.5, Math.min(22.0, bestDist * 0.45)).toFixed(1));
+    const accuracyMeters = Number(
+      Math.max(1.5, Math.min(22.0, bestDist * 0.45)).toFixed(1),
+    );
 
     return {
       x: estX,
@@ -497,12 +551,12 @@ class IndoorLocationService {
       accuracyMeters,
       bestDistance: Number(bestDist.toFixed(2)),
       bestMatch: kNeighbors[0].fp,
-      neighbors: kNeighbors.map(n => ({
+      neighbors: kNeighbors.map((n) => ({
         id: n.fp.id,
         label: n.fp.label,
-        distance: Number(n.distance.toFixed(2))
+        distance: Number(n.distance.toFixed(2)),
       })),
-      method: `fingerprint_knn${kNeighbors.length}`
+      method: `fingerprint_knn${kNeighbors.length}`,
     };
   }
 
@@ -526,14 +580,24 @@ class IndoorLocationService {
     // 1. High match with surveyed zone (d <= 6.5 dBm) -> Dominant fingerprinting (90%)
     if (d <= 6.5) {
       return {
-        x: Math.round(fpPos.x * 0.90 + trilatPos.x * 0.10),
-        y: Math.round(fpPos.y * 0.90 + trilatPos.y * 0.10),
-        pctX: Number(((Math.round(fpPos.x * 0.90 + trilatPos.x * 0.10) / this.mapWidth) * 100).toFixed(2)),
-        pctY: Number(((Math.round(fpPos.y * 0.90 + trilatPos.y * 0.10) / this.mapHeight) * 100).toFixed(2)),
+        x: Math.round(fpPos.x * 0.9 + trilatPos.x * 0.1),
+        y: Math.round(fpPos.y * 0.9 + trilatPos.y * 0.1),
+        pctX: Number(
+          (
+            (Math.round(fpPos.x * 0.9 + trilatPos.x * 0.1) / this.mapWidth) *
+            100
+          ).toFixed(2),
+        ),
+        pctY: Number(
+          (
+            (Math.round(fpPos.y * 0.9 + trilatPos.y * 0.1) / this.mapHeight) *
+            100
+          ).toFixed(2),
+        ),
         accuracyMeters: fpPos.accuracyMeters,
         method: `fingerprint_dominant (${fpPos.bestMatch.label})`,
         nearestFingerprint: fpPos.bestMatch.label,
-        euclideanDistance: d
+        euclideanDistance: d,
       };
     }
 
@@ -543,9 +607,18 @@ class IndoorLocationService {
       const fpWeight = 0.85 * blendFactor;
       const trilatWeight = 1.0 - fpWeight;
 
-      const blendedX = Math.round(fpPos.x * fpWeight + trilatPos.x * trilatWeight);
-      const blendedY = Math.round(fpPos.y * fpWeight + trilatPos.y * trilatWeight);
-      const blendedAcc = Number((fpPos.accuracyMeters * fpWeight + trilatPos.accuracyMeters * trilatWeight).toFixed(1));
+      const blendedX = Math.round(
+        fpPos.x * fpWeight + trilatPos.x * trilatWeight,
+      );
+      const blendedY = Math.round(
+        fpPos.y * fpWeight + trilatPos.y * trilatWeight,
+      );
+      const blendedAcc = Number(
+        (
+          fpPos.accuracyMeters * fpWeight +
+          trilatPos.accuracyMeters * trilatWeight
+        ).toFixed(1),
+      );
 
       return {
         x: blendedX,
@@ -555,7 +628,7 @@ class IndoorLocationService {
         accuracyMeters: blendedAcc,
         method: `hybrid_blend (FP ${Math.round(fpWeight * 100)}% + Tri ${Math.round(trilatWeight * 100)}%)`,
         nearestFingerprint: fpPos.bestMatch.label,
-        euclideanDistance: d
+        euclideanDistance: d,
       };
     }
 
@@ -563,14 +636,14 @@ class IndoorLocationService {
     return {
       ...trilatPos,
       method: `${trilatPos.method} (fallback_unsurveyed)`,
-      euclideanDistance: d
+      euclideanDistance: d,
     };
   }
 
   /**
    * 3. Temporal Jitter Smoothing Filter (EMA + Velocity Clamping)
    * Eliminates rapid jumps and multipath noise
-   * 
+   *
    * @param {string} mac - Device MAC address
    * @param {{x: number, y: number, accuracyMeters: number}} rawPos - Raw position from trilateration
    * @param {number} timestamp - Millisecond timestamp
@@ -593,7 +666,7 @@ class IndoorLocationService {
         lastTimestamp: timestamp,
         firstSeen: timestamp,
         updateCount: 1,
-        rssiPerAp: new Map()
+        rssiPerAp: new Map(),
       };
       this.deviceStates.set(normMac, state);
       return state;
@@ -621,20 +694,26 @@ class IndoorLocationService {
       alpha = 0.22;
     } else {
       // Normal motion: responsive tracking
-      alpha = 0.50;
+      alpha = 0.5;
     }
 
     // Apply Exponential Moving Average
     state.smoothedX = state.smoothedX + alpha * (rawPos.x - state.smoothedX);
     state.smoothedY = state.smoothedY + alpha * (rawPos.y - state.smoothedY);
 
-    state.smoothedPctX = Number(((state.smoothedX / this.mapWidth) * 100).toFixed(2));
-    state.smoothedPctY = Number(((state.smoothedY / this.mapHeight) * 100).toFixed(2));
+    state.smoothedPctX = Number(
+      ((state.smoothedX / this.mapWidth) * 100).toFixed(2),
+    );
+    state.smoothedPctY = Number(
+      ((state.smoothedY / this.mapHeight) * 100).toFixed(2),
+    );
     state.rawX = rawPos.x;
     state.rawY = rawPos.y;
 
     // Smooth accuracy estimate
-    state.accuracyMeters = Number((state.accuracyMeters * 0.7 + rawPos.accuracyMeters * 0.3).toFixed(1));
+    state.accuracyMeters = Number(
+      (state.accuracyMeters * 0.7 + rawPos.accuracyMeters * 0.3).toFixed(1),
+    );
 
     return state;
   }
@@ -642,7 +721,7 @@ class IndoorLocationService {
   /**
    * 4. Ingest MikroTik Registration Table Dump
    * Accepts JSON payload from MikroTik API / script
-   * 
+   *
    * @param {Array<Object>} feedRows
    * Format example:
    * [
@@ -656,27 +735,33 @@ class IndoorLocationService {
    */
   processMikroTikFeed(feedRows) {
     if (!Array.isArray(feedRows)) {
-      throw new Error('Expected feedRows to be an array');
+      throw new Error("Expected feedRows to be an array");
     }
 
     const now = Date.now();
     const updatedDevices = new Map(); // MAC -> Array of AP measurements
 
     for (const row of feedRows) {
-      const rawMac = row['mac-address'] || row.mac || row['mac_address'];
+      const rawMac = row["mac-address"] || row.mac || row["mac_address"];
       if (!rawMac) continue;
       const mac = this.normalizeMac(rawMac);
 
       // Clean signal strength (strip dBm, rate suffixes)
-      const rawSig = String(row['signal-strength'] || row.signal || row.rssi || '-90');
+      const rawSig = String(
+        row["signal-strength"] || row.signal || row.rssi || "-90",
+      );
       const match = rawSig.match(/(-?\d+)/);
       if (!match) continue;
       const rssi = parseInt(match[1], 10);
       if (isNaN(rssi) || rssi < -110 || rssi > -10) continue;
 
       // Identify Access Point
-      const rawBssid = this.normalizeMac(row['ap-bssid'] || row.bssid || row['ap_bssid']);
-      const rawApId = String(row['ap-id'] || row.ap || row['ap_id'] || '').toUpperCase();
+      const rawBssid = this.normalizeMac(
+        row["ap-bssid"] || row.bssid || row["ap_bssid"],
+      );
+      const rawApId = String(
+        row["ap-id"] || row.ap || row["ap_id"] || "",
+      ).toUpperCase();
 
       let ap = this.apByBssid.get(rawBssid);
       if (!ap && rawApId) {
@@ -686,7 +771,11 @@ class IndoorLocationService {
       if (!ap) continue; // Unknown AP, skip
 
       // Convert RSSI to distance
-      const distanceMeters = this.rssiToDistance(rssi, ap.refRssi1m, ap.pathLossN);
+      const distanceMeters = this.rssiToDistance(
+        rssi,
+        ap.refRssi1m,
+        ap.pathLossN,
+      );
 
       if (!updatedDevices.has(mac)) {
         updatedDevices.set(mac, []);
@@ -702,7 +791,7 @@ class IndoorLocationService {
         pctX: ap.pctX,
         pctY: ap.pctY,
         rssi,
-        distanceMeters
+        distanceMeters,
       });
     }
 
@@ -721,10 +810,10 @@ class IndoorLocationService {
       if (!rawPos) continue;
 
       const smoothedState = this.smoothDevicePosition(mac, rawPos, now);
-      smoothedState.activeAps = activeAps.map(a => ({
+      smoothedState.activeAps = activeAps.map((a) => ({
         id: a.apId,
         rssi: a.rssi,
-        distM: Number(a.distanceMeters.toFixed(1))
+        distM: Number(a.distanceMeters.toFixed(1)),
       }));
       smoothedState.method = rawPos.method;
       smoothedState.nearestFingerprint = rawPos.nearestFingerprint || null;
@@ -742,7 +831,7 @@ class IndoorLocationService {
         nearestFingerprint: rawPos.nearestFingerprint || null,
         euclideanDistance: rawPos.euclideanDistance || null,
         lastSeen: now,
-        activeAps: smoothedState.activeAps
+        activeAps: smoothedState.activeAps,
       };
 
       results.push(out);
@@ -767,7 +856,7 @@ class IndoorLocationService {
       try {
         cb(deviceLocation);
       } catch (err) {
-        console.error('[IndoorLocation] Subscriber error:', err);
+        console.error("[IndoorLocation] Subscriber error:", err);
       }
     }
   }
@@ -787,7 +876,7 @@ class IndoorLocationService {
       pctX: state.smoothedPctX,
       pctY: state.smoothedPctY,
       accuracyMeters: state.accuracyMeters,
-      method: state.method || 'trilateration',
+      method: state.method || "trilateration",
       nearestFingerprint: state.nearestFingerprint || null,
       euclideanDistance: state.euclideanDistance || null,
       rawX: state.rawX,
@@ -795,7 +884,7 @@ class IndoorLocationService {
       lastSeen: state.lastTimestamp,
       firstSeen: state.firstSeen,
       updateCount: state.updateCount,
-      activeAps: state.activeAps || []
+      activeAps: state.activeAps || [],
     };
   }
 
@@ -834,7 +923,5 @@ class IndoorLocationService {
 // Singleton instance
 const indoorLocationService = new IndoorLocationService();
 
-module.exports = {
-  IndoorLocationService,
-  indoorLocationService
-};
+export { IndoorLocationService, indoorLocationService };
+export default indoorLocationService;

@@ -1,6 +1,6 @@
 /**
  * Moreno Horizon Spa & Resort - Map-Matching & Snap-to-Path Algorithm
- * 
+ *
  * Capabilities:
  * 1. Paved Path Orthogonal Snapping:
  *    - Extracts all unique walkable segments from VirtualResortMap.nodes.
@@ -26,26 +26,100 @@ const MapMatcher = {
 
   // Free-roam zones where guests can wander freely (restaurants, plazas, lobby, beach sand)
   freeRoamZones: [
-    { id: 'lobby_m', name: 'Main Lobby Hall', x: 283, y: 820, radiusPx: 45 },
-    { id: 'grand_plaza', name: 'Grand Entrance Plaza', x: 340, y: 876, radiusPx: 50 },
-    { id: 'sirena_terrace', name: 'Sirena Restaurant Terrace', x: 325, y: 810, radiusPx: 40 },
-    { id: 'beach_sand', name: 'Beach Shoreline & Marina Deck', x: 381, y: 281, radiusPx: 55 },
-    { id: 'beach_bar_deck', name: 'Beach Bar Pergola', x: 428, y: 340, radiusPx: 35 },
-    { id: 'oriental_deck', name: 'Oriental Grill Garden', x: 442, y: 535, radiusPx: 35 },
-    { id: 'la_mama_indoor', name: 'La Mama Dining Room', x: 348, y: 575, radiusPx: 32 },
-    { id: 'spa_interior', name: 'Spa & Wellness Club', x: 170, y: 750, radiusPx: 38 },
-    { id: 'tennis_court', name: 'Tennis Courts Area', x: 618, y: 732, radiusPx: 45 },
-    { id: 'mall_mls', name: 'Commercial Mall MLS Plaza', x: 163, y: 1037, radiusPx: 45 },
-    { id: 'clinic_mosque', name: 'Clinic & Mosque Courtyard', x: 400, y: 1049, radiusPx: 42 },
-    { id: 'wing_n_lounge', name: 'North Wing Inner Lounge', x: 201, y: 662, radiusPx: 32 },
-    { id: 'wing_s_lounge', name: 'South Wing Inner Lounge', x: 565, y: 650, radiusPx: 32 }
+    { id: "lobby_m", name: "Main Lobby Hall", x: 283, y: 820, radiusPx: 45 },
+    {
+      id: "grand_plaza",
+      name: "Grand Entrance Plaza",
+      x: 340,
+      y: 876,
+      radiusPx: 50,
+    },
+    {
+      id: "sirena_terrace",
+      name: "Sirena Restaurant Terrace",
+      x: 325,
+      y: 810,
+      radiusPx: 40,
+    },
+    {
+      id: "beach_sand",
+      name: "Beach Shoreline & Marina Deck",
+      x: 381,
+      y: 281,
+      radiusPx: 55,
+    },
+    {
+      id: "beach_bar_deck",
+      name: "Beach Bar Pergola",
+      x: 428,
+      y: 340,
+      radiusPx: 35,
+    },
+    {
+      id: "oriental_deck",
+      name: "Oriental Grill Garden",
+      x: 442,
+      y: 535,
+      radiusPx: 35,
+    },
+    {
+      id: "la_mama_indoor",
+      name: "La Mama Dining Room",
+      x: 348,
+      y: 575,
+      radiusPx: 32,
+    },
+    {
+      id: "spa_interior",
+      name: "Spa & Wellness Club",
+      x: 170,
+      y: 750,
+      radiusPx: 38,
+    },
+    {
+      id: "tennis_court",
+      name: "Tennis Courts Area",
+      x: 618,
+      y: 732,
+      radiusPx: 45,
+    },
+    {
+      id: "mall_mls",
+      name: "Commercial Mall MLS Plaza",
+      x: 163,
+      y: 1037,
+      radiusPx: 45,
+    },
+    {
+      id: "clinic_mosque",
+      name: "Clinic & Mosque Courtyard",
+      x: 400,
+      y: 1049,
+      radiusPx: 42,
+    },
+    {
+      id: "wing_n_lounge",
+      name: "North Wing Inner Lounge",
+      x: 201,
+      y: 662,
+      radiusPx: 32,
+    },
+    {
+      id: "wing_s_lounge",
+      name: "South Wing Inner Lounge",
+      x: 565,
+      y: 650,
+      radiusPx: 32,
+    },
   ],
 
   init() {
     if (this.isInitialized) return;
     this.buildEdgeSegments();
     this.isInitialized = true;
-    console.log(`[MapMatcher] Initialized with ${this.edges.length} path segments and ${this.freeRoamZones.length} free-roam zones.`);
+    console.log(
+      `[MapMatcher] Initialized with ${this.edges.length} path segments and ${this.freeRoamZones.length} free-roam zones.`,
+    );
   },
 
   /**
@@ -67,7 +141,7 @@ const MapMatcher = {
         const neighbor = network.nodes[neighborId];
         if (!neighbor) continue;
 
-        const edgeKey = [nodeId, neighborId].sort().join('--');
+        const edgeKey = [nodeId, neighborId].sort().join("--");
         if (uniqueEdgeMap.has(edgeKey)) continue;
         uniqueEdgeMap.add(edgeKey);
 
@@ -84,7 +158,7 @@ const MapMatcher = {
             dx,
             dy,
             lenSq,
-            length: Math.sqrt(lenSq)
+            length: Math.sqrt(lenSq),
           });
         }
       }
@@ -121,7 +195,7 @@ const MapMatcher = {
           pctY: Number(((rawPxY / this.CANVAS_HEIGHT) * 100).toFixed(2)),
           isSnapped: false,
           distMeters: 0,
-          zone: null
+          zone: null,
         };
       }
     }
@@ -145,7 +219,9 @@ const MapMatcher = {
       let bestProjection = { x: rawPxX, y: rawPxY };
 
       for (const edge of this.edges) {
-        const u = ((rawPxX - edge.p1.x) * edge.dx + (rawPxY - edge.p1.y) * edge.dy) / edge.lenSq;
+        const u =
+          ((rawPxX - edge.p1.x) * edge.dx + (rawPxY - edge.p1.y) * edge.dy) /
+          edge.lenSq;
         const t = Math.max(0, Math.min(1, u));
         const projX = edge.p1.x + t * edge.dx;
         const projY = edge.p1.y + t * edge.dy;
@@ -159,7 +235,8 @@ const MapMatcher = {
       }
 
       minPerpDistMeters = minPerpDistPx * this.METERS_PER_PIXEL;
-      const snapThresholdPx = this.SNAP_THRESHOLD_METERS * this.PIXELS_PER_METER; // ~28.5 px
+      const snapThresholdPx =
+        this.SNAP_THRESHOLD_METERS * this.PIXELS_PER_METER; // ~28.5 px
 
       if (minPerpDistPx <= snapThresholdPx) {
         // Snap to path segment
@@ -169,7 +246,10 @@ const MapMatcher = {
       } else {
         // Too far from walkway (e.g. noise placed position deep inside a pool or off-map)
         // Pull it back towards the nearest path with dampening so it never stays in water
-        const pullFactor = Math.min(0.85, (minPerpDistPx - snapThresholdPx) / minPerpDistPx);
+        const pullFactor = Math.min(
+          0.85,
+          (minPerpDistPx - snapThresholdPx) / minPerpDistPx,
+        );
         targetX = rawPxX + (bestProjection.x - rawPxX) * pullFactor;
         targetY = rawPxY + (bestProjection.y - rawPxY) * pullFactor;
         isSnapped = true;
@@ -181,7 +261,10 @@ const MapMatcher = {
     let smoothY = targetY;
 
     if (this.lastPosition) {
-      const jumpDist = Math.hypot(targetX - this.lastPosition.x, targetY - this.lastPosition.y);
+      const jumpDist = Math.hypot(
+        targetX - this.lastPosition.x,
+        targetY - this.lastPosition.y,
+      );
       // If jump > 60px (~25m), fast-snap without lag
       const alpha = jumpDist > 60 ? 0.85 : this.ALPHA_SMOOTH;
       smoothX = this.lastPosition.x * (1 - alpha) + targetX * alpha;
@@ -201,7 +284,7 @@ const MapMatcher = {
       isSnapped,
       distMeters: minPerpDistMeters,
       zone: activeZone ? activeZone.name : null,
-      edge: closestEdge ? `${closestEdge.fromId}->${closestEdge.toId}` : null
+      edge: closestEdge ? `${closestEdge.fromId}->${closestEdge.toId}` : null,
     };
   },
 
@@ -210,14 +293,14 @@ const MapMatcher = {
    */
   reset() {
     this.lastPosition = null;
-  }
+  },
 };
 
 // Auto-initialize when window loads
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.MapMatcher = MapMatcher;
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => MapMatcher.init());
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => MapMatcher.init());
   } else {
     MapMatcher.init();
   }

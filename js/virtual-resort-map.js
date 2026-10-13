@@ -15,24 +15,24 @@ const VirtualResortMap = {
   HEIGHT: 1200,
 
   // Display Mode: 'shapes_only' | 'map_overlay' | 'satellite' | 'night'
-  viewMode: 'shapes_only',
+  viewMode: "shapes_only",
   isSoundEnabled: false,
   moveSpeed: 1.0,
 
   // Navigation Selection State
   nav: {
-    selectionMode: 'start', // 'start' | 'dest' | 'idle'
-    startPoint: { x: 283, y: 820, name: 'المبنى الرئيسي (Lobby M)', id: 'M' },
-    destPoint: { x: 381, y: 281, name: 'منطقة الشاطئ والمارينا', id: '1' },
+    selectionMode: "start", // 'start' | 'dest' | 'idle'
+    startPoint: { x: 340, y: 835, name: "المبنى الرئيسي (Lobby M)", id: "M" },
+    destPoint: { x: 381, y: 281, name: "منطقة الشاطئ والمارينا", id: "1" },
     activeRoutePath: [],
     distMeters: 0,
-    walkMinutes: 0
+    walkMinutes: 0,
   },
 
   // Player Avatar State
   player: {
-    x: 283,
-    y: 820,
+    x: 340,
+    y: 835,
     targetX: null,
     targetY: null,
     isWalking: false,
@@ -41,129 +41,563 @@ const VirtualResortMap = {
     heading: 0,
     facingLeft: false,
     walkFrame: 0,
-    onArrival: null
+    onArrival: null,
   },
 
-  // Walkway Graph Network (Precision graph tracing exact paved walkways, bypassing pools & lawn)
+  // Walkway Graph Network (Precision graph strictly on paved outdoor corridors - ZERO building collisions)
   nodes: {
     // 1. Pier & Beach
-    'p_pier_tip': { x: 381, y: 104, name: 'رصيف المارينا (نهاية الرصيف)', neighbors: ['p_pier_mid'] },
-    'p_pier_mid': { x: 381, y: 190, name: 'ممشى المارينا الخشبي', neighbors: ['p_pier_tip', 'poi_1_beach'] },
-    'poi_1_beach': { x: 381, y: 281, name: 'شاطئ البحر والمارينا (1)', neighbors: ['p_pier_mid', 'p_beach_w', 'p_beach_e', 'p_promenade_center'] },
-    'p_beach_w': { x: 260, y: 310, name: 'ممشى الشاطئ الغربي', neighbors: ['poi_1_beach', 'poi_2_diving', 'p_aqua_promenade'] },
-    'p_beach_e': { x: 480, y: 310, name: 'ممشى الشاطئ الشرقي', neighbors: ['poi_1_beach', 'p_east_shore'] },
-    'p_east_shore': { x: 565, y: 360, name: 'ممشى الشاطئ أقصى الشرق', neighbors: ['p_beach_e', 'p_promenade_6_8_c'] },
+    p_pier_tip: {
+      x: 381,
+      y: 104,
+      name: "رصيف المارينا (نهاية الرصيف)",
+      neighbors: ["p_pier_mid"],
+    },
+    p_pier_mid: {
+      x: 381,
+      y: 190,
+      name: "ممشى المارينا الخشبي",
+      neighbors: ["p_pier_tip", "poi_1_beach"],
+    },
+    poi_1_beach: {
+      x: 381,
+      y: 281,
+      name: "شاطئ البحر والمارينا (1)",
+      neighbors: ["p_pier_mid", "p_beach_w", "p_beach_e", "p_promenade_center"],
+    },
+    p_beach_w: {
+      x: 260,
+      y: 310,
+      name: "ممشى الشاطئ الغربي",
+      neighbors: ["poi_1_beach", "poi_2_diving", "p_aqua_promenade"],
+    },
+    p_beach_e: {
+      x: 480,
+      y: 310,
+      name: "ممشى الشاطئ الشرقي",
+      neighbors: ["poi_1_beach", "p_east_shore"],
+    },
+    p_east_shore: {
+      x: 565,
+      y: 360,
+      name: "ممشى الشاطئ أقصى الشرق",
+      neighbors: ["p_beach_e", "p_promenade_6_8_c"],
+    },
 
     // 2. North strip (Diving, Aqua Park, Kids, Promenade)
-    'poi_2_diving': { x: 150, y: 342, name: 'مركز الغوص (2)', neighbors: ['p_beach_w', 'poi_3_aquapark'] },
-    'poi_3_aquapark': { x: 145, y: 418, name: 'أكوا بارك مورينو (3)', neighbors: ['poi_2_diving', 'p_aqua_promenade', 'p_wing_n_outer_north'] },
-    'p_aqua_promenade': { x: 200, y: 418, name: 'ممشى الأكوا بارك الشرقي', neighbors: ['poi_3_aquapark', 'p_beach_w', 'poi_4_kids'] },
+    poi_2_diving: {
+      x: 150,
+      y: 342,
+      name: "مركز الغوص (2)",
+      neighbors: ["p_beach_w", "poi_3_aquapark"],
+    },
+    poi_3_aquapark: {
+      x: 145,
+      y: 418,
+      name: "أكوا بارك مورينو (3)",
+      neighbors: ["poi_2_diving", "p_aqua_promenade", "p_wing_n_outer_north"],
+    },
+    p_aqua_promenade: {
+      x: 200,
+      y: 418,
+      name: "ممشى الأكوا بارك الشرقي",
+      neighbors: ["poi_3_aquapark", "p_beach_w", "poi_4_kids"],
+    },
+    poi_4_kids: {
+      x: 266,
+      y: 416,
+      name: "منطقة ألعاب الأطفال (4)",
+      neighbors: ["p_aqua_promenade", "p_garden_outer_2", "poi_5_beach_bar"],
+    },
+    poi_5_beach_bar: {
+      x: 335,
+      y: 431,
+      name: "بار الشاطئ (5)",
+      neighbors: [
+        "poi_4_kids",
+        "p_garden_diag_3",
+        "p_promenade_5_6",
+        "p_promenade_center",
+      ],
+    },
+    p_promenade_center: {
+      x: 381,
+      y: 400,
+      name: "ملتقى الكورنيش الشمالي",
+      neighbors: ["poi_1_beach", "poi_5_beach_bar", "p_promenade_5_6"],
+    },
+    p_promenade_5_6: {
+      x: 385,
+      y: 431,
+      name: "ممشى المطاعم (وسط)",
+      neighbors: [
+        "poi_5_beach_bar",
+        "p_promenade_center",
+        "poi_6_oriental",
+        "p_pool_n_mid",
+      ],
+    },
+    poi_6_oriental: {
+      x: 435,
+      y: 431,
+      name: "المطعم الشرقي وسناك بار (6)",
+      neighbors: ["p_promenade_5_6", "p_promenade_6_8_a"],
+    },
+    p_promenade_6_8_a: {
+      x: 470,
+      y: 440,
+      name: "ممشى المطاعم الشرقية 1",
+      neighbors: ["poi_6_oriental", "p_promenade_6_8_b", "p_between_pools"],
+    },
+    p_promenade_6_8_b: {
+      x: 505,
+      y: 445,
+      name: "ممشى المطاعم الشرقية 2",
+      neighbors: ["p_promenade_6_8_a", "p_promenade_6_8_c"],
+    },
+    p_promenade_6_8_c: {
+      x: 525,
+      y: 460,
+      name: "ممشى مطعم لا ماما الشمالي",
+      neighbors: ["p_promenade_6_8_b", "poi_8_lamama", "p_east_shore"],
+    },
+    poi_8_lamama: {
+      x: 538,
+      y: 475,
+      name: "مطعم لا ماما الإيطالي (8)",
+      neighbors: ["p_promenade_6_8_c", "p_wing_s_veranda_north"],
+    },
 
-    // Northern Restaurant Promenade (100% dry paved walkway in front of all restaurants)
-    'poi_4_kids': { x: 266, y: 416, name: 'منطقة ألعاب الأطفال (4)', neighbors: ['p_aqua_promenade', 'p_garden_outer_2', 'poi_5_beach_bar'] },
-    'poi_5_beach_bar': { x: 335, y: 431, name: 'بار الشاطئ (5)', neighbors: ['poi_4_kids', 'p_garden_diag_3', 'p_promenade_5_6', 'p_promenade_center'] },
-    'p_promenade_center': { x: 381, y: 400, name: 'ملتقى الكورنيش الشمالي', neighbors: ['poi_1_beach', 'poi_5_beach_bar', 'p_promenade_5_6'] },
-    'p_promenade_5_6': { x: 385, y: 431, name: 'ممشى المطاعم (وسط)', neighbors: ['poi_5_beach_bar', 'p_promenade_center', 'poi_6_oriental', 'p_pool_n_mid'] },
-    'poi_6_oriental': { x: 435, y: 431, name: 'المطعم الشرقي وسناك بار (6)', neighbors: ['p_promenade_5_6', 'p_promenade_6_8_a'] },
-    'p_promenade_6_8_a': { x: 470, y: 440, name: 'ممشى المطاعم الشرقية 1', neighbors: ['poi_6_oriental', 'p_promenade_6_8_b', 'p_between_pools'] },
-    'p_promenade_6_8_b': { x: 505, y: 445, name: 'ممشى المطاعم الشرقية 2', neighbors: ['p_promenade_6_8_a', 'p_promenade_6_8_c'] },
-    'p_promenade_6_8_c': { x: 525, y: 460, name: 'ممشى مطعم لا ماما الشمالي', neighbors: ['p_promenade_6_8_b', 'poi_8_lamama', 'p_east_shore'] },
-    'poi_8_lamama': { x: 538, y: 475, name: 'مطعم لا ماما الإيطالي (8)', neighbors: ['p_promenade_6_8_c', 'p_wing_s_veranda_north'] },
+    // 3. Wing N & Garden Walkways (Strictly along outdoor garden promenade, outside building walls)
+    poi_n_wing: {
+      x: 250,
+      y: 615,
+      name: "مدخل المبنى الشمالي (Wing N)",
+      neighbors: ["p_garden_w_1", "p_garden_w_2"],
+    },
+    p_garden_w_1: {
+      x: 250,
+      y: 645,
+      name: "ممشى الحديقة الغربي 1",
+      neighbors: ["poi_n_wing", "p_pool_sw", "p_wing_n_se_corner"],
+    },
+    p_wing_n_se_corner: {
+      x: 250,
+      y: 690,
+      name: "ركن الجناح الشمالي الجنوبي",
+      neighbors: ["p_garden_w_1", "p_wing_n_south_bypass", "p_pool_sw"],
+    },
+    p_garden_w_2: {
+      x: 260,
+      y: 570,
+      name: "ممشى الحديقة الغربي 2",
+      neighbors: [
+        "poi_n_wing",
+        "p_garden_diag_1",
+        "p_garden_outer_1",
+        "p_pool_west",
+      ],
+    },
+    p_garden_outer_1: {
+      x: 260,
+      y: 510,
+      name: "ممشى الحديقة الخارجي 1",
+      neighbors: ["p_garden_w_2", "p_garden_outer_2"],
+    },
+    p_garden_outer_2: {
+      x: 260,
+      y: 460,
+      name: "ممشى الحديقة الخارجي 2",
+      neighbors: ["p_garden_outer_1", "poi_4_kids"],
+    },
+    p_garden_diag_1: {
+      x: 285,
+      y: 530,
+      name: "ممشى الحديقة المنحني 1",
+      neighbors: ["p_garden_w_2", "p_garden_diag_2"],
+    },
+    p_garden_diag_2: {
+      x: 320,
+      y: 490,
+      name: "ممشى الحديقة المنحني 2",
+      neighbors: ["p_garden_diag_1", "p_garden_diag_3"],
+    },
+    p_garden_diag_3: {
+      x: 350,
+      y: 450,
+      name: "ممشى الحديقة المنحني 3",
+      neighbors: ["p_garden_diag_2", "poi_5_beach_bar"],
+    },
 
-    // Garden Paths from Wing N (Paved curves through lawn matching photo)
-    'poi_n_wing': { x: 201, y: 662, name: 'المبنى الشمالي (Wing N)', neighbors: ['p_wing_n_exit'] },
-    'p_wing_n_exit': { x: 224, y: 660, name: 'مخرج غرف الجناح الشمالي', neighbors: ['poi_n_wing', 'p_garden_w_1', 'p_wing_n_outer_south', 'p_lobby_north_walk'] },
-    'p_garden_w_1': { x: 240, y: 620, name: 'ممشى الحديقة الغربي 1', neighbors: ['p_wing_n_exit', 'p_garden_w_2', 'p_pool_west'] },
-    'p_garden_w_2': { x: 255, y: 570, name: 'ممشى الحديقة الغربي 2', neighbors: ['p_garden_w_1', 'p_garden_diag_1', 'p_garden_outer_1'] },
-    'p_garden_outer_1': { x: 255, y: 510, name: 'ممشى الحديقة الخارجي 1', neighbors: ['p_garden_w_2', 'p_garden_outer_2'] },
-    'p_garden_outer_2': { x: 260, y: 460, name: 'ممشى الحديقة الخارجي 2', neighbors: ['p_garden_outer_1', 'poi_4_kids'] },
+    // 4. West Side Boulevard & Parking (Fully outdoor west of Wing N)
+    p_wing_n_outer_north: {
+      x: 116,
+      y: 474,
+      name: "الممشى الخارجي للجناح N (شمال)",
+      neighbors: ["poi_3_aquapark", "p_wing_n_outer_mid"],
+    },
+    p_wing_n_outer_mid: {
+      x: 116,
+      y: 600,
+      name: "الممشى الخارجي للجناح N (وسط)",
+      neighbors: [
+        "p_wing_n_outer_north",
+        "p_wing_n_outer_south",
+        "poi_13_parking1",
+      ],
+    },
+    p_wing_n_outer_south: {
+      x: 116,
+      y: 690,
+      name: "الممشى الخارجي للجناح N (جنوب)",
+      neighbors: [
+        "p_wing_n_outer_mid",
+        "p_wing_n_south_bypass",
+        "p_west_service_road",
+      ],
+    },
+    p_wing_n_south_bypass: {
+      x: 180,
+      y: 690,
+      name: "ممشى جنوب الجناح N الخارجي",
+      neighbors: ["p_wing_n_outer_south", "p_wing_n_se_corner"],
+    },
+    poi_13_parking1: {
+      x: 65,
+      y: 727,
+      name: "موقف السيارات 1 (13)",
+      neighbors: [
+        "p_wing_n_outer_mid",
+        "p_west_service_road",
+        "poi_14_side_gate",
+      ],
+    },
+    p_west_service_road: {
+      x: 116,
+      y: 804,
+      name: "طريق الخدمة الغربي",
+      neighbors: [
+        "p_wing_n_outer_south",
+        "poi_13_parking1",
+        "p_avenue_west",
+        "p_mls_west_bypass",
+      ],
+    },
+    p_mls_west_bypass: {
+      x: 100,
+      y: 928,
+      name: "ممشى غرب مول MLS",
+      neighbors: ["p_west_service_road", "poi_14_side_gate", "p_avenue_west"],
+    },
 
-    'p_garden_diag_1': { x: 285, y: 530, name: 'ممشى الحديقة المنحني 1', neighbors: ['p_garden_w_2', 'p_garden_diag_2'] },
-    'p_garden_diag_2': { x: 320, y: 490, name: 'ممشى الحديقة المنحني 2', neighbors: ['p_garden_diag_1', 'p_garden_diag_3'] },
-    'p_garden_diag_3': { x: 350, y: 450, name: 'ممشى الحديقة المنحني 3', neighbors: ['p_garden_diag_2', 'poi_5_beach_bar'] },
+    // 5. Central Pool Ring Walkways (Hugging outer perimeter of umbrellas)
+    p_pool_sw: {
+      x: 280,
+      y: 650,
+      name: "ممشى المسبح (جنوب غرب)",
+      neighbors: [
+        "p_garden_w_1",
+        "p_wing_n_se_corner",
+        "p_pool_west",
+        "p_pool_s",
+      ],
+    },
+    p_pool_west: {
+      x: 265,
+      y: 610,
+      name: "ممشى المسبح (غرب)",
+      neighbors: ["p_garden_w_2", "p_pool_sw", "p_pool_nw_1"],
+    },
+    p_pool_nw_1: {
+      x: 275,
+      y: 565,
+      name: "ممشى المسبح (شمال غرب 1)",
+      neighbors: ["p_pool_west", "p_pool_nw_2"],
+    },
+    p_pool_nw_2: {
+      x: 300,
+      y: 525,
+      name: "ممشى المسبح (شمال غرب 2)",
+      neighbors: ["p_pool_nw_1", "p_pool_n_1"],
+    },
+    p_pool_n_1: {
+      x: 340,
+      y: 495,
+      name: "ممشى المسبح (شمال 1)",
+      neighbors: ["p_pool_nw_2", "p_pool_n_mid"],
+    },
+    p_pool_n_mid: {
+      x: 388,
+      y: 480,
+      name: "ممشى المسبح (شمال وسط)",
+      neighbors: ["p_pool_n_1", "p_pool_ne_1", "p_promenade_5_6"],
+    },
+    p_pool_ne_1: {
+      x: 435,
+      y: 485,
+      name: "ممشى المسبح (شمال شرق 1)",
+      neighbors: ["p_pool_n_mid", "p_pool_ne_2", "p_between_pools"],
+    },
+    p_pool_ne_2: {
+      x: 465,
+      y: 510,
+      name: "ممشى المسبح (شمال شرق 2)",
+      neighbors: [
+        "p_pool_ne_1",
+        "p_between_pools",
+        "p_pool_east",
+        "p_wing_s_veranda_north",
+      ],
+    },
+    p_between_pools: {
+      x: 465,
+      y: 470,
+      name: "الممشى بين المسبحين",
+      neighbors: ["p_pool_ne_1", "p_pool_ne_2", "p_promenade_6_8_a"],
+    },
+    p_pool_east: {
+      x: 475,
+      y: 560,
+      name: "ممشى المسبح (شرق)",
+      neighbors: ["p_pool_ne_2", "poi_s_wing", "p_pool_se"],
+    },
+    p_pool_se: {
+      x: 475,
+      y: 650,
+      name: "ممشى المسبح (جنوب شرق)",
+      neighbors: [
+        "p_pool_east",
+        "poi_s_wing",
+        "p_wing_s_south_bypass",
+        "p_pool_s",
+      ],
+    },
+    p_pool_s: {
+      x: 388,
+      y: 732,
+      name: "ممشى المسبح (جنوب)",
+      neighbors: ["p_pool_sw", "p_pool_se", "poi_12_sirena", "p_lobby_terrace"],
+    },
 
-    // Pool Perimeter Ring (Hugging outer side of umbrellas around main pool)
-    'p_pool_sw': { x: 280, y: 650, name: 'ممشى المسبح (جنوب غرب)', neighbors: ['p_garden_w_1', 'p_pool_west', 'p_pool_s'] },
-    'p_pool_west': { x: 265, y: 610, name: 'ممشى المسبح (غرب)', neighbors: ['p_garden_w_1', 'p_pool_sw', 'p_pool_nw_1'] },
-    'p_pool_nw_1': { x: 275, y: 565, name: 'ممشى المسبح (شمال غرب 1)', neighbors: ['p_pool_west', 'p_pool_nw_2'] },
-    'p_pool_nw_2': { x: 300, y: 525, name: 'ممشى المسبح (شمال غرب 2)', neighbors: ['p_pool_nw_1', 'p_pool_n_1'] },
-    'p_pool_n_1': { x: 340, y: 495, name: 'ممشى المسبح (شمال 1)', neighbors: ['p_pool_nw_2', 'p_pool_n_mid'] },
-    'p_pool_n_mid': { x: 388, y: 480, name: 'ممشى المسبح (شمال وسط)', neighbors: ['p_pool_n_1', 'p_pool_ne_1', 'p_promenade_5_6'] },
-    'p_pool_ne_1': { x: 435, y: 485, name: 'ممشى المسبح (شمال شرق 1)', neighbors: ['p_pool_n_mid', 'p_pool_ne_2', 'p_between_pools'] },
-    'p_pool_ne_2': { x: 465, y: 510, name: 'ممشى المسبح (شمال شرق 2)', neighbors: ['p_pool_ne_1', 'p_between_pools', 'p_pool_east'] },
-    'p_between_pools': { x: 465, y: 470, name: 'الممشى بين المسبحين', neighbors: ['p_pool_ne_1', 'p_pool_ne_2', 'p_promenade_6_8_a'] },
+    // 6. Wing S, Spa (9), Tennis (10), Lotus Pool (11) (Paved walkways outside Wing S)
+    poi_s_wing: {
+      x: 485,
+      y: 615,
+      name: "مدخل المبنى الجنوبي (Wing S)",
+      neighbors: ["p_pool_east", "p_pool_se"],
+    },
+    p_wing_s_veranda_north: {
+      x: 535,
+      y: 525,
+      name: "ممشى الجناح الجنوبي (شمال)",
+      neighbors: ["poi_8_lamama", "p_wing_s_ne_corner", "p_pool_ne_2"],
+    },
+    p_wing_s_ne_corner: {
+      x: 615,
+      y: 525,
+      name: "ركن الجناح الجنوبي الشمالي الشرقي",
+      neighbors: ["p_wing_s_veranda_north", "poi_9_spa"],
+    },
+    poi_9_spa: {
+      x: 615,
+      y: 588,
+      name: "النادي الصحي والسبا (9)",
+      neighbors: ["p_wing_s_ne_corner", "p_tennis_walk"],
+    },
+    p_wing_s_south_bypass: {
+      x: 535,
+      y: 690,
+      name: "ممشى جنوب الجناح S الخارجي",
+      neighbors: ["p_pool_se", "p_tennis_walk"],
+    },
+    p_tennis_walk: {
+      x: 615,
+      y: 690,
+      name: "ممشى ملاعب التنس",
+      neighbors: [
+        "p_wing_s_south_bypass",
+        "poi_9_spa",
+        "poi_10_tennis",
+        "p_lotus_walk_1",
+      ],
+    },
+    poi_10_tennis: {
+      x: 618,
+      y: 732,
+      name: "ملاعب التنس (10)",
+      neighbors: ["p_tennis_walk", "poi_11_lotus_pool"],
+    },
+    p_lotus_walk_1: {
+      x: 590,
+      y: 756,
+      name: "ممشى مسبح لوتس الشمالي",
+      neighbors: ["p_tennis_walk", "poi_11_lotus_pool"],
+    },
+    poi_11_lotus_pool: {
+      x: 620,
+      y: 850,
+      name: "مسبح لوتس (11)",
+      neighbors: ["p_lotus_walk_1", "poi_10_tennis", "p_lotus_south"],
+    },
+    p_lotus_south: {
+      x: 590,
+      y: 888,
+      name: "رصيف مسبح لوتس الجنوبي",
+      neighbors: ["poi_11_lotus_pool", "p_avenue_east"],
+    },
 
-    'p_pool_east': { x: 475, y: 560, name: 'ممشى المسبح (شرق)', neighbors: ['p_pool_ne_2', 'p_pool_se', 'poi_9_spa'] },
-    'p_pool_se': { x: 460, y: 660, name: 'ممشى المسبح (جنوب شرق)', neighbors: ['p_pool_east', 'p_pool_s', 'poi_s_wing'] },
-    'p_pool_s': { x: 388, y: 732, name: 'ممشى المسبح (جنوب)', neighbors: ['p_pool_sw', 'p_pool_se', 'poi_12_sirena', 'p_lobby_terrace'] },
+    // 7. Lobby M, Sirena Restaurant, South Grand Avenue & Plazas (Outside Lobby walls)
+    poi_12_sirena: {
+      x: 429,
+      y: 820,
+      name: "مطعم سيرينا الرئيسي (12)",
+      neighbors: ["p_pool_s", "p_lobby_terrace", "p_avenue_mid"],
+    },
+    p_lobby_terrace: {
+      x: 355,
+      y: 810,
+      name: "تراس اللوبي الشرقي",
+      neighbors: ["p_pool_s", "poi_12_sirena", "poi_m_lobby", "p_grand_plaza"],
+    },
+    poi_m_lobby: {
+      x: 340,
+      y: 835,
+      name: "مدخل اللوبي الرئيسي (Lobby M)",
+      neighbors: ["p_lobby_terrace", "p_grand_plaza"],
+    },
+    p_grand_plaza: {
+      x: 300,
+      y: 865,
+      name: "ساحة الاستقبال الرئيسية",
+      neighbors: [
+        "poi_m_lobby",
+        "p_lobby_terrace",
+        "p_avenue_west",
+        "p_avenue_mid",
+        "p_clinic_walk",
+      ],
+    },
+    p_avenue_west: {
+      x: 220,
+      y: 865,
+      name: "طريق المنتجع الداخلي (غرب)",
+      neighbors: [
+        "p_grand_plaza",
+        "p_west_service_road",
+        "p_mls_walk",
+        "p_mls_west_bypass",
+      ],
+    },
+    p_avenue_mid: {
+      x: 426,
+      y: 888,
+      name: "طريق المنتجع الداخلي (وسط)",
+      neighbors: [
+        "p_grand_plaza",
+        "poi_12_sirena",
+        "p_mosque_walk",
+        "p_avenue_east",
+      ],
+    },
+    p_avenue_east: {
+      x: 520,
+      y: 888,
+      name: "طريق المنتجع الداخلي (شرق)",
+      neighbors: ["p_avenue_mid", "p_lotus_south", "p_parking2_walk"],
+    },
 
-    // Wing S, Spa (9), Tennis (10), Lotus Pool (11)
-    'p_wing_s_veranda_north': { x: 555, y: 530, name: 'ممشى الجناح الجنوبي (شمال)', neighbors: ['poi_8_lamama', 'poi_9_spa'] },
-    'poi_9_spa': { x: 581, y: 588, name: 'النادي الصحي والسبا (9)', neighbors: ['p_wing_s_veranda_north', 'p_pool_east', 'poi_s_wing'] },
-    'poi_s_wing': { x: 565, y: 650, name: 'المبنى الجنوبي (Wing S)', neighbors: ['poi_9_spa', 'p_pool_se', 'p_tennis_walk'] },
-    'p_tennis_walk': { x: 575, y: 690, name: 'ممشى ملاعب التنس', neighbors: ['poi_s_wing', 'poi_10_tennis', 'p_lotus_walk_1'] },
-    'poi_10_tennis': { x: 618, y: 732, name: 'ملاعب التنس (10)', neighbors: ['p_tennis_walk', 'poi_11_lotus_pool'] },
-    'p_lotus_walk_1': { x: 590, y: 756, name: 'ممشى مسبح لوتس الشمالي', neighbors: ['p_tennis_walk', 'poi_11_lotus_pool'] },
-    'poi_11_lotus_pool': { x: 620, y: 850, name: 'مسبح لوتس (11)', neighbors: ['p_lotus_walk_1', 'poi_10_tennis', 'p_lotus_south'] },
-    'p_lotus_south': { x: 590, y: 888, name: 'رصيف مسبح لوتس الجنوبي', neighbors: ['poi_11_lotus_pool', 'p_avenue_east'] },
-
-    // South Grand Avenue & Plazas
-    'poi_12_sirena': { x: 429, y: 840, name: 'مطعم سيرينا الرئيسي (12)', neighbors: ['p_pool_s', 'p_lobby_terrace', 'p_avenue_mid'] },
-    'p_lobby_terrace': { x: 340, y: 840, name: 'تراس اللوبي الشرقي', neighbors: ['p_pool_s', 'poi_12_sirena', 'poi_m_lobby', 'p_grand_plaza'] },
-    'poi_m_lobby': { x: 283, y: 820, name: 'المبنى الرئيسي (Lobby M)', neighbors: ['p_lobby_terrace', 'p_lobby_north_walk', 'p_grand_plaza'] },
-    'p_lobby_north_walk': { x: 230, y: 750, name: 'ممشى اللوبي الشمالي', neighbors: ['p_wing_n_exit', 'poi_m_lobby'] },
-    'p_grand_plaza': { x: 340, y: 876, name: 'ساحة الاستقبال الرئيسية', neighbors: ['p_lobby_terrace', 'poi_m_lobby', 'p_avenue_west', 'p_avenue_mid', 'p_clinic_walk'] },
-
-    'p_avenue_west': { x: 240, y: 876, name: 'طريق المنتجع الداخلي (غرب)', neighbors: ['p_grand_plaza', 'p_west_service_road', 'p_mls_walk'] },
-    'p_avenue_mid': { x: 426, y: 888, name: 'طريق المنتجع الداخلي (وسط)', neighbors: ['p_grand_plaza', 'poi_12_sirena', 'p_mosque_walk', 'p_avenue_east'] },
-    'p_avenue_east': { x: 520, y: 888, name: 'طريق المنتجع الداخلي (شرق)', neighbors: ['p_avenue_mid', 'p_lotus_south', 'p_parking2_walk'] },
-
-    'p_parking2_walk': { x: 580, y: 920, name: 'طريق موقف السيارات 2', neighbors: ['p_avenue_east', 'poi_17_parking2'] },
-    'poi_17_parking2': { x: 603, y: 967, name: 'موقف السيارات 2 (17)', neighbors: ['p_parking2_walk', 'poi_18_main_gate'] },
-    'poi_18_main_gate': { x: 625, y: 1072, name: 'البوابة الرئيسية (18)', neighbors: ['poi_17_parking2', 'p_mosque_walk_s'] },
-
-    'p_mosque_walk': { x: 426, y: 960, name: 'ممشى المسجد الشمالي', neighbors: ['p_avenue_mid', 'poi_16_mosque'] },
-    'p_mosque_walk_s': { x: 500, y: 1049, name: 'ممشى المسجد الشرقي', neighbors: ['poi_16_mosque', 'poi_18_main_gate'] },
-    'poi_16_mosque': { x: 426, y: 1049, name: 'مسجد المنتجع (16)', neighbors: ['p_mosque_walk', 'p_mosque_walk_s', 'poi_15_clinic'] },
-
-    'p_clinic_walk': { x: 370, y: 960, name: 'ممشى العيادة الشمالي', neighbors: ['p_grand_plaza', 'poi_15_clinic'] },
-    'poi_15_clinic': { x: 370, y: 1049, name: 'العيادة والصيدلية (15)', neighbors: ['p_clinic_walk', 'poi_16_mosque', 'poi_mls_mall'] },
-
-    'p_mls_walk': { x: 163, y: 960, name: 'ممشى مول MLS الشمالي', neighbors: ['p_avenue_west', 'poi_mls_mall'] },
-    'poi_mls_mall': { x: 163, y: 1037, name: 'المبنى التجاري (MLS Mall)', neighbors: ['p_mls_walk', 'poi_15_clinic', 'poi_14_side_gate'] },
-
-    'p_west_service_road': { x: 116, y: 804, name: 'طريق الخدمة الغربي', neighbors: ['p_avenue_west', 'p_wing_n_outer_south', 'poi_13_parking1'] },
-    'p_wing_n_outer_north': { x: 116, y: 474, name: 'الممشى الخارجي للجناح N (شمال)', neighbors: ['poi_3_aquapark', 'p_wing_n_outer_mid'] },
-    'p_wing_n_outer_mid': { x: 116, y: 600, name: 'الممشى الخارجي للجناح N (وسط)', neighbors: ['p_wing_n_outer_north', 'p_wing_n_outer_south', 'poi_13_parking1'] },
-    'p_wing_n_outer_south': { x: 116, y: 690, name: 'الممشى الخارجي للجناح N (جنوب)', neighbors: ['p_wing_n_outer_mid', 'p_wing_n_exit', 'p_west_service_road'] },
-
-    'poi_13_parking1': { x: 65, y: 727, name: 'موقف السيارات 1 (13)', neighbors: ['p_west_service_road', 'p_wing_n_outer_mid', 'poi_14_side_gate'] },
-    'poi_14_side_gate': { x: 49, y: 1043, name: 'البوابة الجانبية (14)', neighbors: ['poi_13_parking1', 'poi_mls_mall'] }
+    // 8. MLS Mall, Parking 2, Mosque, Clinic (Paved perimeter corridors)
+    p_mls_walk: {
+      x: 160,
+      y: 920,
+      name: "ممشى مول MLS الشمالي",
+      neighbors: ["p_avenue_west", "poi_mls_mall"],
+    },
+    poi_mls_mall: {
+      x: 160,
+      y: 928,
+      name: "مدخل المبنى التجاري (MLS Mall)",
+      neighbors: ["p_mls_walk", "p_avenue_west"],
+    },
+    poi_14_side_gate: {
+      x: 49,
+      y: 1043,
+      name: "البوابة الجانبية (14)",
+      neighbors: ["poi_13_parking1", "p_mls_west_bypass"],
+    },
+    p_clinic_walk: {
+      x: 370,
+      y: 920,
+      name: "ممشى العيادة الشمالي",
+      neighbors: ["p_grand_plaza", "poi_15_clinic"],
+    },
+    poi_15_clinic: {
+      x: 370,
+      y: 1000,
+      name: "العيادة والصيدلية (15)",
+      neighbors: ["p_clinic_walk", "poi_16_mosque"],
+    },
+    p_mosque_walk: {
+      x: 426,
+      y: 960,
+      name: "ممشى المسجد الشمالي",
+      neighbors: ["p_avenue_mid", "poi_16_mosque"],
+    },
+    poi_16_mosque: {
+      x: 426,
+      y: 1040,
+      name: "مسجد المنتجع (16)",
+      neighbors: ["p_mosque_walk", "poi_15_clinic", "p_mosque_walk_s"],
+    },
+    p_mosque_walk_s: {
+      x: 500,
+      y: 1049,
+      name: "ممشى المسجد الشرقي",
+      neighbors: ["poi_16_mosque", "poi_18_main_gate"],
+    },
+    p_parking2_walk: {
+      x: 580,
+      y: 920,
+      name: "طريق موقف السيارات 2",
+      neighbors: ["p_avenue_east", "poi_17_parking2"],
+    },
+    poi_17_parking2: {
+      x: 603,
+      y: 967,
+      name: "موقف السيارات 2 (17)",
+      neighbors: ["p_parking2_walk", "poi_18_main_gate"],
+    },
+    poi_18_main_gate: {
+      x: 625,
+      y: 1072,
+      name: "البوابة الرئيسية (18)",
+      neighbors: ["poi_17_parking2", "p_mosque_walk_s"],
+    },
   },
 
   // POI Key to Node Key
   poiToNodeMap: {
-    '1': 'poi_1_beach',
-    '2': 'poi_2_diving',
-    '3': 'poi_3_aquapark',
-    '4': 'poi_4_kids',
-    '5': 'poi_5_beach_bar',
-    '6': 'poi_6_oriental',
-    '8': 'poi_8_lamama',
-    '9': 'poi_9_spa',
-    '10': 'poi_10_tennis',
-    '11': 'poi_11_lotus_pool',
-    '12': 'poi_12_sirena',
-    '13': 'poi_13_parking1',
-    '14': 'poi_14_side_gate',
-    '15': 'poi_15_clinic',
-    '16': 'poi_16_mosque',
-    '17': 'poi_17_parking2',
-    '18': 'poi_18_main_gate',
-    'N': 'poi_n_wing',
-    'S': 'poi_s_wing',
-    'M': 'poi_m_lobby',
-    'MLS': 'poi_mls_mall'
+    1: "poi_1_beach",
+    2: "poi_2_diving",
+    3: "poi_3_aquapark",
+    4: "poi_4_kids",
+    5: "poi_5_beach_bar",
+    6: "poi_6_oriental",
+    8: "poi_8_lamama",
+    9: "poi_9_spa",
+    10: "poi_10_tennis",
+    11: "poi_11_lotus_pool",
+    12: "poi_12_sirena",
+    13: "poi_13_parking1",
+    14: "poi_14_side_gate",
+    15: "poi_15_clinic",
+    16: "poi_16_mosque",
+    17: "poi_17_parking2",
+    18: "poi_18_main_gate",
+    N: "poi_n_wing",
+    S: "poi_s_wing",
+    M: "poi_m_lobby",
+    MLS: "poi_mls_mall",
   },
 
   // Audio Context
@@ -177,6 +611,7 @@ const VirtualResortMap = {
    * Initialize Virtual Map
    */
   init() {
+    this.ensureBidirectionalGraph();
     this.renderCanvasWorld();
     this.startAnimationLoop();
     this.initAudio();
@@ -184,29 +619,42 @@ const VirtualResortMap = {
     this.updateRouteBetweenStartAndDest(false);
   },
 
+  ensureBidirectionalGraph() {
+    for (const [fromKey, node] of Object.entries(this.nodes)) {
+      for (const toKey of node.neighbors || []) {
+        if (
+          this.nodes[toKey] &&
+          !this.nodes[toKey].neighbors.includes(fromKey)
+        ) {
+          this.nodes[toKey].neighbors.push(fromKey);
+        }
+      }
+    }
+  },
+
   /**
    * Render the Canvas and SVG Elements
    */
   renderCanvasWorld() {
-    const container = document.getElementById('mapCanvasWrapper');
+    const container = document.getElementById("mapCanvasWrapper");
     if (!container) return;
 
     container.style.width = `${this.WIDTH}px`;
     container.style.height = `${this.HEIGHT}px`;
-    container.style.position = 'relative';
+    container.style.position = "relative";
 
     container.innerHTML = `
       <!-- Optional Background Image (Illustrated Map Photo without directory text) -->
       <img id="resortMapIllustrated" src="moreno_resort_map_new.png" alt="Moreno Horizon Map"
-           class="earth-layer-img ${this.viewMode === 'map_overlay' ? 'active' : 'inactive'}" draggable="false">
+           class="earth-layer-img ${this.viewMode === "map_overlay" ? "active" : "inactive"}" draggable="false">
 
       <!-- Optional Satellite Photo -->
       <img id="resortMapSatellite" src="assets/images/moreno_earth_day.jpg" alt="Satellite Map" 
-           class="earth-layer-img ${this.viewMode === 'satellite' ? 'active' : 'inactive'}" draggable="false">
+           class="earth-layer-img ${this.viewMode === "satellite" ? "active" : "inactive"}" draggable="false">
 
       <!-- Optional Night Photo -->
       <img id="resortMapNight" src="assets/images/moreno_earth_night.jpg" alt="Night Map" 
-           class="earth-layer-img ${this.viewMode === 'night' ? 'active' : 'inactive'}" draggable="false">
+           class="earth-layer-img ${this.viewMode === "night" ? "active" : "inactive"}" draggable="false">
 
       <!-- Master SVG Resort World: Shapes, Pathways, Avatar, Markers -->
       <svg id="virtualResortSvg" viewBox="0 0 ${this.WIDTH} ${this.HEIGHT}" 
@@ -245,7 +693,7 @@ const VirtualResortMap = {
         </defs>
 
         <!-- PURE RESORT SHAPES LAYER (Drawn from the Old Map) -->
-        <g id="layerResortShapes" class="${this.viewMode === 'shapes_only' ? 'opacity-100' : 'opacity-25'} transition-opacity duration-300">
+        <g id="layerResortShapes" class="${this.viewMode === "shapes_only" ? "opacity-100" : "opacity-25"} transition-opacity duration-300">
           <!-- 1. Resort Grounds & Lawn Base -->
           <rect x="0" y="0" width="${this.WIDTH}" height="${this.HEIGHT}" fill="#15803d" />
           
@@ -384,14 +832,14 @@ const VirtualResortMap = {
     `;
 
     // Click handler for Setting Start/Dest or Walking
-    const hitArea = document.getElementById('svgHitLayer');
+    const hitArea = document.getElementById("svgHitLayer");
     if (hitArea) {
-      hitArea.addEventListener('click', (e) => this.handleMapClick(e));
+      hitArea.addEventListener("click", (e) => this.handleMapClick(e));
     }
   },
 
   generateWalkwayLines() {
-    let out = '';
+    let out = "";
     const visited = new Set();
 
     for (const [key, node] of Object.entries(this.nodes)) {
@@ -399,7 +847,7 @@ const VirtualResortMap = {
         const neighbor = this.nodes[nKey];
         if (!neighbor) continue;
 
-        const edgeId = [key, nKey].sort().join('--');
+        const edgeId = [key, nKey].sort().join("--");
         if (visited.has(edgeId)) continue;
         visited.add(edgeId);
 
@@ -416,23 +864,28 @@ const VirtualResortMap = {
   },
 
   generateInteractivePins() {
-    if (typeof resortPois === 'undefined') return '';
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    if (typeof resortPois === "undefined") return "";
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
 
-    return resortPois.map(poi => {
-      // Map node key
-      const nodeKey = this.poiToNodeMap[poi.id];
-      const node = this.nodes[nodeKey];
-      const px = node ? node.x : (poi.coords.x / 100) * this.WIDTH;
-      const py = node ? node.y : (poi.coords.y / 100) * this.HEIGHT;
-      const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr };
+    return resortPois
+      .map((poi) => {
+        // Map node key
+        const nodeKey = this.poiToNodeMap[poi.id];
+        const node = this.nodes[nodeKey];
+        const px = node ? node.x : (poi.coords.x / 100) * this.WIDTH;
+        const py = node ? node.y : (poi.coords.y / 100) * this.HEIGHT;
+        const loc =
+          typeof getLocalizedPoi === "function"
+            ? getLocalizedPoi(poi, lang)
+            : { name: poi.nameAr };
 
-      return `
+        return `
         <g id="vpin-${poi.id}" onclick="VirtualResortMap.onPinClick('${poi.id}')" class="virtual-resort-pin cursor-pointer tap-effect" transform="translate(${px}, ${py})">
           <line x1="0" y1="0" x2="0" y2="-18" stroke="#ffffff" stroke-width="2" />
           <g transform="translate(0, -20)">
             <circle cx="0" cy="0" r="12" fill="#0b2545" stroke="#ffffff" stroke-width="1.5" />
-            <circle cx="0" cy="0" r="10" fill="${poi.isBuilding ? '#d97706' : '#0284c7'}" />
+            <circle cx="0" cy="0" r="10" fill="${poi.isBuilding ? "#d97706" : "#0284c7"}" />
             <text x="0" y="3.5" text-anchor="middle" font-size="8.5" font-weight="900" fill="#ffffff">${poi.num}</text>
           </g>
           <g class="vpin-label opacity-0 hover:opacity-100 transition-opacity pointer-events-none" transform="translate(0, -38)">
@@ -441,7 +894,8 @@ const VirtualResortMap = {
           </g>
         </g>
       `;
-    }).join('');
+      })
+      .join("");
   },
 
   renderAvatarSvg() {
@@ -481,17 +935,17 @@ const VirtualResortMap = {
     this.player.y = y;
     this.player.isWalking = false;
 
-    const el = document.getElementById('actorPlayer');
-    if (el) el.setAttribute('transform', `translate(${x}, ${y})`);
+    const el = document.getElementById("actorPlayer");
+    if (el) el.setAttribute("transform", `translate(${x}, ${y})`);
 
     // Sync dropdown
-    const select = document.getElementById('guestOriginSelect');
+    const select = document.getElementById("guestOriginSelect");
     if (select && id) select.value = id;
 
     // Recalculate route to destination
     this.updateRouteBetweenStartAndDest(false);
 
-    if (typeof App !== 'undefined' && App.showToast) {
+    if (typeof App !== "undefined" && App.showToast) {
       App.showToast(`🟢 تم تحديد نقطة البداية: ${name}`);
     }
   },
@@ -502,17 +956,17 @@ const VirtualResortMap = {
   setDestination(x, y, name, id = null) {
     this.nav.destPoint = { x, y, name, id };
 
-    const marker = document.getElementById('markerDestination');
-    if (marker) marker.setAttribute('transform', `translate(${x}, ${y})`);
+    const marker = document.getElementById("markerDestination");
+    if (marker) marker.setAttribute("transform", `translate(${x}, ${y})`);
 
     // Sync dropdown
-    const select = document.getElementById('guestDestSelect');
+    const select = document.getElementById("guestDestSelect");
     if (select && id) select.value = id;
 
     // Recalculate route to destination
     this.updateRouteBetweenStartAndDest(true);
 
-    if (typeof App !== 'undefined' && App.showToast) {
+    if (typeof App !== "undefined" && App.showToast) {
       App.showToast(`🎯 تم تحديد الوجهة: ${name}`);
     }
   },
@@ -521,20 +975,31 @@ const VirtualResortMap = {
    * Calculate Shortest Path between Start & Destination
    */
   updateRouteBetweenStartAndDest(autoStartWalk = false) {
-    const startKey = this.getNearestNodeKey(this.nav.startPoint.x, this.nav.startPoint.y);
-    const destKey = this.getNearestNodeKey(this.nav.destPoint.x, this.nav.destPoint.y);
+    const startKey = this.getNearestNodeKey(
+      this.nav.startPoint.x,
+      this.nav.startPoint.y,
+    );
+    const destKey = this.getNearestNodeKey(
+      this.nav.destPoint.x,
+      this.nav.destPoint.y,
+    );
 
     const graphPath = this.findPath(startKey, destKey) || [];
     const waypoints = [{ x: this.nav.startPoint.x, y: this.nav.startPoint.y }];
     for (const node of graphPath) {
-      if (node && typeof node.x === 'number' && typeof node.y === 'number') {
+      if (node && typeof node.x === "number" && typeof node.y === "number") {
         waypoints.push({ x: node.x, y: node.y });
       }
     }
     waypoints.push({ x: this.nav.destPoint.x, y: this.nav.destPoint.y });
 
     // Clean out redundant or close adjacent points
-    const cleanPath = waypoints.filter((pt, idx) => idx === 0 || Math.hypot(pt.x - waypoints[idx - 1].x, pt.y - waypoints[idx - 1].y) > 2.5);
+    const cleanPath = waypoints.filter(
+      (pt, idx) =>
+        idx === 0 ||
+        Math.hypot(pt.x - waypoints[idx - 1].x, pt.y - waypoints[idx - 1].y) >
+          2.5,
+    );
 
     this.nav.activeRoutePath = cleanPath;
     this.drawDynamicRoute(cleanPath);
@@ -542,10 +1007,16 @@ const VirtualResortMap = {
     // Calculate distance & time
     let meters = 0;
     for (let i = 1; i < cleanPath.length; i++) {
-      meters += Math.hypot(cleanPath[i].x - cleanPath[i-1].x, cleanPath[i].y - cleanPath[i-1].y);
+      meters += Math.hypot(
+        cleanPath[i].x - cleanPath[i - 1].x,
+        cleanPath[i].y - cleanPath[i - 1].y,
+      );
     }
     this.nav.distMeters = Math.round(meters * 0.38);
-    this.nav.walkMinutes = Math.max(1, Math.round(this.nav.distMeters / (this.moveSpeed > 1.5 ? 95 : 60)));
+    this.nav.walkMinutes = Math.max(
+      1,
+      Math.round(this.nav.distMeters / (this.moveSpeed > 1.5 ? 95 : 60)),
+    );
 
     // Update Telemetry HUD
     this.renderRouteInfoHud();
@@ -556,7 +1027,7 @@ const VirtualResortMap = {
   },
 
   renderRouteInfoHud() {
-    const badge = document.getElementById('activePoiText');
+    const badge = document.getElementById("activePoiText");
     if (badge) {
       badge.innerHTML = `🟢 <strong>${this.nav.startPoint.name}</strong> ➔ 🎯 <strong>${this.nav.destPoint.name}</strong> • ⏱️ ${this.nav.distMeters} م (~${this.nav.walkMinutes} دقيقة مشي)`;
     }
@@ -573,61 +1044,72 @@ const VirtualResortMap = {
     this.player.path = [...this.nav.activeRoutePath];
     this.player.currentPathIdx = 0;
     this.player.isWalking = true;
-    this.nav.selectionMode = 'idle';
+    this.nav.selectionMode = "idle";
 
-    if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast(`🚶‍♂️ بدأ النزيل بالسير من [${this.nav.startPoint.name}] إلى [${this.nav.destPoint.name}]`);
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(
+        `🚶‍♂️ بدأ النزيل بالسير من [${this.nav.startPoint.name}] إلى [${this.nav.destPoint.name}]`,
+      );
     }
   },
 
   swapPoints() {
     const temp = { ...this.nav.startPoint };
-    this.setStartLocation(this.nav.destPoint.x, this.nav.destPoint.y, this.nav.destPoint.name, this.nav.destPoint.id);
+    this.setStartLocation(
+      this.nav.destPoint.x,
+      this.nav.destPoint.y,
+      this.nav.destPoint.name,
+      this.nav.destPoint.id,
+    );
     this.setDestination(temp.x, temp.y, temp.name, temp.id);
   },
 
   setSelectionMode(mode) {
     this.nav.selectionMode = mode;
-    const btnStart = document.getElementById('btnModeSetStart');
-    const btnDest = document.getElementById('btnModeSetDest');
+    const btnStart = document.getElementById("btnModeSetStart");
+    const btnDest = document.getElementById("btnModeSetDest");
 
-    if (btnStart) btnStart.classList.toggle('active-mode', mode === 'start');
-    if (btnDest) btnDest.classList.toggle('active-mode', mode === 'dest');
+    if (btnStart) btnStart.classList.toggle("active-mode", mode === "start");
+    if (btnDest) btnDest.classList.toggle("active-mode", mode === "dest");
 
-    if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast(mode === 'start' ? '🟢 انقر على الخريطة لتحديد مكان البداية' : '🎯 انقر على الخريطة لتحديد الوجهة');
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(
+        mode === "start"
+          ? "🟢 انقر على الخريطة لتحديد مكان البداية"
+          : "🎯 انقر على الخريطة لتحديد الوجهة",
+      );
     }
   },
 
   handleMapClick(e) {
-    const svg = document.getElementById('virtualResortSvg');
+    const svg = document.getElementById("virtualResortSvg");
     if (!svg) return;
 
     const rect = svg.getBoundingClientRect();
     const clickX = ((e.clientX - rect.left) / rect.width) * this.WIDTH;
     const clickY = ((e.clientY - rect.top) / rect.height) * this.HEIGHT;
 
-    if (this.nav.selectionMode === 'start') {
-      this.setStartLocation(clickX, clickY, 'نقطة البداية المحددة');
+    if (this.nav.selectionMode === "start") {
+      this.setStartLocation(clickX, clickY, "نقطة البداية المحددة");
       // Prompt user to pick destination next
-      this.setSelectionMode('dest');
+      this.setSelectionMode("dest");
       return;
     }
 
-    if (this.nav.selectionMode === 'dest') {
-      this.setDestination(clickX, clickY, 'الوجهة المحددة');
-      this.nav.selectionMode = 'idle';
+    if (this.nav.selectionMode === "dest") {
+      this.setDestination(clickX, clickY, "الوجهة المحددة");
+      this.nav.selectionMode = "idle";
       this.startWalkingRoute();
       return;
     }
 
     // Default tap: set destination directly and walk!
-    this.setDestination(clickX, clickY, 'الموقع المحدد على الممشى');
+    this.setDestination(clickX, clickY, "الموقع المحدد على الممشى");
     this.startWalkingRoute();
   },
 
   onPinClick(poiId) {
-    const poi = resortPois.find(p => p.id === poiId);
+    const poi = resortPois.find((p) => p.id === poiId);
     if (!poi) return;
 
     const nodeKey = this.poiToNodeMap[poiId];
@@ -635,9 +1117,9 @@ const VirtualResortMap = {
     const px = node ? node.x : (poi.coords.x / 100) * this.WIDTH;
     const py = node ? node.y : (poi.coords.y / 100) * this.HEIGHT;
 
-    if (this.nav.selectionMode === 'start') {
+    if (this.nav.selectionMode === "start") {
       this.setStartLocation(px, py, poi.nameAr, poi.id);
-      this.setSelectionMode('dest');
+      this.setSelectionMode("dest");
       return;
     }
 
@@ -648,6 +1130,15 @@ const VirtualResortMap = {
 
   /* ================= PATHFINDING & ANIMATION LOOP ================= */
 
+  /**
+   * A* Pathfinding — replaces legacy Dijkstra.
+   * Uses Euclidean heuristic h(n) = distance(n, target) to guide search
+   * toward the goal, dramatically reducing explored nodes (O(E log V) avg).
+   *
+   * @param {string} startKey  - Node key for start
+   * @param {string} targetKey - Node key for destination
+   * @returns {Array} Array of node objects forming the optimal path
+   */
   findPath(startKey, targetKey) {
     if (!this.nodes[startKey] || !this.nodes[targetKey]) {
       const fallback = this.nodes[startKey] || this.nodes[targetKey];
@@ -658,66 +1149,104 @@ const VirtualResortMap = {
       return [this.nodes[startKey]];
     }
 
-    const distances = {};
-    const previous = {};
-    const unvisited = new Set(Object.keys(this.nodes));
+    const targetNode = this.nodes[targetKey];
 
-    for (const key of unvisited) {
-      distances[key] = Infinity;
+    // Euclidean heuristic: straight-line distance to target
+    const h = (key) => {
+      const n = this.nodes[key];
+      return Math.hypot(n.x - targetNode.x, n.y - targetNode.y);
+    };
+
+    // g-scores: cost from start to node
+    const gScore = {};
+    // f-scores: g + h (estimated total cost)
+    const fScore = {};
+    const previous = {};
+    // Open set: keys to explore (using sorted array as priority queue)
+    const openSet = new Set([startKey]);
+
+    for (const key of Object.keys(this.nodes)) {
+      gScore[key] = Infinity;
+      fScore[key] = Infinity;
       previous[key] = null;
     }
-    distances[startKey] = 0;
+    gScore[startKey] = 0;
+    fScore[startKey] = h(startKey);
 
-    while (unvisited.size > 0) {
+    while (openSet.size > 0) {
+      // Pick the open node with lowest f-score (priority queue via iteration)
       let current = null;
-      let minDistance = Infinity;
-      for (const key of unvisited) {
-        if (distances[key] < minDistance) {
-          minDistance = distances[key];
+      let lowestF = Infinity;
+      for (const key of openSet) {
+        if (fScore[key] < lowestF) {
+          lowestF = fScore[key];
           current = key;
         }
       }
 
-      if (!current || distances[current] === Infinity) break;
+      if (!current) break;
       if (current === targetKey) break;
 
-      unvisited.delete(current);
+      openSet.delete(current);
 
       const neighbors = this.nodes[current].neighbors || [];
       for (const nKey of neighbors) {
-        if (!unvisited.has(nKey) || !this.nodes[nKey]) continue;
+        if (!this.nodes[nKey]) continue;
 
         const currNode = this.nodes[current];
         const nextNode = this.nodes[nKey];
-        const dist = Math.hypot(nextNode.x - currNode.x, nextNode.y - currNode.y);
-        const alt = distances[current] + dist;
+        const edgeDist = Math.hypot(
+          nextNode.x - currNode.x,
+          nextNode.y - currNode.y,
+        );
+        const tentativeG = gScore[current] + edgeDist;
 
-        if (alt < distances[nKey]) {
-          distances[nKey] = alt;
+        if (tentativeG < gScore[nKey]) {
           previous[nKey] = current;
+          gScore[nKey] = tentativeG;
+          fScore[nKey] = tentativeG + h(nKey);
+          openSet.add(nKey);
         }
       }
     }
 
+    // Reconstruct path
     const path = [];
     let u = targetKey;
-    while (u) {
+    while (u && previous[u] !== null) {
       path.unshift(this.nodes[u]);
       u = previous[u];
     }
 
-    if (path.length > 0 && path[0] !== this.nodes[startKey]) {
+    // Prepend start node
+    if (u && this.nodes[u]) {
+      path.unshift(this.nodes[u]);
+    }
+
+    // Safety fallback: if path is unreachable, return direct line
+    if (path.length < 2 || path[0] !== this.nodes[startKey]) {
       return [this.nodes[startKey], this.nodes[targetKey]];
     }
 
     return path;
   },
 
-  getNearestNodeKey(x, y) {
-    let nearestKey = 'poi_m_lobby';
+  /**
+   * Finds the nearest graph node to a given pixel coordinate.
+   * Optionally biases toward the nearest edge projection for
+   * more accurate "on-path" start/end points.
+   *
+   * @param {number} x - Pixel X
+   * @param {number} y - Pixel Y
+   * @param {string|null} excludeKey - Node key to skip (avoids trivial self-matches)
+   * @returns {string} The nearest node key
+   */
+  getNearestNodeKey(x, y, excludeKey = null) {
+    let nearestKey = "poi_m_lobby";
     let minDistance = Infinity;
 
     for (const [key, node] of Object.entries(this.nodes)) {
+      if (key === excludeKey) continue;
       const dist = Math.hypot(node.x - x, node.y - y);
       if (dist < minDistance) {
         minDistance = dist;
@@ -727,14 +1256,55 @@ const VirtualResortMap = {
     return nearestKey;
   },
 
+  /**
+   * Finds the nearest point on any graph edge (segment) to a given pixel,
+   * returning {key1, key2, projX, projY, dist} — used to cleanly enter/exit
+   * the graph without teleporting directly to a node.
+   *
+   * @param {number} x - Pixel X
+   * @param {number} y - Pixel Y
+   * @returns {Object|null} Nearest edge info or null if no edges found
+   */
+  getNearestEdgePoint(x, y) {
+    let bestResult = null;
+    let minDist = Infinity;
+
+    for (const [fromKey, node] of Object.entries(this.nodes)) {
+      const neighbors = node.neighbors || [];
+      for (const toKey of neighbors) {
+        const toNode = this.nodes[toKey];
+        if (!toNode) continue;
+
+        const dx = toNode.x - node.x;
+        const dy = toNode.y - node.y;
+        const lenSq = dx * dx + dy * dy;
+        if (lenSq < 0.001) continue;
+
+        const u = Math.max(
+          0,
+          Math.min(1, ((x - node.x) * dx + (y - node.y) * dy) / lenSq),
+        );
+        const projX = node.x + u * dx;
+        const projY = node.y + u * dy;
+        const dist = Math.hypot(x - projX, y - projY);
+
+        if (dist < minDist) {
+          minDist = dist;
+          bestResult = { fromKey, toKey, projX, projY, dist, u };
+        }
+      }
+    }
+    return bestResult;
+  },
+
   drawDynamicRoute(path) {
-    const glow = document.getElementById('activeRouteGlow');
-    const bg = document.getElementById('activeRouteBackground');
+    const glow = document.getElementById("activeRouteGlow");
+    const bg = document.getElementById("activeRouteBackground");
     if (!glow || !bg) return;
 
     if (!path || path.length < 2) {
-      glow.setAttribute('d', '');
-      bg.setAttribute('d', '');
+      glow.setAttribute("d", "");
+      bg.setAttribute("d", "");
       return;
     }
 
@@ -743,15 +1313,17 @@ const VirtualResortMap = {
       d += ` L ${path[i].x} ${path[i].y}`;
     }
 
-    glow.setAttribute('d', d);
-    bg.setAttribute('d', d);
-    glow.setAttribute('stroke-linejoin', 'round');
-    bg.setAttribute('stroke-linejoin', 'round');
+    glow.setAttribute("d", d);
+    bg.setAttribute("d", d);
+    glow.setAttribute("stroke-linejoin", "round");
+    bg.setAttribute("stroke-linejoin", "round");
   },
 
   startAnimationLoop() {
     const loop = (timestamp) => {
-      const dt = this.lastTimestamp ? Math.min((timestamp - this.lastTimestamp) / 1000, 0.1) : 0.016;
+      const dt = this.lastTimestamp
+        ? Math.min((timestamp - this.lastTimestamp) / 1000, 0.1)
+        : 0.016;
       this.lastTimestamp = timestamp;
 
       this.updatePlayerWalking(dt);
@@ -799,9 +1371,12 @@ const VirtualResortMap = {
     this.player.walkFrame += dt * 8 * this.moveSpeed;
     const bounceY = Math.sin(this.player.walkFrame) * 3.5;
 
-    const avatarEl = document.getElementById('actorPlayer');
+    const avatarEl = document.getElementById("actorPlayer");
     if (avatarEl) {
-      avatarEl.setAttribute('transform', `translate(${this.player.x}, ${this.player.y + bounceY}) scale(${this.player.facingLeft ? -1 : 1}, 1)`);
+      avatarEl.setAttribute(
+        "transform",
+        `translate(${this.player.x}, ${this.player.y + bounceY}) scale(${this.player.facingLeft ? -1 : 1}, 1)`,
+      );
     }
 
     if (Math.sin(this.player.walkFrame) > 0.88) {
@@ -816,13 +1391,13 @@ const VirtualResortMap = {
 
     this.playArrivalChime();
 
-    if (typeof App !== 'undefined' && App.showToast) {
+    if (typeof App !== "undefined" && App.showToast) {
       App.showToast(`🎉 وصلت بحمد الله إلى وجهتك: ${this.nav.destPoint.name}`);
     }
 
     // Open detail modal if it's a POI
-    const poi = resortPois.find(p => p.id === this.nav.destPoint.id);
-    if (poi && typeof App !== 'undefined' && App.openPoiModal) {
+    const poi = resortPois.find((p) => p.id === this.nav.destPoint.id);
+    if (poi && typeof App !== "undefined" && App.openPoiModal) {
       App.openPoiModal(poi);
     }
   },
@@ -832,64 +1407,69 @@ const VirtualResortMap = {
   setViewMode(mode) {
     this.viewMode = mode;
 
-    const shapesLayer = document.getElementById('layerResortShapes');
-    const illusImg = document.getElementById('resortMapIllustrated');
-    const satImg = document.getElementById('resortMapSatellite');
-    const nightImg = document.getElementById('resortMapNight');
+    const shapesLayer = document.getElementById("layerResortShapes");
+    const illusImg = document.getElementById("resortMapIllustrated");
+    const satImg = document.getElementById("resortMapSatellite");
+    const nightImg = document.getElementById("resortMapNight");
 
-    document.querySelectorAll('.map-layer-pill').forEach(b => b.classList.remove('active'));
+    document
+      .querySelectorAll(".map-layer-pill")
+      .forEach((b) => b.classList.remove("active"));
     const btn = document.getElementById(`layerBtn_${mode}`);
-    if (btn) btn.classList.add('active');
+    if (btn) btn.classList.add("active");
 
-    if (mode === 'shapes_only') {
-      if (shapesLayer) shapesLayer.classList.remove('opacity-25');
-      if (shapesLayer) shapesLayer.classList.add('opacity-100');
-      if (illusImg) illusImg.className = 'earth-layer-img inactive';
-      if (satImg) satImg.className = 'earth-layer-img inactive';
-      if (nightImg) nightImg.className = 'earth-layer-img inactive';
-    } else if (mode === 'map_overlay') {
-      if (shapesLayer) shapesLayer.classList.add('opacity-25');
-      if (illusImg) illusImg.className = 'earth-layer-img active';
-      if (satImg) satImg.className = 'earth-layer-img inactive';
-      if (nightImg) nightImg.className = 'earth-layer-img inactive';
-    } else if (mode === 'satellite') {
-      if (shapesLayer) shapesLayer.classList.add('opacity-25');
-      if (illusImg) illusImg.className = 'earth-layer-img inactive';
-      if (satImg) satImg.className = 'earth-layer-img active';
-      if (nightImg) nightImg.className = 'earth-layer-img inactive';
-    } else if (mode === 'night') {
-      if (shapesLayer) shapesLayer.classList.add('opacity-25');
-      if (illusImg) illusImg.className = 'earth-layer-img inactive';
-      if (satImg) satImg.className = 'earth-layer-img inactive';
-      if (nightImg) nightImg.className = 'earth-layer-img active';
+    if (mode === "shapes_only") {
+      if (shapesLayer) shapesLayer.classList.remove("opacity-25");
+      if (shapesLayer) shapesLayer.classList.add("opacity-100");
+      if (illusImg) illusImg.className = "earth-layer-img inactive";
+      if (satImg) satImg.className = "earth-layer-img inactive";
+      if (nightImg) nightImg.className = "earth-layer-img inactive";
+    } else if (mode === "map_overlay") {
+      if (shapesLayer) shapesLayer.classList.add("opacity-25");
+      if (illusImg) illusImg.className = "earth-layer-img active";
+      if (satImg) satImg.className = "earth-layer-img inactive";
+      if (nightImg) nightImg.className = "earth-layer-img inactive";
+    } else if (mode === "satellite") {
+      if (shapesLayer) shapesLayer.classList.add("opacity-25");
+      if (illusImg) illusImg.className = "earth-layer-img inactive";
+      if (satImg) satImg.className = "earth-layer-img active";
+      if (nightImg) nightImg.className = "earth-layer-img inactive";
+    } else if (mode === "night") {
+      if (shapesLayer) shapesLayer.classList.add("opacity-25");
+      if (illusImg) illusImg.className = "earth-layer-img inactive";
+      if (satImg) satImg.className = "earth-layer-img inactive";
+      if (nightImg) nightImg.className = "earth-layer-img active";
     }
 
-    if (typeof App !== 'undefined' && App.showToast) {
+    if (typeof App !== "undefined" && App.showToast) {
       const titles = {
-        shapes_only: '🎨 عرض الأشكال والمسارات الصافية فقط',
-        map_overlay: '🗺️ عرض مع الخريطة المصورة الأصلية',
-        satellite: '🛰️ عرض القمر الصناعي',
-        night: '🌙 عرض الرؤية الليلية'
+        shapes_only: "🎨 عرض الأشكال والمسارات الصافية فقط",
+        map_overlay: "🗺️ عرض مع الخريطة المصورة الأصلية",
+        satellite: "🛰️ عرض القمر الصناعي",
+        night: "🌙 عرض الرؤية الليلية",
       };
       App.showToast(titles[mode]);
     }
   },
 
   populateNavigatorSelectors() {
-    const originSelect = document.getElementById('guestOriginSelect');
-    const destSelect = document.getElementById('guestDestSelect');
-    if (!originSelect || !destSelect || typeof resortPois === 'undefined') return;
+    const originSelect = document.getElementById("guestOriginSelect");
+    const destSelect = document.getElementById("guestDestSelect");
+    if (!originSelect || !destSelect || typeof resortPois === "undefined")
+      return;
 
-    const optionsHtml = resortPois.map(p => `<option value="${p.id}">${p.num} - ${p.nameAr}</option>`).join('');
+    const optionsHtml = resortPois
+      .map((p) => `<option value="${p.id}">${p.num} - ${p.nameAr}</option>`)
+      .join("");
     originSelect.innerHTML = optionsHtml;
     destSelect.innerHTML = optionsHtml;
 
-    originSelect.value = 'M';
-    destSelect.value = '1';
+    originSelect.value = "M";
+    destSelect.value = "1";
   },
 
   onOriginSelectChange(val) {
-    const poi = resortPois.find(p => p.id === val);
+    const poi = resortPois.find((p) => p.id === val);
     if (!poi) return;
     const nodeKey = this.poiToNodeMap[val];
     const node = this.nodes[nodeKey];
@@ -899,7 +1479,7 @@ const VirtualResortMap = {
   },
 
   onDestSelectChange(val) {
-    const poi = resortPois.find(p => p.id === val);
+    const poi = resortPois.find((p) => p.id === val);
     if (!poi) return;
     const nodeKey = this.poiToNodeMap[val];
     const node = this.nodes[nodeKey];
@@ -909,7 +1489,7 @@ const VirtualResortMap = {
   },
 
   quickWalkTo(poiId) {
-    const poi = resortPois.find(p => p.id === poiId);
+    const poi = resortPois.find((p) => p.id === poiId);
     if (!poi) return;
     const nodeKey = this.poiToNodeMap[poiId];
     const node = this.nodes[nodeKey];
@@ -920,18 +1500,21 @@ const VirtualResortMap = {
   },
 
   quickWalkToRoom() {
-    const savedRoom = localStorage.getItem('moreno_guest_room');
+    const savedRoom = localStorage.getItem("moreno_guest_room");
     if (!savedRoom) {
-      if (typeof App !== 'undefined' && App.openSaveRoomModal) App.openSaveRoomModal();
+      if (typeof App !== "undefined" && App.openSaveRoomModal)
+        App.openSaveRoomModal();
       return;
     }
 
     const roomNum = parseInt(savedRoom);
-    const buildings = resortPois.filter(p => p.isBuilding);
+    const buildings = resortPois.filter((p) => p.isBuilding);
     let matchedBuilding = null;
     for (const b of buildings) {
       for (const r of b.rooms) {
-        const isMatch = r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max);
+        const isMatch = r.exact
+          ? r.exact.includes(roomNum)
+          : roomNum >= r.min && roomNum <= r.max;
         if (isMatch) {
           matchedBuilding = b;
           break;
@@ -951,13 +1534,15 @@ const VirtualResortMap = {
 
   toggleSpeed() {
     this.moveSpeed = this.moveSpeed > 1.5 ? 1.0 : 2.2;
-    const btn = document.getElementById('speedToggleBtn');
+    const btn = document.getElementById("speedToggleBtn");
     if (btn) {
-      btn.innerHTML = this.moveSpeed > 1.5 ? '⚡ ركض سريع' : '🚶‍♂️ سير عادي';
-      btn.classList.toggle('active-mode', this.moveSpeed > 1.5);
+      btn.innerHTML = this.moveSpeed > 1.5 ? "⚡ ركض سريع" : "🚶‍♂️ سير عادي";
+      btn.classList.toggle("active-mode", this.moveSpeed > 1.5);
     }
-    if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast(this.moveSpeed > 1.5 ? '⚡ سرعة الركض مفعلة' : '🚶‍♂️ السير الطبيعي');
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(
+        this.moveSpeed > 1.5 ? "⚡ سرعة الركض مفعلة" : "🚶‍♂️ السير الطبيعي",
+      );
     }
   },
 
@@ -970,12 +1555,15 @@ const VirtualResortMap = {
 
   toggleSound() {
     if (!this.audioCtx) this.initAudio();
-    if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+    if (this.audioCtx && this.audioCtx.state === "suspended")
+      this.audioCtx.resume();
     this.isSoundEnabled = !this.isSoundEnabled;
-    const btn = document.getElementById('soundToggleBtn');
+    const btn = document.getElementById("soundToggleBtn");
     if (btn) {
-      btn.classList.toggle('active-mode', this.isSoundEnabled);
-      btn.innerHTML = this.isSoundEnabled ? '🔊 الأصوات تعمل' : '🔇 المؤثرات مكتومة';
+      btn.classList.toggle("active-mode", this.isSoundEnabled);
+      btn.innerHTML = this.isSoundEnabled
+        ? "🔊 الأصوات تعمل"
+        : "🔇 المؤثرات مكتومة";
     }
   },
 
@@ -984,10 +1572,16 @@ const VirtualResortMap = {
     try {
       const osc = this.audioCtx.createOscillator();
       const gain = this.audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(140 + Math.random() * 20, this.audioCtx.currentTime);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(
+        140 + Math.random() * 20,
+        this.audioCtx.currentTime,
+      );
       gain.gain.setValueAtTime(0.025, this.audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.08);
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        this.audioCtx.currentTime + 0.08,
+      );
       osc.connect(gain);
       gain.connect(this.audioCtx.destination);
       osc.start();
@@ -998,24 +1592,33 @@ const VirtualResortMap = {
   playArrivalChime() {
     if (!this.isSoundEnabled || !this.audioCtx) return;
     try {
-      const notes = [523.25, 659.25, 783.99, 1046.50];
+      const notes = [523.25, 659.25, 783.99, 1046.5];
       notes.forEach((freq, idx) => {
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime + idx * 0.1);
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(
+          freq,
+          this.audioCtx.currentTime + idx * 0.1,
+        );
         gain.gain.setValueAtTime(0.08, this.audioCtx.currentTime + idx * 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + idx * 0.1 + 0.35);
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          this.audioCtx.currentTime + idx * 0.1 + 0.35,
+        );
         osc.connect(gain);
         gain.connect(this.audioCtx.destination);
         osc.start(this.audioCtx.currentTime + idx * 0.1);
         osc.stop(this.audioCtx.currentTime + idx * 0.1 + 0.35);
       });
     } catch (e) {}
-  }
+  },
 };
 
 // Expose globally
-if (typeof window !== 'undefined') {
+if (typeof globalThis !== "undefined") {
+  globalThis.VirtualResortMap = VirtualResortMap;
+}
+if (typeof window !== "undefined") {
   window.VirtualResortMap = VirtualResortMap;
 }

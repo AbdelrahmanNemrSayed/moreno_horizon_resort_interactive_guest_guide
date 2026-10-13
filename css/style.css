@@ -1,6 +1,7 @@
 /* Moreno Horizon Spa & Resort - Core Luxury Stylesheet */
 
-html, body {
+html,
+body {
   overflow-x: hidden;
   max-width: 100vw;
 }
@@ -27,142 +28,191 @@ html, body {
 }
 
 /* ========================================================
-   Ultra-Luxury Comprehensive Glassmorphic Theme Engine
+   Royal Red Sea & Luminous Gold Theme Engine (5-Star Luxury)
    ======================================================== */
 body {
-  background-color: #F8FAFC !important;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.12) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.08) 0px, transparent 60%),
-    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.09) 0px, transparent 50%) !important;
+  background-color: #f8fafc !important;
+  background-image:
+    radial-gradient(
+      ellipse at 50% -10%,
+      rgba(245, 158, 11, 0.14) 0px,
+      transparent 60%
+    ),
+    radial-gradient(at 0% 10%, rgba(0, 212, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 25%, rgba(245, 158, 11, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 60%, rgba(14, 165, 233, 0.08) 0px, transparent 65%),
+    radial-gradient(at 100% 100%, rgba(6, 214, 160, 0.08) 0px, transparent 50%) !important;
   background-attachment: fixed !important;
 }
 
 .dark body {
-  background-color: #060E1A !important;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.16) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.1) 0px, transparent 60%),
-    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(244, 63, 94, 0.1) 0px, transparent 50%) !important;
+  background-color: #030712 !important;
+  background-image:
+    radial-gradient(
+      ellipse at 50% -10%,
+      rgba(245, 158, 11, 0.2) 0px,
+      transparent 60%
+    ),
+    radial-gradient(at 0% 12%, rgba(0, 212, 255, 0.18) 0px, transparent 50%),
+    radial-gradient(at 100% 25%, rgba(245, 158, 11, 0.16) 0px, transparent 50%),
+    radial-gradient(at 50% 60%, rgba(10, 37, 64, 0.35) 0px, transparent 65%),
+    radial-gradient(at 100% 100%, rgba(6, 214, 160, 0.12) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(217, 119, 6, 0.12) 0px, transparent 50%) !important;
   background-attachment: fixed !important;
 }
 
-/* Glass Header & Navbar */
+/* Glass Header & Navbar with Luminous Gold Bottom Hairline */
 header,
 .glass-nav {
-  backdrop-filter: blur(28px) !important;
-  -webkit-backdrop-filter: blur(28px) !important;
-  background: rgba(255, 255, 255, 0.82) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06), inset 0 -1px 0 rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(32px) !important;
+  -webkit-backdrop-filter: blur(32px) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3) !important;
+  box-shadow:
+    0 6px 30px rgba(0, 0, 0, 0.07),
+    0 0 20px rgba(245, 158, 11, 0.06),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 .dark header,
 .dark .glass-nav {
-  background: rgba(6, 14, 26, 0.8) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
+  background: rgba(4, 11, 24, 0.84) !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.6),
+    0 0 30px rgba(245, 158, 11, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Glass Main Page Major Sections */
+/* Glass Main Page Major Sections — Frosted Deep Sapphire with Gold Edge */
 #wayfinder-section,
 #map-section,
 #home > section:first-of-type,
 #home > section.grid > div,
 #home > div[onclick*="openSunShadeModal"] {
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  background: rgba(255, 255, 255, 0.84) !important;
-  border: 1px solid rgba(255, 255, 255, 0.65) !important;
-  box-shadow: 0 10px 35px 0 rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  box-shadow:
+    0 12px 35px 0 rgba(31, 38, 135, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
 }
 .dark #wayfinder-section,
 .dark #map-section,
 .dark #home > section:first-of-type,
 .dark #home > section.grid > div,
 .dark #home > div[onclick*="openSunShadeModal"] {
-  background: rgba(10, 22, 38, 0.74) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 15px 45px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  background: rgba(7, 19, 38, 0.82) !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+  box-shadow:
+    0 18px 50px -10px rgba(0, 0, 0, 0.65),
+    0 0 25px rgba(245, 158, 11, 0.06),
+    inset 0 1px 0 rgba(254, 243, 199, 0.12) !important;
+}
+
+#wayfinder-section:hover,
+#home > div[onclick*="openSunShadeModal"]:hover {
+  border-color: rgba(245, 158, 11, 0.55) !important;
+  box-shadow:
+    0 22px 60px -8px rgba(0, 0, 0, 0.75),
+    0 0 35px rgba(245, 158, 11, 0.2) !important;
+  transform: translateY(-2px);
 }
 
 /* ========================================================
    VIP Personal Guest Hub & Live Meal Dashboard
-   Signature Luxury Obsidian/Navy Card with Amber & Gold Accents
-   (Engineered for Peak Contrast & Readability in Both Themes)
+   Signature Luxury Card (Optimized for both Light & Dark modes)
    ======================================================== */
 #guestDashboardSection {
-  background: linear-gradient(135deg, #091325 0%, #0c203d 50%, #050b16 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #fffdf8 45%,
+    #f0f9ff 100%
+  ) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(245, 158, 11, 0.45) !important;
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 35px rgba(245, 158, 11, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
-  color: #ffffff !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow:
+    0 15px 45px -10px rgba(0, 0, 0, 0.08),
+    0 0 25px rgba(245, 158, 11, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
 }
 
 #guestDashboardSection #guestDashName {
-  color: #ffffff !important;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  color: #0f172a !important;
+  text-shadow: none !important;
 }
 
 #guestDashboardSection #guestDashBuildingText {
-  color: #fde68a !important; /* amber-200 */
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  color: #b45309 !important; /* warm luxury bronze */
+  text-shadow: none !important;
 }
 
 #guestDashboardSection #guestDashRoomBadge {
-  background: rgba(16, 185, 129, 0.2) !important;
-  border-color: rgba(52, 211, 153, 0.5) !important;
-  color: #6ee7b7 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(5, 150, 105, 0.4) !important;
+  color: #065f46 !important;
 }
 
 #guestDashboardSection span[data-i18n="guest_quick_services"],
 #guestDashboardSection span[data-i18n="guest_meal_header"] {
-  color: #e2e8f0 !important; /* slate-200 */
+  color: #334155 !important;
 }
 
-/* Meal Slots within Guest Hub */
+/* Meal Slots within Guest Hub - Light Mode */
 #guestDashboardSection div[id^="mealSlot"] {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 1) !important;
   transition: all 0.25s ease;
 }
 
 #guestDashboardSection div[id^="mealSlot"] span[data-i18n^="guest_meal_"] {
-  color: #f8fafc !important; /* slate-50 */
+  color: #0f172a !important;
 }
 
 #guestDashboardSection div[id^="mealSlot"] span.font-mono {
-  color: #fcd34d !important; /* amber-300 */
+  color: #d97706 !important; /* rich amber */
 }
 
 #guestDashboardSection div[id^="mealSlot"] span[data-i18n^="guest_venue_"] {
-  color: #94a3b8 !important; /* slate-400 */
+  color: #64748b !important;
 }
 
-/* Quick Action 1-Tap Buttons */
-#guestDashboardSection button.tap-effect:not([onclick*="openGuestProfileModal"]) {
-  background: rgba(255, 255, 255, 0.09) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+/* Quick Action 1-Tap Buttons - Light Mode */
+#guestDashboardSection
+  button.tap-effect:not([onclick*="openGuestProfileModal"]) {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
   transition: all 0.25s ease;
 }
 
-#guestDashboardSection button.tap-effect:not([onclick*="openGuestProfileModal"]):hover {
-  background: rgba(245, 158, 11, 0.22) !important;
+#guestDashboardSection
+  button.tap-effect:not([onclick*="openGuestProfileModal"]):hover {
+  background: rgba(245, 158, 11, 0.18) !important;
   border-color: rgba(245, 158, 11, 0.6) !important;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2) !important;
   transform: translateY(-2px);
 }
 
-#guestDashboardSection button.tap-effect:not([onclick*="openGuestProfileModal"]) span {
-  color: #ffffff !important;
+#guestDashboardSection
+  button.tap-effect:not([onclick*="openGuestProfileModal"])
+  span {
+  color: #0f172a !important;
+}
+
+#guestDashboardSection
+  button.tap-effect:not([onclick*="openGuestProfileModal"])
+  span.text-amber-300 {
+  color: #b45309 !important;
 }
 
 /* Profile Edit Button */
@@ -180,6 +230,90 @@ header,
 
 #guestDashboardSection button[onclick*="openGuestProfileModal"] span {
   color: #020617 !important;
+}
+
+/* ========================================================
+   DARK MODE OVERRIDES FOR VIP HUB
+   ======================================================== */
+.dark #guestDashboardSection {
+  background: linear-gradient(
+    135deg,
+    #091325 0%,
+    #0c203d 50%,
+    #050b16 100%
+  ) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow:
+    0 20px 50px -10px rgba(0, 0, 0, 0.6),
+    0 0 35px rgba(245, 158, 11, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.dark #guestDashboardSection #guestDashName {
+  color: #ffffff !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.dark #guestDashboardSection #guestDashBuildingText {
+  color: #fde68a !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dark #guestDashboardSection #guestDashRoomBadge {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: rgba(52, 211, 153, 0.5) !important;
+  color: #6ee7b7 !important;
+}
+
+.dark #guestDashboardSection span[data-i18n="guest_quick_services"],
+.dark #guestDashboardSection span[data-i18n="guest_meal_header"] {
+  color: #e2e8f0 !important;
+}
+
+.dark #guestDashboardSection div[id^="mealSlot"] {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark
+  #guestDashboardSection
+  div[id^="mealSlot"]
+  span[data-i18n^="guest_meal_"] {
+  color: #f8fafc !important;
+}
+
+.dark #guestDashboardSection div[id^="mealSlot"] span.font-mono {
+  color: #fcd34d !important;
+}
+
+.dark
+  #guestDashboardSection
+  div[id^="mealSlot"]
+  span[data-i18n^="guest_venue_"] {
+  color: #94a3b8 !important;
+}
+
+.dark
+  #guestDashboardSection
+  button.tap-effect:not([onclick*="openGuestProfileModal"]) {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark
+  #guestDashboardSection
+  button.tap-effect:not([onclick*="openGuestProfileModal"])
+  span {
+  color: #ffffff !important;
+}
+
+.dark
+  #guestDashboardSection
+  button.tap-effect:not([onclick*="openGuestProfileModal"])
+  span.text-amber-300 {
+  color: #fcd34d !important;
 }
 
 /* Glass Modals, Action Sheets & Full Drawers */
@@ -201,7 +335,9 @@ header,
   border-radius: 1.75rem !important;
   background: rgba(255, 255, 255, 0.92) !important;
   border: 1px solid rgba(255, 255, 255, 0.7) !important;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
 }
 .dark .modal > div,
 .dark #smartHubModal > div,
@@ -218,7 +354,9 @@ header,
 .dark #emergencyDrawer > div {
   background: rgba(7, 16, 30, 0.88) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  box-shadow:
+    0 30px 70px -15px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
 }
 
 /* Glass Buttons & Cards inside Modals & Hubs */
@@ -257,7 +395,9 @@ header,
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
   background: rgba(255, 255, 255, 0.85) !important;
   border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 10px 35px 0 rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  box-shadow:
+    0 10px 35px 0 rgba(31, 38, 135, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 .dark .glass-card,
 .dark .poi-card,
@@ -269,7 +409,9 @@ header,
 .dark .service-card {
   background: rgba(11, 23, 41, 0.76) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 12px 40px -10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Hover Shine on Glass Cards */
@@ -278,7 +420,131 @@ header,
 .restaurant-card:hover {
   transform: translateY(-3px) scale(1.01);
   border-color: rgba(245, 158, 11, 0.45) !important;
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.2) !important;
+  box-shadow:
+    0 20px 50px -10px rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* ========================================================
+   Signature Royal Red Sea & Luminous Gold Luxury Accents
+   ======================================================== */
+.text-gold-gradient {
+  background: linear-gradient(
+    135deg,
+    #b45309 0%,
+    #d97706 40%,
+    #f59e0b 80%,
+    #b45309 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 1px 2px rgba(180, 83, 9, 0.25));
+}
+.dark .text-gold-gradient {
+  background: linear-gradient(
+    135deg,
+    #fffbeb 0%,
+    #f59e0b 45%,
+    #d97706 80%,
+    #b45309 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.35));
+}
+
+.text-azure-gradient {
+  background: linear-gradient(
+    135deg,
+    #0369a1 0%,
+    #0284c7 40%,
+    #00d4ff 80%,
+    #0369a1 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.25));
+}
+.dark .text-azure-gradient {
+  background: linear-gradient(
+    135deg,
+    #e0f2fe 0%,
+    #38bdf8 40%,
+    #00d4ff 80%,
+    #0284c7 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 2px 8px rgba(0, 212, 255, 0.25));
+}
+
+.btn-royal-gold {
+  background: linear-gradient(
+    135deg,
+    #f59e0b 0%,
+    #d97706 60%,
+    #b45309 100%
+  ) !important;
+  color: #020617 !important;
+  font-weight: 900 !important;
+  border: 1px solid rgba(254, 240, 138, 0.6) !important;
+  box-shadow:
+    0 8px 25px -4px rgba(245, 158, 11, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.btn-royal-gold:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow:
+    0 12px 35px -2px rgba(245, 158, 11, 0.7),
+    0 0 25px rgba(245, 158, 11, 0.45) !important;
+  filter: brightness(1.08) !important;
+}
+
+.btn-royal-glass {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  transition: all 0.25s ease !important;
+}
+.btn-royal-glass:hover {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  color: #fde68a !important;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.badge-royal-gold {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(217, 119, 6, 0.45) !important;
+  color: #92400e !important; /* Deep rich amber in light mode */
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15) !important;
+  font-weight: 800 !important;
+}
+.dark .badge-royal-gold {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.25) 0%,
+    rgba(217, 119, 6, 0.15) 100%
+  ) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  color: #fde68a !important; /* Luminous Champagne highlight in dark mode */
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.2) !important;
+}
+
+.luxury-weather-card {
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border: 1px solid rgba(245, 158, 11, 0.18) !important;
+}
+.luxury-weather-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  box-shadow:
+    0 12px 28px -6px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(245, 158, 11, 0.15) !important;
 }
 
 /* Glass Pills, Chips & Quick Landmarks */
@@ -289,21 +555,21 @@ header,
   -webkit-backdrop-filter: blur(16px) !important;
   transition: all 0.2s ease !important;
   background: rgba(255, 255, 255, 0.8) !important;
-  color: #1E293B !important;
+  color: #1e293b !important;
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
 }
 .dark .glass-pill,
 .dark .landmark-preset-btn:not(.bg-amber-500),
 .dark .voice-chip-btn {
   background: rgba(255, 255, 255, 0.06) !important;
-  color: #E2E8F0 !important;
+  color: #e2e8f0 !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 .landmark-preset-btn.bg-amber-500,
 .landmark-preset-btn.bg-amber-500 * {
-  background: #F59E0B !important;
-  color: #0F172A !important;
-  border-color: #FBBF24 !important;
+  background: #f59e0b !important;
+  color: #0f172a !important;
+  border-color: #fbbf24 !important;
 }
 
 /* Glass Inputs, Search Bars, Selects */
@@ -318,7 +584,7 @@ textarea {
   transition: all 0.25s ease !important;
   background: rgba(255, 255, 255, 0.85) !important;
   border: 1px solid rgba(255, 255, 255, 0.7) !important;
-  color: #0F172A !important;
+  color: #0f172a !important;
 }
 .dark input[type="text"],
 .dark input[type="search"],
@@ -328,7 +594,7 @@ textarea {
 .dark textarea {
   background: rgba(7, 15, 28, 0.75) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  color: #F8FAFC !important;
+  color: #f8fafc !important;
 }
 .dark input[type="text"]:focus,
 .dark input[type="search"]:focus,
@@ -407,7 +673,9 @@ textarea {
   -webkit-backdrop-filter: blur(28px) !important;
   background: rgba(7, 16, 30, 0.88) !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Glass Route Summary Banner */
@@ -423,7 +691,9 @@ textarea {
 .dark #routeResultBanner {
   background: rgba(9, 19, 35, 0.88) !important;
   border: 1px solid rgba(245, 158, 11, 0.45) !important;
-  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Glass Floating Voice Guide */
@@ -431,7 +701,9 @@ textarea {
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
 /* Glass Toast Alerts */
@@ -458,24 +730,30 @@ textarea {
 
 /* Pulse Glow & Radar Keyframes */
 @keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(221, 161, 94, 0.6); }
-  50% { box-shadow: 0 0 0 14px rgba(221, 161, 94, 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(221, 161, 94, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(221, 161, 94, 0);
+  }
 }
 .glow-gold {
   animation: pulse-gold 2.4s infinite;
 }
 
 @keyframes radar-ping {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.95; }
-  100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.8);
+    opacity: 0;
+  }
 }
 .radar-pulse {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 9999px;
-  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-  pointer-events: none;
+  display: none !important;
 }
 
 /* Animated Wayfinding SVG Route */
@@ -495,7 +773,11 @@ textarea {
 
 /* Tap & Click Feedback */
 .tap-effect {
-  transition: transform 0.15s ease, filter 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .tap-effect:active {
   transform: scale(0.96);
@@ -519,19 +801,41 @@ textarea {
   left: 0 !important;
 }
 
-/* Smooth Hotspot Pins */
+/* Smooth Hotspot Pins:
+   Hidden by default in 2D so the illustrated resort map stays clean;
+   Only visible when 3D mode is toggled on (or when a pin is explicitly active). */
 .map-pin {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, filter 0.25s ease;
+  display: none !important;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  border-radius: 9999px;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.25s ease,
+    filter 0.25s ease;
   transform: translate(-50%, -50%);
+}
+.map-pin.is-wing {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+}
+.map-viewport.mode-3d .map-pin,
+.mode-3d .map-pin {
+  display: flex !important;
+}
+.map-pin.active-pin {
+  display: flex !important;
+  transform: translate(-50%, -50%) scale(1.45);
+  z-index: 35;
+  filter: drop-shadow(0 0 14px #dda15e);
 }
 .map-pin:hover {
   transform: translate(-50%, -50%) scale(1.32);
   z-index: 30;
-}
-.map-pin.active-pin {
-  transform: translate(-50%, -50%) scale(1.45);
-  z-index: 35;
-  filter: drop-shadow(0 0 14px #dda15e);
 }
 .map-pin.dimmed {
   opacity: 0.22;
@@ -544,7 +848,9 @@ textarea {
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, 8px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .map-pin:hover .pin-tooltip {
   opacity: 1;
@@ -574,21 +880,42 @@ textarea {
   animation: toastFadeUp 0.3s ease forwards;
 }
 @keyframes toastSlideDown {
-  from { opacity: 0; transform: translateY(-20px) scale(0.94); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 @keyframes toastFadeUp {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(-16px) scale(0.94); }
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.94);
+  }
 }
 
 /* Shimmer Loading Effect */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 .shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -637,16 +964,21 @@ body.sunlight-mode .map-pin {
   overflow: hidden;
 }
 .wallet-pass::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(221, 161, 94, 0.08) 0%, transparent 60%);
+  background: radial-gradient(
+    circle,
+    rgba(221, 161, 94, 0.08) 0%,
+    transparent 60%
+  );
   pointer-events: none;
 }
-.pass-notch-left, .pass-notch-right {
+.pass-notch-left,
+.pass-notch-right {
   position: absolute;
   width: 24px;
   height: 24px;
@@ -654,14 +986,20 @@ body.sunlight-mode .map-pin {
   border-radius: 9999px;
   top: 68%;
 }
-.pass-notch-left { left: -12px; }
-.pass-notch-right { right: -12px; }
+.pass-notch-left {
+  left: -12px;
+}
+.pass-notch-right {
+  right: -12px;
+}
 
 /* 3. Interactive Qibla Compass */
 .qibla-dial {
   background: radial-gradient(circle, #0f2b48 0%, #081626 100%);
   border: 3px solid #dda15e;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7), 0 8px 25px rgba(221, 161, 94, 0.25);
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.7),
+    0 8px 25px rgba(221, 161, 94, 0.25);
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .qibla-needle {
@@ -685,8 +1023,14 @@ body.sunlight-mode .map-pin {
   animation: hudSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes hudSlideDown {
-  from { transform: translate(-50%, -30px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+  from {
+    transform: translate(-50%, -30px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
 .cinematic-bottom-theater {
   backdrop-filter: blur(28px);
@@ -697,8 +1041,14 @@ body.sunlight-mode .map-pin {
   animation: hudSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes hudSlideUp {
-  from { transform: translate(-50%, 40px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+  from {
+    transform: translate(-50%, 40px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
 .cinematic-step-segment {
   height: 3.5px;
@@ -720,21 +1070,35 @@ body.sunlight-mode .map-pin {
 
 /* Active Pin Spotlight & Dimming Effects */
 .map-pin.active-tour-pin {
-  box-shadow: 0 0 0 5px rgba(251, 191, 36, 0.9), 0 0 35px rgba(251, 191, 36, 1), 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+  box-shadow:
+    0 0 0 5px rgba(251, 191, 36, 0.9),
+    0 0 35px rgba(251, 191, 36, 1),
+    0 10px 25px rgba(0, 0, 0, 0.6) !important;
   z-index: 60 !important;
   opacity: 1 !important;
   filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.9));
   animation: tourPinPulse 1.8s infinite ease-in-out;
 }
 @keyframes tourPinPulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.8), 0 0 25px rgba(251, 191, 36, 0.9); }
-  50% { box-shadow: 0 0 0 9px rgba(251, 191, 36, 0.5), 0 0 45px rgba(251, 191, 36, 1); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgba(251, 191, 36, 0.8),
+      0 0 25px rgba(251, 191, 36, 0.9);
+  }
+  50% {
+    box-shadow:
+      0 0 0 9px rgba(251, 191, 36, 0.5),
+      0 0 45px rgba(251, 191, 36, 1);
+  }
 }
 
 .map-pin.tour-dimmed-pin {
   opacity: 0.3 !important;
   filter: grayscale(40%) !important;
-  transition: opacity 0.5s ease, filter 0.5s ease;
+  transition:
+    opacity 0.5s ease,
+    filter 0.5s ease;
 }
 
 /* 3D Ground Spotlight Beacon for Tour */
@@ -753,7 +1117,9 @@ body.sunlight-mode .map-pin {
   transform: translate(-50%, -50%);
   border-radius: 50%;
   border: 2.5px solid #f59e0b;
-  box-shadow: 0 0 15px rgba(245, 158, 11, 0.8), inset 0 0 15px rgba(245, 158, 11, 0.4);
+  box-shadow:
+    0 0 15px rgba(245, 158, 11, 0.8),
+    inset 0 0 15px rgba(245, 158, 11, 0.4);
   pointer-events: none;
 }
 
@@ -767,7 +1133,9 @@ body.sunlight-mode .map-pin {
   width: 90px;
   height: 90px;
   border-color: #06d6a0;
-  box-shadow: 0 0 20px rgba(6, 214, 160, 0.8), inset 0 0 15px rgba(6, 214, 160, 0.4);
+  box-shadow:
+    0 0 20px rgba(6, 214, 160, 0.8),
+    inset 0 0 15px rgba(6, 214, 160, 0.4);
   animation: beaconSonarPulse 2.4s cubic-bezier(0.1, 0.8, 0.3, 1) 0.8s infinite;
 }
 
@@ -801,14 +1169,27 @@ body.sunlight-mode .map-pin {
   height: 22px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, #fbbf24 0%, #f59e0b 60%, transparent 100%);
-  box-shadow: 0 0 25px #f59e0b, 0 0 50px rgba(245, 158, 11, 0.9);
+  background: radial-gradient(
+    circle,
+    #fbbf24 0%,
+    #f59e0b 60%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 25px #f59e0b,
+    0 0 50px rgba(245, 158, 11, 0.9);
   animation: beaconPulseCore 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes beaconPulseCore {
-  0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.8; }
-  100% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.35);
+    opacity: 1;
+  }
 }
 
 .beacon-vertical-beam {
@@ -818,15 +1199,26 @@ body.sunlight-mode .map-pin {
   width: 3px;
   height: 85px;
   transform: translateX(-50%);
-  background: linear-gradient(to top, rgba(251, 191, 36, 0.95), rgba(6, 214, 160, 0.7), transparent);
+  background: linear-gradient(
+    to top,
+    rgba(251, 191, 36, 0.95),
+    rgba(6, 214, 160, 0.7),
+    transparent
+  );
   box-shadow: 0 0 12px rgba(251, 191, 36, 0.9);
   pointer-events: none;
   animation: beaconBeamFlicker 1.8s ease-in-out infinite alternate;
 }
 
 @keyframes beaconBeamFlicker {
-  0% { opacity: 0.6; height: 65px; }
-  100% { opacity: 1; height: 105px; }
+  0% {
+    opacity: 0.6;
+    height: 65px;
+  }
+  100% {
+    opacity: 1;
+    height: 105px;
+  }
 }
 
 /* 2D Screen-Space Landmark Pinpoint Tag (100% Crisp Typography, Never Distorted in 3D) */
@@ -837,8 +1229,13 @@ body.sunlight-mode .map-pin {
 }
 
 @keyframes subtleFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 .animate-subtle-float {
@@ -848,9 +1245,12 @@ body.sunlight-mode .map-pin {
 /* 5. Star Rating Component */
 .star-btn {
   color: #cbd5e1;
-  transition: transform 0.15s ease, color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
 }
-.star-btn.active, .star-btn:hover {
+.star-btn.active,
+.star-btn:hover {
   color: #f59e0b;
   transform: scale(1.2);
 }
@@ -886,15 +1286,17 @@ body.sunlight-mode .map-pin {
 }
 
 .smart-fab-trigger {
-  background: linear-gradient(135deg, #134074 0%, #0B2545 100%);
-  color: #FBBF24;
+  background: linear-gradient(135deg, #134074 0%, #0b2545 100%);
+  color: #fbbf24;
   border: 2px solid rgba(221, 161, 94, 0.45);
 }
 
 .smart-fab-trigger:hover {
   transform: scale(1.08);
-  border-color: #FBBF24;
-  box-shadow: 0 12px 28px rgba(19, 64, 116, 0.6), 0 0 16px rgba(251, 191, 36, 0.4);
+  border-color: #fbbf24;
+  box-shadow:
+    0 12px 28px rgba(19, 64, 116, 0.6),
+    0 0 16px rgba(251, 191, 36, 0.4);
 }
 
 .smart-fab-trigger.open {
@@ -913,7 +1315,9 @@ body.sunlight-mode .map-pin {
 
 .smart-fab-cart-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 12px 26px rgba(217, 119, 6, 0.55), 0 0 14px rgba(245, 158, 11, 0.5);
+  box-shadow:
+    0 12px 26px rgba(217, 119, 6, 0.55),
+    0 0 14px rgba(245, 158, 11, 0.5);
 }
 
 .smart-fab-cart-badge {
@@ -937,8 +1341,12 @@ body.sunlight-mode .map-pin {
 }
 
 @keyframes cartBadgePop {
-  0% { transform: scale(0); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .smart-fab-menu {
@@ -1015,8 +1423,14 @@ body.sunlight-mode .map-pin {
 }
 
 @keyframes turnNavSlideUp {
-  from { transform: translateY(16px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .turn-progress-track {
@@ -1086,8 +1500,14 @@ body.sunlight-mode .map-pin {
 }
 
 @keyframes hudSlideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* 8. My Location GPS Beacon (Blue Dot) */
@@ -1118,8 +1538,14 @@ body.sunlight-mode .map-pin {
   animation: myLocPulse 1.8s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 @keyframes myLocPulse {
-  0% { transform: scale(0.6); opacity: 1; }
-  100% { transform: scale(2.8); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
 }
 
 /* 9. Open Now Radar Indicator */
@@ -1133,8 +1559,15 @@ body.sunlight-mode .map-pin {
   animation: openNowGlow 1.5s infinite alternate;
 }
 @keyframes openNowGlow {
-  from { opacity: 0.6; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px #10b981; }
+  from {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px #10b981;
+  }
 }
 
 /* Accessible step-free route line */
@@ -1146,13 +1579,27 @@ body.sunlight-mode .map-pin {
 
 /* 10. Cinematic Promo Video Player Styles */
 .promo-cinema-overlay {
-  background: radial-gradient(circle at center, rgba(11, 37, 69, 0.4) 0%, rgba(4, 10, 20, 0.96) 100%);
+  background: radial-gradient(
+    circle at center,
+    rgba(11, 37, 69, 0.4) 0%,
+    rgba(4, 10, 20, 0.96) 100%
+  );
 }
 
 .promo-vignette {
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(4, 10, 20, 0.85) 100%),
-              linear-gradient(to top, rgba(4, 10, 20, 0.96) 0%, rgba(4, 10, 20, 0.55) 30%, transparent 65%),
-              linear-gradient(to bottom, rgba(4, 10, 20, 0.88) 0%, transparent 40%);
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 40%,
+      rgba(4, 10, 20, 0.85) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(4, 10, 20, 0.96) 0%,
+      rgba(4, 10, 20, 0.55) 30%,
+      transparent 65%
+    ),
+    linear-gradient(to bottom, rgba(4, 10, 20, 0.88) 0%, transparent 40%);
 }
 
 .ken-burns-anim-a {
@@ -1164,15 +1611,27 @@ body.sunlight-mode .map-pin {
 }
 
 @keyframes promoKenBurnsA {
-  0% { transform: scale(1) translate(0, 0); }
-  50% { transform: scale(1.08) translate(-1.5%, -1%); }
-  100% { transform: scale(1.15) translate(1.5%, 1%); }
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.08) translate(-1.5%, -1%);
+  }
+  100% {
+    transform: scale(1.15) translate(1.5%, 1%);
+  }
 }
 
 @keyframes promoKenBurnsB {
-  0% { transform: scale(1.15) translate(1%, -1%); }
-  50% { transform: scale(1.08) translate(-1%, 1.5%); }
-  100% { transform: scale(1) translate(0, 0); }
+  0% {
+    transform: scale(1.15) translate(1%, -1%);
+  }
+  50% {
+    transform: scale(1.08) translate(-1%, 1.5%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
 }
 
 .promo-text-fade-in {
@@ -1180,26 +1639,49 @@ body.sunlight-mode .map-pin {
 }
 
 @keyframes promoTextFade {
-  0% { opacity: 0; transform: translateY(22px); filter: blur(5px); }
-  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 /* Sound wave animated equalizer bars */
 .sound-wave-bar {
   display: inline-block;
   width: 3px;
-  background-color: #FBBF24;
+  background-color: #fbbf24;
   border-radius: 9999px;
   animation: soundBarDance 1.2s ease-in-out infinite alternate;
 }
-.sound-wave-bar:nth-child(2) { animation-delay: 0.2s; height: 14px; }
-.sound-wave-bar:nth-child(3) { animation-delay: 0.4s; height: 8px; }
-.sound-wave-bar:nth-child(4) { animation-delay: 0.1s; height: 16px; }
+.sound-wave-bar:nth-child(2) {
+  animation-delay: 0.2s;
+  height: 14px;
+}
+.sound-wave-bar:nth-child(3) {
+  animation-delay: 0.4s;
+  height: 8px;
+}
+.sound-wave-bar:nth-child(4) {
+  animation-delay: 0.1s;
+  height: 16px;
+}
 
 @keyframes soundBarDance {
-  0% { height: 4px; }
-  50% { height: 18px; }
-  100% { height: 7px; }
+  0% {
+    height: 4px;
+  }
+  50% {
+    height: 18px;
+  }
+  100% {
+    height: 7px;
+  }
 }
 
 /* Story chapter bar */
@@ -1223,7 +1705,7 @@ body.sunlight-mode .map-pin {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #FBBF24;
+  background: #fbbf24;
   width: 0%;
   border-radius: 9999px;
   box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
@@ -1234,7 +1716,8 @@ body.sunlight-mode .map-pin {
    ======================================================== */
 
 /* Prevent horizontal overflow across all screens */
-html, body {
+html,
+body {
   max-width: 100vw;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
@@ -1247,7 +1730,11 @@ body {
 }
 
 /* Touch responsiveness & fast taps */
-button, a, select, input, .tap-effect {
+button,
+a,
+select,
+input,
+.tap-effect {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1273,7 +1760,9 @@ main {
 
 /* Prevent automatic zoom on focus in iOS Safari */
 @media (max-width: 768px) {
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 }
@@ -1312,22 +1801,41 @@ main {
     display: none !important;
   }
 
+  /* Navigation card is outside the map in natural flow - NOT fixed over the map! */
   body.turn-navigation-active .turn-nav-bar {
-    position: fixed;
-    left: 0.75rem;
-    right: 0.75rem;
-    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
-    z-index: 60;
-    width: auto;
-    max-width: none;
-    max-height: min(40vh, 250px);
-    overflow-y: auto;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 38;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    margin: 0.5rem 0 !important;
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* When inside fullscreen map viewport on mobile */
+  .map-viewport.fullscreen-active .turn-nav-bar {
+    position: absolute !important;
+    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px)) !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    max-width: none !important;
+    z-index: 50 !important;
+  }
+
+  .turn-nav-bar.is-collapsed {
+    padding: 0.45rem 0.75rem !important;
   }
 }
 
 @media (max-width: 380px) {
   body.turn-navigation-active .turn-nav-bar {
-    max-height: min(60dvh, 360px);
+    padding: 0.5rem 0.65rem !important;
   }
 
   #turnNavHud > div:last-child {
@@ -1409,7 +1917,7 @@ main {
 
   /* Expand touch target hit-box for pins on mobile without altering visual style */
   .map-pin::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -8px;
     left: -8px;
@@ -1613,7 +2121,12 @@ main {
   left: 0;
   right: 0;
   height: 110px;
-  background: linear-gradient(180deg, rgba(14, 165, 233, 0.45) 0%, rgba(6, 182, 212, 0.25) 35%, rgba(15, 23, 42, 0) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(14, 165, 233, 0.45) 0%,
+    rgba(6, 182, 212, 0.25) 35%,
+    rgba(15, 23, 42, 0) 100%
+  );
   pointer-events: none;
   z-index: 25;
   transition: opacity 0.5s ease;
@@ -1626,26 +2139,35 @@ main {
 }
 
 .map-pin.pin-3d::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 96%;
   left: 50%;
   transform: translateX(-50%);
   width: 2px;
   height: 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(221, 161, 94, 0.75) 65%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(221, 161, 94, 0.75) 65%,
+    transparent 100%
+  );
   pointer-events: none;
 }
 
 .map-pin.pin-3d::before {
-  content: '';
+  content: "";
   position: absolute;
   top: calc(96% + 15px);
   left: 50%;
   transform: translateX(-50%);
   width: 16px;
   height: 7px;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7) 0%, transparent 75%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.7) 0%,
+    transparent 75%
+  );
   border-radius: 50%;
   pointer-events: none;
 }
@@ -1670,10 +2192,14 @@ main {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1.5px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.45),
+    inset 0 1px 2px rgba(255, 255, 255, 0.35);
   position: relative;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -1762,20 +2288,23 @@ main {
 
 /* Active 3D Pin Beacon */
 @keyframes beaconRays {
-  0% { opacity: 0.8; transform: translate(-50%, -100%) scaleY(0.9); }
-  50% { opacity: 1; transform: translate(-50%, -100%) scaleY(1.05); }
-  100% { opacity: 0.8; transform: translate(-50%, -100%) scaleY(0.9); }
+  0% {
+    opacity: 0.8;
+    transform: translate(-50%, -100%) scaleY(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -100%) scaleY(1.05);
+  }
+  100% {
+    opacity: 0.8;
+    transform: translate(-50%, -100%) scaleY(0.9);
+  }
 }
 
-.active-3d-beacon-beam {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 3px;
-  height: 140px;
-  background: linear-gradient(0deg, #06d6a0 0%, #38bdf8 60%, rgba(251, 191, 36, 0) 100%);
-  animation: beaconRays 1.8s ease-in-out infinite;
-  pointer-events: none;
+.active-3d-beacon-beam,
+#active3DBeacon {
+  display: none !important;
 }
 /* Layer crossfade styling */
 .earth-layer-img {
@@ -1826,7 +2355,11 @@ main {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at 48% 58%, rgba(6, 182, 212, 0.12), rgba(2, 6, 23, 0.48));
+  background: radial-gradient(
+    circle at 48% 58%,
+    rgba(6, 182, 212, 0.12),
+    rgba(2, 6, 23, 0.48)
+  );
   mix-blend-mode: hard-light;
 }
 
@@ -1871,8 +2404,16 @@ main {
 }
 
 @keyframes orbitPulseGlow {
-  0% { box-shadow: 0 0 6px #dda15e, inset 0 0 4px #dda15e; }
-  100% { box-shadow: 0 0 18px #f59e0b, inset 0 0 10px #f59e0b; }
+  0% {
+    box-shadow:
+      0 0 6px #dda15e,
+      inset 0 0 4px #dda15e;
+  }
+  100% {
+    box-shadow:
+      0 0 18px #f59e0b,
+      inset 0 0 10px #f59e0b;
+  }
 }
 
 /* Layer Switcher Pill Buttons */
@@ -1894,65 +2435,72 @@ main {
 
 /* ACTIVE STATE - LIGHT MODE */
 .map-layer-pill.active {
-  background: #0B2545 !important;
-  color: #FFFFFF !important;
-  border: 1px solid #DDA15E !important;
-  box-shadow: 0 4px 14px rgba(11, 37, 69, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  background: linear-gradient(135deg, #051329 0%, #0a2540 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #f59e0b !important;
+  box-shadow:
+    0 4px 18px rgba(5, 19, 41, 0.45),
+    0 0 14px rgba(245, 158, 11, 0.3) !important;
 }
 .map-layer-pill.active,
 .map-layer-pill.active * {
-  color: #FFFFFF !important;
-  fill: #FFFFFF !important;
+  color: #ffffff !important;
+  fill: #ffffff !important;
 }
 
 /* ACTIVE STATE - DARK MODE */
 .dark .map-layer-pill.active {
-  background: linear-gradient(135deg, #DDA15E 0%, #B8860B 100%) !important;
-  color: #06101E !important;
-  border: 1px solid #F59E0B !important;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35) !important;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: #030712 !important;
+  border: 1px solid #fef08a !important;
+  box-shadow:
+    0 4px 20px rgba(245, 158, 11, 0.5),
+    0 0 16px rgba(245, 158, 11, 0.4) !important;
 }
 .dark .map-layer-pill.active,
 .dark .map-layer-pill.active * {
-  color: #06101E !important;
-  fill: #06101E !important;
+  color: #030712 !important;
+  fill: #030712 !important;
+  font-weight: 900 !important;
 }
 
 /* INACTIVE STATE - LIGHT MODE */
 .map-layer-pill:not(.active) {
   background: rgba(255, 255, 255, 0.85) !important;
-  color: #1E293B !important;
+  color: #1e293b !important;
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
 }
 .map-layer-pill:not(.active),
 .map-layer-pill:not(.active) * {
-  color: #1E293B !important;
+  color: #1e293b !important;
 }
 
 /* INACTIVE STATE - DARK MODE */
 .dark .map-layer-pill:not(.active) {
   background: rgba(15, 23, 42, 0.75) !important;
-  color: #E2E8F0 !important;
+  color: #e2e8f0 !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
 }
 .dark .map-layer-pill:not(.active),
 .dark .map-layer-pill:not(.active) * {
-  color: #E2E8F0 !important;
+  color: #e2e8f0 !important;
 }
 
 /* HOVER STATES */
 .map-layer-pill:not(.active):hover {
-  background: #F1F5F9 !important;
-  color: #0B2545 !important;
-  border-color: rgba(221, 161, 94, 0.5) !important;
+  background: #f8fafc !important;
+  color: #051329 !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2) !important;
   transform: translateY(-1px);
 }
 .dark .map-layer-pill:not(.active):hover {
-  background: rgba(30, 41, 59, 0.9) !important;
-  color: #FFFFFF !important;
-  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: rgba(14, 30, 56, 0.9) !important;
+  color: #ffffff !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25) !important;
   transform: translateY(-1px);
 }
 
@@ -1981,7 +2529,9 @@ main {
 
 /* Interactive Buildings 2.5D Hover Lift */
 .interactive-bld {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.25s ease;
   transform-origin: center;
 }
 
@@ -2000,13 +2550,21 @@ main {
 }
 
 @keyframes waveFloat1 {
-  0% { transform: translateY(0px) scaleY(1); }
-  100% { transform: translateY(5px) scaleY(1.08); }
+  0% {
+    transform: translateY(0px) scaleY(1);
+  }
+  100% {
+    transform: translateY(5px) scaleY(1.08);
+  }
 }
 
 @keyframes waveFloat2 {
-  0% { transform: translateY(0px) scaleY(1); }
-  100% { transform: translateY(-4px) scaleY(0.94); }
+  0% {
+    transform: translateY(0px) scaleY(1);
+  }
+  100% {
+    transform: translateY(-4px) scaleY(0.94);
+  }
 }
 
 /* Floating Boats */
@@ -2020,8 +2578,12 @@ main {
 }
 
 @keyframes boatFloat {
-  0% { transform: translate(640px, 90px) rotate(-1.5deg); }
-  100% { transform: translate(640px, 94px) rotate(2deg); }
+  0% {
+    transform: translate(640px, 90px) rotate(-1.5deg);
+  }
+  100% {
+    transform: translate(640px, 94px) rotate(2deg);
+  }
 }
 
 /* Swaying Tropical Palm Trees */
@@ -2041,8 +2603,12 @@ main {
 }
 
 @keyframes palmSway {
-  0% { transform: rotate(-2deg); }
-  100% { transform: rotate(2.5deg); }
+  0% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    transform: rotate(2.5deg);
+  }
 }
 
 /* Shimmering Pool Water */
@@ -2051,8 +2617,12 @@ main {
 }
 
 @keyframes poolShimmer {
-  0% { filter: brightness(1) saturate(1); }
-  100% { filter: brightness(1.12) saturate(1.2); }
+  0% {
+    filter: brightness(1) saturate(1);
+  }
+  100% {
+    filter: brightness(1.12) saturate(1.2);
+  }
 }
 
 /* Water Splash Fountains */
@@ -2061,8 +2631,14 @@ main {
 }
 
 @keyframes fountainSpray {
-  0% { r: 5; opacity: 0.5; }
-  100% { r: 9; opacity: 0.9; }
+  0% {
+    r: 5;
+    opacity: 0.5;
+  }
+  100% {
+    r: 9;
+    opacity: 0.9;
+  }
 }
 
 /* Living Route Neon Dash Animation */
@@ -2083,9 +2659,18 @@ main {
 }
 
 @keyframes playerRingPulse {
-  0% { r: 14; opacity: 0.8; }
-  50% { r: 26; opacity: 0.2; }
-  100% { r: 14; opacity: 0.8; }
+  0% {
+    r: 14;
+    opacity: 0.8;
+  }
+  50% {
+    r: 26;
+    opacity: 0.2;
+  }
+  100% {
+    r: 14;
+    opacity: 0.8;
+  }
 }
 
 /* Night Mode Lanterns */
@@ -2094,8 +2679,14 @@ main {
 }
 
 @keyframes lanternFlicker {
-  0% { opacity: 0.2; transform: scale(0.9); }
-  100% { opacity: 0.45; transform: scale(1.15); }
+  0% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0.45;
+    transform: scale(1.15);
+  }
 }
 
 .pool-night-glow {
@@ -2103,28 +2694,41 @@ main {
 }
 
 @keyframes underwaterPulse {
-  0% { opacity: 0.25; transform: scale(0.95); }
-  100% { opacity: 0.5; transform: scale(1.1); }
+  0% {
+    opacity: 0.25;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
 }
 
 /* ================= LUXURY MAP ENGINE 2.0 & MOBILE NAV STYLES ================= */
 
 /* Enhanced Map Pin Design */
 .map-pin {
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
 }
 .map-pin:hover {
   transform: translate(-50%, -50%) scale(1.3);
   z-index: 40;
-  box-shadow: 0 0 20px rgba(221, 161, 94, 0.8), 0 8px 16px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 20px rgba(221, 161, 94, 0.8),
+    0 8px 16px rgba(0, 0, 0, 0.4);
 }
 .map-pin.active-pin {
   transform: translate(-50%, -50%) scale(1.42);
   z-index: 50;
   border-color: #fbbf24 !important;
-  box-shadow: 0 0 24px #fbbf24, 0 10px 24px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 24px #fbbf24,
+    0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* Floating Responsive POI Bottom Sheet Card (Outside Map Viewport by default) */
@@ -2160,8 +2764,14 @@ main {
 }
 
 @keyframes sheetSlideUp {
-  from { transform: translateY(16px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Active Room Target Beacon Over Matched Building */
@@ -2177,8 +2787,12 @@ main {
 }
 
 @keyframes roomBeaconBounce {
-  0% { transform: translate(-50%, -100%) translateY(0); }
-  100% { transform: translate(-50%, -100%) translateY(-8px); }
+  0% {
+    transform: translate(-50%, -100%) translateY(0);
+  }
+  100% {
+    transform: translate(-50%, -100%) translateY(-8px);
+  }
 }
 
 .room-beacon-badge {
@@ -2189,7 +2803,9 @@ main {
   border: 2px solid #dda15e;
   border-radius: 9999px;
   padding: 0.35rem 0.85rem;
-  box-shadow: 0 0 25px rgba(221, 161, 94, 0.8), 0 8px 24px rgba(0, 0, 0, 0.7);
+  box-shadow:
+    0 0 25px rgba(221, 161, 94, 0.8),
+    0 8px 24px rgba(0, 0, 0, 0.7);
   white-space: nowrap;
 }
 
@@ -2242,8 +2858,175 @@ main {
 }
 
 @keyframes roomRadarPulse {
-  0% { transform: translateX(-50%) scale(0.4); opacity: 1; }
-  100% { transform: translateX(-50%) scale(2.4); opacity: 0; }
+  0% {
+    transform: translateX(-50%) scale(0.4);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* ========================================================
+   Active Destination Location Pin 📍 (High Visibility 3D Marker)
+   ======================================================== */
+.destination-location-pin {
+  position: absolute;
+  z-index: 55;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform, left, top;
+}
+
+.dest-pin-ground-pulse {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 9999px;
+  border: 2px solid #ef4444;
+  background: radial-gradient(
+    circle,
+    rgba(239, 68, 68, 0.45) 0%,
+    rgba(245, 158, 11, 0.25) 60%,
+    transparent 100%
+  );
+  animation: destGroundPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+.dest-pin-ground-target {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  background: #ef4444;
+  box-shadow:
+    0 0 12px #ef4444,
+    0 0 4px #ffffff;
+  pointer-events: none;
+}
+
+.dest-pin-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation:
+    destPinDropBounce 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+    destPinFloat 2.2s ease-in-out infinite alternate 0.55s;
+}
+
+.dest-pin-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ea580c 100%);
+  border: 2px solid #fef08a;
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  box-shadow:
+    0 0 25px rgba(239, 68, 68, 0.85),
+    0 8px 24px rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
+}
+
+.dest-pin-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  animation: pinEmojiPulse 1.4s ease-in-out infinite alternate;
+}
+
+.dest-pin-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: right;
+}
+
+.dest-pin-name {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.dest-pin-cat {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fef08a;
+}
+
+.dest-pin-pointer {
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid #dc2626;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  margin-top: -1px;
+}
+
+@keyframes destGroundPing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes destPinDropBounce {
+  0% {
+    transform: translateY(-40px) scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(6px) scale(1.1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-3px) scale(0.97);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes destPinFloat {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes pinEmojiPulse {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+/* Ensure no in-viewport legacy HUDs cover the map canvas */
+.map-route-hud,
+.walk-simulation-hud {
+  display: none !important;
 }
 
 /* Animated Live Walker Avatar for Simulated Navigation */
@@ -2261,7 +3044,9 @@ main {
   border-radius: 50%;
   background: linear-gradient(135deg, #0284c7 0%, #00f0ff 100%);
   border: 2.5px solid #ffffff;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.85), 0 4px 14px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 20px rgba(0, 240, 255, 0.85),
+    0 4px 14px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2278,8 +3063,14 @@ main {
 }
 
 @keyframes walkerRadarPulse {
-  0% { transform: scale(0.6); opacity: 0.95; }
-  100% { transform: scale(2); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 /* In-Map Instant Search & Quick Chips */
@@ -2333,7 +3124,7 @@ main {
   width: 72px;
   height: 96px;
   background-color: rgba(15, 23, 42, 0.85);
-  background-image: url('../moreno_resort_map_new.png');
+  background-image: url("../moreno_resort_map_new.png");
   background-size: cover;
   background-position: center;
   border-radius: 0.75rem;
@@ -2362,15 +3153,18 @@ main {
   left: 0;
   right: 0;
   z-index: 50;
-  background: rgba(11, 27, 47, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(221, 161, 94, 0.3);
-  padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom, 0px)) 0.75rem;
+  background: rgba(4, 12, 28, 0.88) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border-top: 1px solid rgba(245, 158, 11, 0.35) !important;
+  padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom, 0px))
+    0.75rem;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 -8px 30px rgba(0, 0, 0, 0.65),
+    0 0 20px rgba(245, 158, 11, 0.08) !important;
 }
 @media (min-width: 768px) {
   .mobile-bottom-nav {
@@ -2384,23 +3178,27 @@ main {
   gap: 0.15rem;
   color: #94a3b8;
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: 800;
   transition: all 0.2s ease;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  border-radius: 0.75rem;
+  border-radius: 0.85rem;
+  border: none;
+  background: transparent;
 }
 .mobile-nav-item.active,
 .mobile-nav-item:hover {
-  color: #fbbf24;
+  color: #f59e0b !important;
   transform: translateY(-2px);
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
 }
 .mobile-nav-item .nav-icon {
   font-size: 1.25rem;
   transition: transform 0.2s ease;
 }
 .mobile-nav-item.active .nav-icon {
-  transform: scale(1.15);
+  transform: scale(1.18);
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
 }
 
 /* Add bottom padding to body on mobile so bottom bar does not hide content */
@@ -2427,8 +3225,14 @@ main {
   animation: audioWaveBar 0.75s ease-in-out infinite alternate 0.1s;
 }
 @keyframes audioWaveBar {
-  0% { transform: scaleY(0.4); opacity: 0.6; }
-  100% { transform: scaleY(1.3); opacity: 1; }
+  0% {
+    transform: scaleY(0.4);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scaleY(1.3);
+    opacity: 1;
+  }
 }
 
 /* ========================================================
@@ -2436,7 +3240,9 @@ main {
    ======================================================== */
 .walk-simulation-hud {
   animation: slideDownIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.15);
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(245, 158, 11, 0.15);
 }
 @keyframes slideDownIn {
   from {
@@ -2472,7 +3278,12 @@ main {
   left: -22px;
   width: 44px;
   height: 52px;
-  background: radial-gradient(ellipse at bottom, rgba(245, 158, 11, 0.75) 0%, rgba(56, 189, 248, 0.45) 50%, rgba(245, 158, 11, 0) 80%);
+  background: radial-gradient(
+    ellipse at bottom,
+    rgba(245, 158, 11, 0.75) 0%,
+    rgba(56, 189, 248, 0.45) 50%,
+    rgba(245, 158, 11, 0) 80%
+  );
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
   pointer-events: none;
@@ -2506,7 +3317,9 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.75), 0 0 0 3px #ffffff;
+  box-shadow:
+    0 8px 25px rgba(245, 158, 11, 0.75),
+    0 0 0 3px #ffffff;
   position: relative;
   z-index: 2;
   animation: walkerBounce 0.7s infinite alternate ease-in-out;
@@ -2532,18 +3345,32 @@ main {
   height: 60px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(245, 158, 11, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(245, 158, 11, 0.45) 0%,
+    rgba(245, 158, 11, 0) 70%
+  );
   animation: walkerAuraPulse 1.6s infinite ease-out;
   pointer-events: none;
   z-index: 1;
 }
 @keyframes walkerBounce {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-4px);
+  }
 }
 @keyframes walkerAuraPulse {
-  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
 }
 
 /* ========================================================
@@ -2554,7 +3381,11 @@ main {
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.15) 0%, rgba(15, 23, 42, 0.8) 70%);
+  background: radial-gradient(
+    circle at center,
+    rgba(245, 158, 11, 0.15) 0%,
+    rgba(15, 23, 42, 0.8) 70%
+  );
   border: 2px dashed rgba(245, 158, 11, 0.4);
   box-shadow: inset 0 0 25px rgba(245, 158, 11, 0.2);
   display: flex;
@@ -2599,21 +3430,75 @@ main {
   bottom: 5.5rem;
   right: 1.25rem;
   z-index: 45;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.5), 0 0 15px rgba(245, 158, 11, 0.3);
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 8px 24px rgba(245, 158, 11, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
 }
-@media (max-width: 767px) {
+
+.voice-fab-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  flex-shrink: 0;
+}
+
+.voice-fab-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.voice-fab-text {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+/* On mobile: compact 42px circular floating action button so it never covers content! */
+@media (max-width: 640px) {
   .voice-nav-fab {
-    bottom: 5rem;
-    right: 1rem;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    justify-content: center;
+    bottom: 4.8rem;
+    right: 0.85rem;
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.45),
+      0 0 16px rgba(245, 158, 11, 0.4);
+  }
+  .voice-nav-fab .voice-fab-text {
+    display: none;
+  }
+  .voice-nav-fab .voice-fab-pulse {
+    display: none;
+  }
+  .voice-nav-fab .voice-fab-icon {
+    font-size: 1.25rem;
   }
 }
+
 .voice-nav-fab:hover {
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 15px 35px -5px rgba(245, 158, 11, 0.65), 0 0 25px rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 12px 30px rgba(245, 158, 11, 0.6),
+    0 0 20px rgba(245, 158, 11, 0.5);
 }
-
-
 
 .voice-mic-main {
   width: 90px;
@@ -2640,8 +3525,13 @@ main {
   animation: voiceMicPulse 1s infinite alternate ease-in-out;
 }
 @keyframes voiceMicPulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.1); box-shadow: 0 0 35px rgba(239, 68, 68, 0.7); }
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.7);
+  }
 }
 
 .voice-pulse-rings {
@@ -2661,7 +3551,7 @@ main {
 }
 .voice-pulse-rings.voice-rings-active::before,
 .voice-pulse-rings.voice-rings-active::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -2672,8 +3562,14 @@ main {
   animation-delay: 0.9s;
 }
 @keyframes voiceRingsExpand {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(1.4); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 
 .voice-chip-btn {
@@ -2693,7 +3589,9 @@ main {
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 55;
-  transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), top 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  transition:
+    left 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+    top 0.8s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: left, top;
 }
 
@@ -2704,10 +3602,17 @@ main {
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 166, 255, 0.18) 0%, rgba(0, 132, 255, 0.08) 65%, rgba(0, 132, 255, 0) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 166, 255, 0.18) 0%,
+    rgba(0, 132, 255, 0.08) 65%,
+    rgba(0, 132, 255, 0) 100%
+  );
   border: 1.5px solid rgba(0, 166, 255, 0.35);
   pointer-events: none;
-  transition: width 0.6s ease, height 0.6s ease;
+  transition:
+    width 0.6s ease,
+    height 0.6s ease;
 }
 
 /* Directional heading cone / beam */
@@ -2728,7 +3633,12 @@ main {
   left: -24px;
   width: 48px;
   height: 60px;
-  background: radial-gradient(ellipse at bottom, rgba(56, 189, 248, 0.75) 0%, rgba(14, 165, 233, 0.35) 50%, rgba(14, 165, 233, 0) 80%);
+  background: radial-gradient(
+    ellipse at bottom,
+    rgba(56, 189, 248, 0.75) 0%,
+    rgba(14, 165, 233, 0.35) 50%,
+    rgba(14, 165, 233, 0) 80%
+  );
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7));
 }
@@ -2749,8 +3659,14 @@ main {
 }
 
 @keyframes blueDotPulse {
-  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.4);
+    opacity: 0;
+  }
 }
 
 /* 3D Billboard Core Wrapper */
@@ -2770,7 +3686,9 @@ main {
   border-radius: 50%;
   background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
   border: 3px solid #ffffff;
-  box-shadow: 0 0 18px rgba(14, 165, 233, 0.9), 0 4px 12px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 0 18px rgba(14, 165, 233, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2839,7 +3757,9 @@ main {
   justify-content: center;
   color: #ffffff;
   font-size: 14px;
-  box-shadow: 0 0 16px rgba(14, 165, 233, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 16px rgba(14, 165, 233, 0.8),
+    0 4px 10px rgba(0, 0, 0, 0.5);
   position: relative;
   transform-origin: center center;
 }
@@ -2854,8 +3774,12 @@ main {
 }
 
 @keyframes apPulseRotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .ap-marker-tag {
@@ -2875,7 +3799,9 @@ main {
 
 .ap-marker.active-detect .ap-marker-core {
   background: linear-gradient(135deg, #10b981, #047857);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.9), 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 20px rgba(16, 185, 129, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.5);
   border-color: #a7f3d0;
 }
 
@@ -2886,7 +3812,10 @@ main {
 
 /* AP Calibration Radius Circles SVG */
 .ap-radius-svg-circle {
-  transition: r 0.8s cubic-bezier(0.25, 1, 0.5, 1), stroke 0.4s ease, fill 0.4s ease;
+  transition:
+    r 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+    stroke 0.4s ease,
+    fill 0.4s ease;
   transform-origin: center center;
 }
 
@@ -2896,8 +3825,12 @@ main {
 }
 
 @keyframes rayDashTravel {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: -16; }
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -16;
+  }
 }
 
 /* Floating Admin Calibration HUD */
@@ -2909,11 +3842,14 @@ main {
   max-width: calc(100% - 24px);
   max-height: calc(100% - 24px);
   background: rgba(10, 15, 30, 0.94);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 20px;
   color: #f8fafc;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 20px rgba(14, 165, 233, 0.2);
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.65),
+    0 0 20px rgba(14, 165, 233, 0.2);
   z-index: 45;
   overflow: hidden;
   display: flex;
@@ -2967,7 +3903,9 @@ main {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 20px;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), 0 0 25px rgba(6, 182, 212, 0.2);
+  box-shadow:
+    0 20px 45px -10px rgba(0, 0, 0, 0.75),
+    0 0 25px rgba(6, 182, 212, 0.2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -3053,12 +3991,64 @@ main {
 }
 
 @keyframes geofenceProgress {
-  from { width: 100%; }
-  to { width: 0%; }
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 @keyframes geofenceRadarPulse {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  100% { transform: scale(1.35); opacity: 0; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
 }
 
+/* ========================================================
+   Performance Optimizations: GPU Acceleration & Compositing
+   ======================================================== */
+#mapCanvasWrapper,
+.earth-layer-img,
+#routeSvgLayer {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.voice-nav-fab,
+.mobile-nav-bar,
+.toast-msg {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ========================================================
+   Accessibility: prefers-reduced-motion (WCAG 2.1 AA)
+   ======================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .radar-pulse-ring,
+  .voice-fab-pulse,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-spin,
+  .guest-dot-halo,
+  .beacon-ripple,
+  .shimmer-effect {
+    animation: none !important;
+  }
+}

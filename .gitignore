@@ -6,7 +6,8 @@ scratch/
 test_*.js
 .DS_Store
 Thumbs.db
-
 .vercel
 Photos/
-
+.env
+.env.*
+!.env.example

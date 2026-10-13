@@ -1,0 +1,67 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": [
+            "ES2022",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "allowJs": true,
+        "checkJs": false,
+        "outDir": "./dist",
+        "rootDir": ".",
+        "strict": false,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "useDefineForClassFields": true,
+        "baseUrl": ".",
+        "paths": {
+            "@core/*": [
+                "src/core/*"
+            ],
+            "@data/*": [
+                "src/data/*"
+            ],
+            "@services/*": [
+                "src/services/*"
+            ],
+            "@features/*": [
+                "src/features/*"
+            ],
+            "@shared/*": [
+                "shared/*"
+            ],
+            "@config/*": [
+                "config/*"
+            ],
+            "@tests/*": [
+                "tests/*"
+            ]
+        }
+    },
+    "include": [
+        "js/**/*.js",
+        "src/**/*.js",
+        "shared/**/*.js",
+        "server/**/*.js",
+        "config/**/*.js",
+        "tests/**/*.js",
+        "scripts/**/*.js"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "assets",
+        "locales"
+    ]
+}

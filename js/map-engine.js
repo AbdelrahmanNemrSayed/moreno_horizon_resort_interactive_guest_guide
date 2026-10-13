@@ -19,11 +19,11 @@ const MapEngine = {
   maxScale: 4.5,
   panX: 0,
   panY: 0,
-  pitch: 0,        // 2D top-down mode by default
-  bearing: 0,       // Compass rotation in degrees (0 = North up)
-  is3D: false,      // 2D mode enabled by default for classic flat map
-  currentLayer: 'illustrated', // 'illustrated' | 'satellite' | 'night'
-  currentCategoryFilter: 'all',
+  pitch: 0, // 2D top-down mode by default
+  bearing: 0, // Compass rotation in degrees (0 = North up)
+  is3D: false, // 2D mode enabled by default for classic flat map
+  currentLayer: "illustrated", // 'illustrated' | 'satellite' | 'night'
+  currentCategoryFilter: "all",
 
   // Interaction State
   isPanning: false,
@@ -62,14 +62,23 @@ const MapEngine = {
     // Check URL query parameters for Admin / AP Debug mode (?debug=true, ?admin=true, ?calibrate=true)
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('debug') === 'true' || urlParams.get('debug') === '1' || urlParams.get('admin') === 'true' || urlParams.get('calibrate') === 'true') {
+      if (
+        urlParams.get("debug") === "true" ||
+        urlParams.get("debug") === "1" ||
+        urlParams.get("admin") === "true" ||
+        urlParams.get("calibrate") === "true"
+      ) {
         setTimeout(() => this.toggleApCalibrationOverlay(true), 400);
       }
     } catch (e) {}
 
     // Keyboard shortcut: Ctrl + Shift + D toggles AP calibration overlay
-    window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+    window.addEventListener("keydown", (e) => {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        (e.key === "D" || e.key === "d")
+      ) {
         e.preventDefault();
         this.toggleApCalibrationOverlay();
       }
@@ -84,26 +93,26 @@ const MapEngine = {
       this.fitToViewport();
     }, 250);
 
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       this.fitToViewport();
     });
 
-    document.addEventListener('fullscreenchange', () => {
+    document.addEventListener("fullscreenchange", () => {
       this.syncExternalNavParent();
       setTimeout(() => this.fitToViewport(), 100);
     });
   },
 
   fitToViewport() {
-    const viewport = document.getElementById('mapViewport');
-    const canvas = document.getElementById('mapCanvasWrapper');
+    const viewport = document.getElementById("mapViewport");
+    const canvas = document.getElementById("mapCanvasWrapper");
     if (!viewport || !canvas) return;
 
     // Enforce LTR coordinate system for 100% exact canvas centering
-    viewport.style.direction = 'ltr';
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0px';
-    canvas.style.left = '0px';
+    viewport.style.direction = "ltr";
+    canvas.style.position = "absolute";
+    canvas.style.top = "0px";
+    canvas.style.left = "0px";
 
     const vw = viewport.clientWidth;
     const vh = viewport.clientHeight;
@@ -115,7 +124,7 @@ const MapEngine = {
 
     this.scale = fitScale * (this.is3D ? 0.98 : 0.95);
     // Never allow zooming out so much that huge empty spaces appear
-    this.minScale = Math.min(this.scale, fitScale * 0.90);
+    this.minScale = Math.min(this.scale, fitScale * 0.9);
     this.maxScale = Math.max(fitScale * 5.0, 3.8);
 
     // Exact center coordinates in viewport
@@ -127,7 +136,7 @@ const MapEngine = {
   },
 
   clampPan() {
-    const viewport = document.getElementById('mapViewport');
+    const viewport = document.getElementById("mapViewport");
     if (!viewport) return;
 
     const vw = viewport.clientWidth;
@@ -166,20 +175,22 @@ const MapEngine = {
   },
 
   applyTransform(smooth = false) {
-    const canvas = document.getElementById('mapCanvasWrapper');
-    const viewport = document.getElementById('mapViewport');
+    const canvas = document.getElementById("mapCanvasWrapper");
+    const viewport = document.getElementById("mapViewport");
     if (!canvas) return;
 
     if (viewport) {
       if (this.is3D) {
-        viewport.classList.add('mode-3d');
+        viewport.classList.add("mode-3d");
       } else {
-        viewport.classList.remove('mode-3d');
+        viewport.classList.remove("mode-3d");
       }
     }
 
-    canvas.style.transition = smooth ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'none';
-    canvas.style.transformOrigin = '50% 50%';
+    canvas.style.transition = smooth
+      ? "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)"
+      : "none";
+    canvas.style.transformOrigin = "50% 50%";
 
     const currentPitch = this.is3D ? this.pitch : 0;
     canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale}) rotateX(${currentPitch}deg) rotateZ(${this.bearing}deg)`;
@@ -196,77 +207,80 @@ const MapEngine = {
   },
 
   updatePinBillboards() {
-    const pins = document.querySelectorAll('.map-pin');
+    const pins = document.querySelectorAll(".map-pin");
     const currentPitch = this.is3D ? this.pitch : 0;
 
-    pins.forEach(pin => {
-      const isTourActive = pin.classList.contains('active-tour-pin');
-      const scaleStr = isTourActive ? 'scale(1.4)' : '';
+    pins.forEach((pin) => {
+      const isTourActive = pin.classList.contains("active-tour-pin");
+      const scaleStr = isTourActive ? "scale(1.4)" : "";
       if (this.is3D) {
-        pin.classList.add('pin-3d');
+        pin.classList.add("pin-3d");
         // Counter-rotate pin so it stands upright and faces viewer
         pin.style.transform = `translate(-50%, -100%) rotateZ(${-this.bearing}deg) rotateX(${-currentPitch}deg) ${scaleStr}`;
       } else {
-        pin.classList.remove('pin-3d');
+        pin.classList.remove("pin-3d");
         pin.style.transform = `translate(-50%, -50%) rotateZ(${-this.bearing}deg) ${scaleStr}`;
       }
     });
 
     // Also counter-rotate location marker if present
-    const locMarker = document.getElementById('myLocationMarker');
+    const locMarker = document.getElementById("myLocationMarker");
     if (locMarker) {
       locMarker.style.transform = `translate(-50%, -50%) rotateZ(${-this.bearing}deg) rotateX(${-currentPitch}deg)`;
     }
 
-    const walker = document.getElementById('walkerBeacon');
+    const walker = document.getElementById("walkerBeacon");
     if (walker) {
       walker.style.transform = `rotateZ(${-this.bearing}deg) rotateX(${-currentPitch}deg)`;
     }
 
-    const simAvatar = document.getElementById('simWalkerAvatarWrapper');
+    const simAvatar = document.getElementById("simWalkerAvatarWrapper");
     if (simAvatar) {
-      simAvatar.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+      simAvatar.style.transform =
+        this.is3D && currentPitch > 0 ? `rotateX(${-currentPitch}deg)` : "none";
     }
 
-    const blueDotWrapper = document.getElementById('blueDotCoreWrapper');
+    const blueDotWrapper = document.getElementById("blueDotCoreWrapper");
     if (blueDotWrapper) {
-      blueDotWrapper.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+      blueDotWrapper.style.transform =
+        this.is3D && currentPitch > 0 ? `rotateX(${-currentPitch}deg)` : "none";
     }
 
-    document.querySelectorAll('.ap-marker-core').forEach(apCore => {
-      apCore.style.transform = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+    document.querySelectorAll(".ap-marker-core").forEach((apCore) => {
+      apCore.style.transform =
+        this.is3D && currentPitch > 0 ? `rotateX(${-currentPitch}deg)` : "none";
     });
   },
 
   updateCompassUI() {
-    const needle = document.getElementById('earthCompassNeedle');
+    const needle = document.getElementById("earthCompassNeedle");
     if (needle) {
       needle.style.transform = `rotate(${-this.bearing}deg)`;
     }
   },
 
   updateEarthHud() {
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
-    const hudPitch = document.getElementById('hudPitch');
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
+    const hudPitch = document.getElementById("hudPitch");
     if (hudPitch) {
       hudPitch.innerText = this.is3D ? t.map_view_3d : t.map_view_2d;
     }
 
-    const hudAlt = document.getElementById('hudAlt');
+    const hudAlt = document.getElementById("hudAlt");
     if (hudAlt) {
       hudAlt.innerText = `${t.map_zoom_level} ${this.scale.toFixed(1)}x`;
     }
 
-    const glow = document.getElementById('earthHorizonGlow');
+    const glow = document.getElementById("earthHorizonGlow");
     if (glow) {
-      glow.style.opacity = (this.is3D && this.pitch > 20) ? '1' : '0';
+      glow.style.opacity = this.is3D && this.pitch > 20 ? "1" : "0";
     }
   },
 
   // 3D Tilt Controls
   toggle3D() {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(700);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(700);
     this.stopOrbitTour();
     this.is3D = !this.is3D;
 
@@ -277,13 +291,17 @@ const MapEngine = {
     }
 
     this.applyTransform(true);
-    if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast(this.is3D ? '🌍 تم تفعيل منظور Google Earth 3D المجسم' : '🗺️ تم الانتقال للمنظور الأفقي المباشر (2D)');
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(
+        this.is3D
+          ? "🌍 تم تفعيل منظور Google Earth 3D المجسم"
+          : "🗺️ تم الانتقال للمنظور الأفقي المباشر (2D)",
+      );
     }
   },
 
   adjustPitch(delta) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(650);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(650);
     this.stopOrbitTour();
     if (!this.is3D) {
       this.is3D = true;
@@ -301,60 +319,67 @@ const MapEngine = {
 
   // Keep both 3D toggle buttons (map toolbar + Earth widget) in sync
   set3DButtonsActive(active) {
-    ['btnToggle3D', 'btnToggle3DEarth'].forEach(id => {
+    ["btnToggle3D", "btnToggle3DEarth"].forEach((id) => {
       const el = document.getElementById(id);
-      if (el) el.classList.toggle('active-mode', !!active);
+      if (el) el.classList.toggle("active-mode", !!active);
     });
   },
 
   // 360° Compass Rotation Controls
   rotateBearing(delta) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(600);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(600);
     this.stopOrbitTour();
     this.bearing = (this.bearing + delta + 360) % 360;
     this.applyTransform(true);
   },
 
   resetBearing() {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(800);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(800);
     this.stopOrbitTour();
     this.bearing = 0;
     this.applyTransform(true);
-    if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast('🧭 تم توجيه الخريطة نحو الشمال الحقيقي');
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast("🧭 تم توجيه الخريطة نحو الشمال الحقيقي");
     }
   },
 
   // Layer Switcher: Satellite / Night / Illustrated
   setLayer(layerName, btn) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(600);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(600);
     this.currentLayer = layerName;
 
     // Update layer images visibility with crossfade
-    const satImg = document.getElementById('resortMapSatellite');
-    const nightWrapper = document.getElementById('resortMapNightWrapper') || document.getElementById('resortMapNight');
-    const illusImg = document.getElementById('resortMapIllustrated');
+    const satImg = document.getElementById("resortMapSatellite");
+    const nightWrapper =
+      document.getElementById("resortMapNightWrapper") ||
+      document.getElementById("resortMapNight");
+    const illusImg = document.getElementById("resortMapIllustrated");
 
     if (satImg) {
-      satImg.className = `earth-layer-img map-layer-satellite ${layerName === 'satellite' ? 'active' : 'inactive'}`;
+      satImg.className = `earth-layer-img map-layer-satellite ${layerName === "satellite" ? "active" : "inactive"}`;
     }
     if (nightWrapper) {
-      nightWrapper.className = `earth-layer-img map-layer-night-wrapper ${layerName === 'night' ? 'active' : 'inactive'}`;
+      nightWrapper.className = `earth-layer-img map-layer-night-wrapper ${layerName === "night" ? "active" : "inactive"}`;
     }
     if (illusImg) {
-      illusImg.className = `earth-layer-img ${layerName === 'illustrated' ? 'active' : 'inactive'}`;
+      illusImg.className = `earth-layer-img ${layerName === "illustrated" ? "active" : "inactive"}`;
     }
 
     // Update layer switcher button states
-    document.querySelectorAll('.map-layer-pill').forEach(b => b.classList.remove('active'));
+    document
+      .querySelectorAll(".map-layer-pill")
+      .forEach((b) => b.classList.remove("active"));
     if (btn) {
-      btn.classList.add('active');
+      btn.classList.add("active");
     } else {
       const activeBtn = document.getElementById(
-        layerName === 'satellite' ? 'layerBtnSatellite' :
-        layerName === 'night' ? 'layerBtnNight' : 'layerBtnIllustrated'
+        layerName === "satellite"
+          ? "layerBtnSatellite"
+          : layerName === "night"
+            ? "layerBtnNight"
+            : "layerBtnIllustrated",
       );
-      if (activeBtn) activeBtn.classList.add('active');
+      if (activeBtn) activeBtn.classList.add("active");
     }
   },
 
@@ -368,17 +393,17 @@ const MapEngine = {
   },
 
   startOrbitTour() {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(900);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(900);
     this.isOrbiting = true;
     this.is3D = true;
     this.pitch = 56;
 
-    const btn = document.getElementById('orbitTourBtn');
-    if (btn) btn.classList.add('earth-orbit-running');
+    const btn = document.getElementById("orbitTourBtn");
+    if (btn) btn.classList.add("earth-orbit-running");
     this.set3DButtonsActive(true);
 
-    if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast('🚁 بدأت جولة الطيران الجوي الفضائي 360° حول المنتجع');
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast("🚁 بدأت جولة الطيران الجوي الفضائي 360° حول المنتجع");
     }
 
     const animateOrbit = () => {
@@ -399,53 +424,57 @@ const MapEngine = {
       cancelAnimationFrame(this.orbitAnimId);
       this.orbitAnimId = null;
     }
-    const btn = document.getElementById('orbitTourBtn');
-    if (btn) btn.classList.remove('earth-orbit-running');
+    const btn = document.getElementById("orbitTourBtn");
+    if (btn) btn.classList.remove("earth-orbit-running");
   },
 
   getPoiIcon(poi) {
     if (poi.icon) return poi.icon;
-    if (poi.isBuilding) return '🏨';
+    if (poi.isBuilding) return "🏨";
     const id = String(poi.id);
-    if (id === '1') return '🏖️';
-    if (id === '2') return '🤿';
-    if (id === '3') return '🎪';
-    if (id === '4') return '🎠';
-    if (id === '5' || id === '7' || id === '9') return '🍹';
-    if (id === '6' || id === '8' || id === '12') return '🍽️';
-    if (id === '10') return '🎾';
-    if (id === '11') return '🏊‍♂️';
-    if (id === '13' || id === '17') return '🅿️';
-    if (id === '14' || id === '18') return '🚪';
-    if (id === '15') return '🏥';
-    if (id === '16') return '🕌';
-    if (id === 'MLS') return '🛍️';
-    return '📍';
+    if (id === "1") return "🏖️";
+    if (id === "2") return "🤿";
+    if (id === "3") return "🎪";
+    if (id === "4") return "🎠";
+    if (id === "5" || id === "7" || id === "9") return "🍹";
+    if (id === "6" || id === "8" || id === "12") return "🍽️";
+    if (id === "10") return "🎾";
+    if (id === "11") return "🏊‍♂️";
+    if (id === "13" || id === "17") return "🅿️";
+    if (id === "14" || id === "18") return "🚪";
+    if (id === "15") return "🏥";
+    if (id === "16") return "🕌";
+    if (id === "MLS") return "🛍️";
+    return "📍";
   },
 
   renderPins() {
-    const overlay = document.getElementById('pinsOverlay');
+    const overlay = document.getElementById("pinsOverlay");
     if (!overlay) return;
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
 
-    overlay.innerHTML = resortPois.map(poi => {
-      const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, hours: poi.hours };
-      const icon = this.getPoiIcon(poi);
-      const isWing = poi.isBuilding;
-      return `
+    overlay.innerHTML = resortPois
+      .map((poi) => {
+        const loc =
+          typeof getLocalizedPoi === "function"
+            ? getLocalizedPoi(poi, lang)
+            : { name: poi.nameAr, hours: poi.hours };
+        const icon = this.getPoiIcon(poi);
+        const isWing = poi.isBuilding;
+        return `
       <div 
         id="pin-${poi.id}" 
         onclick="MapEngine.selectPoi('${poi.id}')"
         style="left: ${poi.coords.x}%; top: ${poi.coords.y}%;" 
-        class="map-pin ${this.is3D ? 'pin-3d' : ''} absolute flex items-center justify-center rounded-full text-white font-black shadow-xl cursor-pointer tap-effect border-2 border-white dark:border-slate-900 ${poi.badgeColor} ${isWing ? 'w-9 h-9 text-xs ring-2 ring-amber-400' : 'w-7 h-7 text-[10px]'}"
+        class="map-pin ${this.is3D ? "pin-3d" : ""} ${isWing ? "is-wing ring-2 ring-amber-400" : ""} absolute flex items-center justify-center rounded-full text-white font-black shadow-xl cursor-pointer tap-effect border-2 border-white dark:border-slate-900 ${poi.badgeColor} ${isWing ? "min-w-[40px] h-10 px-2 text-xs" : "min-w-[34px] h-[34px] px-1.5 text-[11px]"}"
         data-category="${poi.category}"
         title="${loc.name}"
       >
-        <span class="relative z-10 flex items-center justify-center gap-0.5 pointer-events-none">
-          <span class="text-xs leading-none">${icon}</span>
-          <span class="font-black leading-none">${poi.num}</span>
+        <span class="relative z-10 flex items-center justify-center gap-1 pointer-events-none px-0.5 whitespace-nowrap leading-none">
+          <span class="text-[12px] leading-none shrink-0">${icon}</span>
+          <span class="font-black leading-none tracking-tight">${poi.num}</span>
         </span>
-        <span class="radar-pulse ${poi.badgeColor}"></span>
 
         <!-- Instant Hover Tooltip Preview -->
         <div class="pin-tooltip absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white px-3 py-1.5 rounded-xl shadow-2xl border border-slate-700 whitespace-nowrap text-center z-40 pointer-events-none">
@@ -453,32 +482,35 @@ const MapEngine = {
             <span>${icon}</span>
             <span class="text-xs font-black">${loc.name}</span>
           </div>
-          <span class="block text-[10px] text-amber-300 font-semibold mt-0.5">${loc.hours || poi.hours || ''}</span>
+          <span class="block text-[10px] text-amber-300 font-semibold mt-0.5">${loc.hours || poi.hours || ""}</span>
         </div>
       </div>
     `;
-    }).join('');
+      })
+      .join("");
 
     this.updatePinBillboards();
   },
 
   getNavContainer() {
-    const vp = document.getElementById('mapViewport');
-    const isFullscreen = (vp && vp.classList.contains('fullscreen-active')) || !!document.fullscreenElement;
+    const vp = document.getElementById("mapViewport");
+    const isFullscreen =
+      (vp && vp.classList.contains("fullscreen-active")) ||
+      !!document.fullscreenElement;
     if (isFullscreen) {
       return vp;
     }
-    return document.getElementById('mapExternalNavContainer') || vp;
+    return document.getElementById("mapExternalNavContainer") || vp;
   },
 
   syncExternalNavParent() {
     const targetParent = this.getNavContainer();
     if (!targetParent) return;
-    const hud = document.getElementById('turnNavHud');
+    const hud = document.getElementById("turnNavHud");
     if (hud && hud.parentElement !== targetParent) {
       targetParent.appendChild(hud);
     }
-    const pop = document.getElementById('activeMapPopover');
+    const pop = document.getElementById("activeMapPopover");
     if (pop && pop.parentElement !== targetParent) {
       targetParent.appendChild(pop);
     }
@@ -491,8 +523,18 @@ const MapEngine = {
     const targetParent = this.getNavContainer();
     if (!targetParent) return;
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, hours: poi.hours, tag: poi.tagAr, description: poi.descriptionAr, category: poi.categoryNameAr };
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const loc =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(poi, lang)
+        : {
+            name: poi.nameAr,
+            hours: poi.hours,
+            tag: poi.tagAr,
+            description: poi.descriptionAr,
+            category: poi.categoryNameAr,
+          };
     const icon = this.getPoiIcon(poi);
 
     // Calculate walking distance from live Blue Dot position, or fallback to saved room / lobby M
@@ -501,32 +543,65 @@ const MapEngine = {
     let originPoi = null;
 
     if (this.lastGuestPosition) {
-      originCoords = { x: this.lastGuestPosition.pctX, y: this.lastGuestPosition.pctY };
+      originCoords = {
+        x: this.lastGuestPosition.pctX,
+        y: this.lastGuestPosition.pctY,
+      };
       isFromLiveLocation = true;
     } else {
-      const savedRoom = localStorage.getItem('moreno_guest_room');
-      originPoi = resortPois.find(p => p.id === 'M');
+      const savedRoom = localStorage.getItem("moreno_guest_room");
+      originPoi = resortPois.find((p) => p.id === "M");
       if (savedRoom) {
         const roomNum = parseInt(savedRoom);
-        const b = resortPois.filter(p => p.isBuilding).find(b => b.rooms.some(r => r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max)));
+        const b = resortPois
+          .filter((p) => p.isBuilding)
+          .find((b) =>
+            b.rooms.some((r) =>
+              r.exact
+                ? r.exact.includes(roomNum)
+                : roomNum >= r.min && roomNum <= r.max,
+            ),
+          );
         if (b) originPoi = b;
       }
       originCoords = originPoi ? originPoi.coords : { x: 31.55, y: 68.36 };
     }
 
-    const distPx = Math.hypot((poi.coords.x - originCoords.x) * (this.CANVAS_WIDTH / 100), (poi.coords.y - originCoords.y) * (this.CANVAS_HEIGHT / 100));
+    const distPx = Math.hypot(
+      (poi.coords.x - originCoords.x) * (this.CANVAS_WIDTH / 100),
+      (poi.coords.y - originCoords.y) * (this.CANVAS_HEIGHT / 100),
+    );
     const distMeters = Math.round(distPx * 0.42);
     const walkMin = Math.max(1, Math.round(distMeters / 65));
 
-    const popover = document.createElement('div');
-    popover.id = 'activeMapPopover';
-    popover.className = 'map-bottom-sheet-card';
+    const popover = document.createElement("div");
+    popover.id = "activeMapPopover";
+    popover.className = "map-bottom-sheet-card";
 
-    const imgUrl = poi.image || 'assets/images/hero_resort.jpg';
+    const imgUrl = poi.image || "assets/images/hero_resort.jpg";
     const walkBtnText = isFromLiveLocation
-      ? ((lang === 'ar') ? 'الاتجاهات من موقعي 🧭' : (lang === 'ru') ? 'Вести от меня 🧭' : (lang === 'de') ? 'Route von hier 🧭' : 'Navigate Here 🧭')
-      : ((lang === 'ar') ? 'تحديد المسار والملاحة 🚶‍♂️' : (lang === 'ru') ? 'Живой маршрут 🚶‍♂️' : (lang === 'de') ? 'Live Route 🚶‍♂️' : 'Get Directions 🚶‍♂️');
-    const detailBtnText = (lang === 'ar') ? 'التفاصيل ℹ️' : (lang === 'ru') ? 'Инфо ℹ️' : (lang === 'de') ? 'Info ℹ️' : 'Details ℹ️';
+      ? lang === "ar"
+        ? "الاتجاهات من موقعي 🧭"
+        : lang === "ru"
+          ? "Вести от меня 🧭"
+          : lang === "de"
+            ? "Route von hier 🧭"
+            : "Navigate Here 🧭"
+      : lang === "ar"
+        ? "تحديد المسار والملاحة 🚶‍♂️"
+        : lang === "ru"
+          ? "Живой маршрут 🚶‍♂️"
+          : lang === "de"
+            ? "Live Route 🚶‍♂️"
+            : "Get Directions 🚶‍♂️";
+    const detailBtnText =
+      lang === "ar"
+        ? "التفاصيل ℹ️"
+        : lang === "ru"
+          ? "Инфо ℹ️"
+          : lang === "de"
+            ? "Info ℹ️"
+            : "Details ℹ️";
 
     popover.innerHTML = `
       <div class="flex items-center gap-3 w-full">
@@ -545,23 +620,23 @@ const MapEngine = {
             <button onclick="event.stopPropagation(); MapEngine.closePopover();" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/25 text-slate-300 hover:text-white flex items-center justify-center text-xs shrink-0 transition" title="إغلاق">✕</button>
           </div>
           <div class="flex items-center gap-2 text-[10px] text-slate-300 mb-1">
-            <span class="text-amber-300 font-semibold truncate">${loc.category || poi.categoryNameAr || ''}</span>
+            <span class="text-amber-300 font-semibold truncate">${loc.category || poi.categoryNameAr || ""}</span>
             <span>•</span>
             <span class="text-emerald-400 font-bold shrink-0">🟢 مفتوح</span>
-            ${isFromLiveLocation ? '<span class="text-blue-400 font-bold text-[9px] bg-blue-500/20 px-1.5 py-0.2 rounded-full border border-blue-500/30">📍 من موقعك</span>' : ''}
+            ${isFromLiveLocation ? '<span class="text-blue-400 font-bold text-[9px] bg-blue-500/20 px-1.5 py-0.2 rounded-full border border-blue-500/30">📍 من موقعك</span>' : ""}
           </div>
           <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
             <span>⏱️ ${walkMin} دقيقة (${distMeters}م)</span>
             <span>•</span>
-            <span class="truncate">🕒 ${loc.hours || poi.hours || 'متاح للنزلاء'}</span>
+            <span class="truncate">🕒 ${loc.hours || poi.hours || "متاح للنزلاء"}</span>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-white/10">
-        <button onclick="event.stopPropagation(); MapEngine.navigateDirectTo('${poi.id}')" class="tap-effect py-2 px-3 rounded-xl ${isFromLiveLocation ? 'bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 text-slate-950 font-black' : 'bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black'} text-xs flex items-center justify-center gap-1.5 shadow-md hover:brightness-110">
-          <span>${isFromLiveLocation ? '🧭' : '🚶‍♂️'}</span>
+        <button onclick="event.stopPropagation(); MapEngine.navigateDirectTo('${poi.id}')" class="tap-effect py-2 px-3 rounded-xl ${isFromLiveLocation ? "bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 text-slate-950 font-black" : "bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black"} text-xs flex items-center justify-center gap-1.5 shadow-md hover:brightness-110">
+          <span>${isFromLiveLocation ? "🧭" : "🚶‍♂️"}</span>
           <span class="truncate">${walkBtnText}</span>
         </button>
         <button onclick="event.stopPropagation(); App.openPoiModal(resortPois.find(p => p.id === '${poi.id}'))" class="tap-effect py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-white/15">
@@ -575,53 +650,71 @@ const MapEngine = {
   },
 
   closePopover() {
-    const pop = document.getElementById('activeMapPopover');
+    const pop = document.getElementById("activeMapPopover");
     if (pop) pop.remove();
   },
 
   navigateDirectTo(destId) {
     this.closePopover();
-    const destPoi = resortPois.find(p => p.id === destId);
+    const destPoi = resortPois.find((p) => p.id === destId);
     if (!destPoi) return;
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const locDest = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(destPoi, lang) : { name: destPoi.nameAr };
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const locDest =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(destPoi, lang)
+        : { name: destPoi.nameAr };
 
     let originPoi;
     let originTitle;
 
     // 1. If guest has live Blue Dot location, route directly from live position
     if (this.lastGuestPosition) {
-      const liveName = (lang === 'ar') ? 'موقعي الحالي' : (lang === 'ru') ? 'Мое местоположение' : (lang === 'de' ? 'Mein Standort' : 'My Live Location');
+      const liveName =
+        lang === "ar"
+          ? "موقعي الحالي"
+          : lang === "ru"
+            ? "Мое местоположение"
+            : lang === "de"
+              ? "Mein Standort"
+              : "My Live Location";
       originPoi = {
-        id: 'LIVE_GUEST_LOCATION',
+        id: "LIVE_GUEST_LOCATION",
         nameAr: liveName,
-        nameEn: 'My Live Location',
-        nameRu: 'Мое местоположение',
-        nameDe: 'Mein Standort',
-        coords: { x: this.lastGuestPosition.pctX, y: this.lastGuestPosition.pctY },
-        isLiveLocation: true
+        nameEn: "My Live Location",
+        nameRu: "Мое местоположение",
+        nameDe: "Mein Standort",
+        coords: {
+          x: this.lastGuestPosition.pctX,
+          y: this.lastGuestPosition.pctY,
+        },
+        isLiveLocation: true,
       };
       originTitle = `📍 ${liveName}`;
       this.activeLiveNavDestination = destPoi;
       this.lastNavRecalcPos = {
         x: (this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH,
-        y: (this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT
+        y: (this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT,
       };
     } else {
       this.activeLiveNavDestination = null;
       this.lastNavRecalcPos = null;
 
       // Fallback: Check if guest has saved room or pinned origin
-      const savedRoom = localStorage.getItem('moreno_guest_room');
-      const pinnedOrigin = resortPois.find(p => p.id === this.guestLocationPoiId);
-      originPoi = pinnedOrigin || resortPois.find(p => p.id === 'M');
+      const savedRoom = localStorage.getItem("moreno_guest_room");
+      const pinnedOrigin = resortPois.find(
+        (p) => p.id === this.guestLocationPoiId,
+      );
+      originPoi = pinnedOrigin || resortPois.find((p) => p.id === "M");
       if (!pinnedOrigin && savedRoom) {
         const roomNum = parseInt(savedRoom);
-        const buildings = resortPois.filter(p => p.isBuilding);
+        const buildings = resortPois.filter((p) => p.isBuilding);
         for (const b of buildings) {
           for (const r of b.rooms) {
-            const isMatch = r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max);
+            const isMatch = r.exact
+              ? r.exact.includes(roomNum)
+              : roomNum >= r.min && roomNum <= r.max;
             if (isMatch) {
               originPoi = b;
               break;
@@ -629,256 +722,688 @@ const MapEngine = {
           }
         }
       }
-      const locOrigin = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(originPoi, lang) : { name: originPoi.nameAr };
+      const locOrigin =
+        typeof getLocalizedPoi === "function"
+          ? getLocalizedPoi(originPoi, lang)
+          : { name: originPoi.nameAr };
       originTitle = locOrigin.name;
     }
 
-    this.drawRoute(originPoi.coords, destPoi.coords, originTitle, locDest.name, false, true);
+    this.drawRoute(
+      originPoi.coords,
+      destPoi.coords,
+      originTitle,
+      locDest.name,
+      false,
+      true,
+    );
     this.startTurnByTurn(originPoi, destPoi, false, true);
   },
 
-  drawRoute(originCoords, destCoords, originTitle, destTitle, isAccessible = false, recenterCamera = true) {
+  drawRoute(
+    originCoords,
+    destCoords,
+    originTitle,
+    destTitle,
+    isAccessible = false,
+    recenterCamera = true,
+  ) {
     this.closePopover();
-    const svgLayer = document.getElementById('routeSvgLayer');
+    const svgLayer = document.getElementById("routeSvgLayer");
     if (!svgLayer) return;
 
     const routePoints = this.getWalkwayRoutePoints(originCoords, destCoords);
-    const [startPoint] = routePoints;
+    const startPoint = routePoints[0];
     const endPoint = routePoints[routePoints.length - 1];
-    const pathD = routePoints.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
 
     this.lastRoutePoints = routePoints;
     this.lastRouteOriginTitle = originTitle;
     this.lastRouteDestTitle = destTitle;
 
+    // ── Compute total distance ──
     let distPx = 0;
-    for (let index = 1; index < routePoints.length; index++) {
-      distPx += Math.hypot(routePoints[index].x - routePoints[index - 1].x, routePoints[index].y - routePoints[index - 1].y);
+    for (let i = 1; i < routePoints.length; i++) {
+      distPx += Math.hypot(
+        routePoints[i].x - routePoints[i - 1].x,
+        routePoints[i].y - routePoints[i - 1].y,
+      );
     }
     const distMeters = Math.round(distPx * 0.42);
     const walkMin = Math.max(1, Math.round(distMeters / 65));
 
-    const lineClass = isAccessible ? 'animated-route-line accessible-route-line' : 'animated-route-line';
-    const strokeUrl = isAccessible ? '#10b981' : 'url(#routeGlowGrad)';
+    // ── Build smooth Bezier path (Catmull-Rom spline) ──
+    const bezierD = this.buildBezierPath(routePoints, 0.22);
+    // Fallback linear path for shadow (works on all browsers)
+    const linearD = routePoints
+      .map((pt, i) => `${i === 0 ? "M" : "L"} ${pt.x} ${pt.y}`)
+      .join(" ");
+
+    const lineClass = isAccessible
+      ? "animated-route-line accessible-route-line"
+      : "animated-route-line";
+    const strokeUrl = isAccessible ? "#10b981" : "url(#routeGlowGrad)";
+
+    // ── Dynamic particle duration based on route length ──
+    // Short route (<150px) → fast 1.8s, long route (>600px) → slow 4.2s
+    const particleDur = Math.max(1.8, Math.min(4.2, distPx / 155)).toFixed(2);
+    const particle2Dur = Math.max(
+      1.8,
+      Math.min(4.2, distPx / 155 + 0.05),
+    ).toFixed(2);
+
+    // ── Compute initial heading arrow for start marker ──
+    let startAngle = 0;
+    if (routePoints.length >= 2) {
+      startAngle =
+        Math.atan2(
+          routePoints[1].y - routePoints[0].y,
+          routePoints[1].x - routePoints[0].x,
+        ) *
+        (180 / Math.PI);
+    }
+    const arrowX = startPoint.x + Math.cos((startAngle * Math.PI) / 180) * 14;
+    const arrowY = startPoint.y + Math.sin((startAngle * Math.PI) / 180) * 14;
 
     svgLayer.innerHTML = `
       <defs>
+        <!-- Gradient flows from cyan (origin) to gold (destination) -->
         <linearGradient id="routeGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.95" />
-          <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
-          <stop offset="100%" stop-color="#fbbf24" stop-opacity="1" />
+          <stop offset="0%"   stop-color="#00f0ff" stop-opacity="0.98" />
+          <stop offset="40%"  stop-color="#38bdf8" stop-opacity="1"    />
+          <stop offset="100%" stop-color="#fbbf24" stop-opacity="1"    />
         </linearGradient>
-        <filter id="routeGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+
+        <!-- Accessible route: emerald green gradient -->
+        <linearGradient id="accessibleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#10b981" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#34d399" stop-opacity="1"   />
+        </linearGradient>
+
+        <!-- Glow filter: blurred halo behind the route line -->
+        <filter id="routeGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
+
+        <!-- Strong glow for destination beacon -->
+        <filter id="destGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
       </defs>
 
-      <!-- Background shadow path for 3D depth -->
-      <path d="${pathD}" fill="none" stroke="#000000" stroke-width="9" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round" />
+      <!-- 1. Deep shadow for visual depth (uses linear fallback for reliability) -->
+      <path d="${linearD}" fill="none"
+            stroke="#000000" stroke-width="10"
+            stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
 
-      <!-- Glowing animated route line with traveling dash animation -->
-      <path id="liveRouteSvgPath" d="${pathD}" fill="none" stroke="${strokeUrl}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" class="${lineClass}" filter="url(#routeGlow)" />
+      <!-- 2. Wide soft glow halo beneath the line -->
+      <path d="${bezierD}" fill="none"
+            stroke="${isAccessible ? "url(#accessibleGrad)" : "#00d4ff"}"
+            stroke-width="11" stroke-opacity="0.22"
+            stroke-linecap="round" stroke-linejoin="round"/>
 
-      <!-- Traveling Leader Particle (Golden Orb with Light Trail) -->
-      <circle r="7.5" fill="#fbbf24" stroke="#ffffff" stroke-width="1.5" class="route-particle-glow">
-        <animateMotion dur="2.8s" repeatCount="indefinite" path="${pathD}" />
+      <!-- 3. Main Bezier route line — smooth spline, no harsh corners -->
+      <path id="liveRouteSvgPath" d="${bezierD}" fill="none"
+            stroke="${strokeUrl}" stroke-width="5"
+            stroke-linecap="round" stroke-linejoin="round"
+            class="${lineClass}" filter="url(#routeGlow)"/>
+
+      <!-- 4. Leader particle: golden orb traveling the Bezier path -->
+      <circle r="8" fill="#fbbf24" stroke="#ffffff" stroke-width="1.8" class="route-particle-glow">
+        <animateMotion dur="${particleDur}s" repeatCount="indefinite" path="${bezierD}"
+                       calcMode="paced"/>
       </circle>
 
-      <!-- Traveling Follower Particle 1 (Cyan Orb) -->
-      <circle r="5" fill="#00f0ff" stroke="#ffffff" stroke-width="1" class="route-particle-cyan" opacity="0.95">
-        <animateMotion dur="2.8s" begin="0.35s" repeatCount="indefinite" path="${pathD}" />
+      <!-- 5. Follower particle 1: cyan orb with slight delay -->
+      <circle r="5.5" fill="#00f0ff" stroke="#ffffff" stroke-width="1" class="route-particle-cyan" opacity="0.92">
+        <animateMotion dur="${particleDur}s" begin="${(+particleDur * 0.28).toFixed(2)}s"
+                       repeatCount="indefinite" path="${bezierD}" calcMode="paced"/>
       </circle>
 
-      <!-- Traveling Follower Particle 2 (Light Sparkle) -->
-      <circle r="3.5" fill="#ffffff" opacity="0.85">
-        <animateMotion dur="2.8s" begin="0.7s" repeatCount="indefinite" path="${pathD}" />
+      <!-- 6. Follower particle 2: white sparkle -->
+      <circle r="3.5" fill="#ffffff" opacity="0.80">
+        <animateMotion dur="${particle2Dur}s" begin="${(+particleDur * 0.56).toFixed(2)}s"
+                       repeatCount="indefinite" path="${bezierD}" calcMode="paced"/>
       </circle>
 
-      <!-- Origin Marker Pin Pulse -->
+      <!-- 7. Origin pulse ring + directional heading arrow -->
       <g transform="translate(${startPoint.x}, ${startPoint.y})">
-        <circle r="14" fill="#00f0ff" fill-opacity="0.35">
-          <animate attributeName="r" values="7;18;7" dur="2s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.9;0.1;0.9" dur="2s" repeatCount="indefinite" />
+        <!-- Expanding pulse -->
+        <circle r="14" fill="#00f0ff" fill-opacity="0.28">
+          <animate attributeName="r"       values="6;20;6"   dur="2.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.9;0;0.9" dur="2.2s" repeatCount="indefinite"/>
         </circle>
-        <circle r="6.5" fill="#00f0ff" stroke="#ffffff" stroke-width="2.5" />
+        <!-- Solid inner dot -->
+        <circle r="6" fill="#00f0ff" stroke="#ffffff" stroke-width="2.5"/>
+        <!-- Direction heading arrow -->
+        <line x1="0" y1="0" x2="${(arrowX - startPoint.x).toFixed(1)}" y2="${(arrowY - startPoint.y).toFixed(1)}"
+              stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+        <circle cx="${(arrowX - startPoint.x).toFixed(1)}" cy="${(arrowY - startPoint.y).toFixed(1)}"
+                r="2.5" fill="#ffffff" opacity="0.85"/>
       </g>
 
-      <!-- Destination Target Beacon -->
-      <g transform="translate(${endPoint.x}, ${endPoint.y})">
-        <circle r="18" fill="#fbbf24" fill-opacity="0.4">
-          <animate attributeName="r" values="9;24;9" dur="1.6s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1.6s" repeatCount="indefinite" />
+      <!-- 8. Destination beacon: gold pulsing rings with star icon -->
+      <g transform="translate(${endPoint.x}, ${endPoint.y})" filter="url(#destGlow)">
+        <!-- Outer fast ring -->
+        <circle r="22" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-opacity="0.5">
+          <animate attributeName="r"             values="12;28;12"  dur="1.8s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-opacity" values="0.7;0;0.7" dur="1.8s" repeatCount="indefinite"/>
         </circle>
-        <circle r="7.5" fill="#fbbf24" stroke="#ffffff" stroke-width="2.5" />
+        <!-- Inner glow fill -->
+        <circle r="16" fill="#fbbf24" fill-opacity="0.25">
+          <animate attributeName="r"            values="8;20;8"    dur="1.8s" repeatCount="indefinite"/>
+          <animate attributeName="fill-opacity" values="0.5;0;0.5" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Solid destination dot -->
+        <circle r="8" fill="#fbbf24" stroke="#ffffff" stroke-width="2.5"/>
+        <!-- ★ star icon in center -->
+        <text x="0" y="3.5" text-anchor="middle"
+              font-size="8" fill="#1e1b00" font-weight="900" font-family="sans-serif">★</text>
       </g>
     `;
 
-    // Center and zoom map view to focus the full route (only on initial navigation start)
+    // Center map on route midpoint on first draw
     if (recenterCamera) {
       const midPctX = (originCoords.x + destCoords.x) / 2;
       const midPctY = (originCoords.y + destCoords.y) / 2;
       this.focusCoordinate(midPctX, midPctY, 1.25);
     }
 
-    // Show floating route HUD
+    // Show floating route HUD (currently a no-op, kept for extensibility)
     this.renderRouteHud(originTitle, destTitle, distMeters, walkMin);
 
     // AI Voice Concierge spoken route start announcement
-    if (typeof VoiceConcierge !== 'undefined' && VoiceConcierge.onRouteCalculated) {
-      VoiceConcierge.onRouteCalculated({ destTitle, meters: distMeters, minutes: walkMin });
+    if (
+      typeof VoiceConcierge !== "undefined" &&
+      VoiceConcierge.onRouteCalculated
+    ) {
+      VoiceConcierge.onRouteCalculated({
+        destTitle,
+        meters: distMeters,
+        minutes: walkMin,
+      });
     }
 
     return { meters: distMeters, minutes: walkMin };
   },
 
-  getWalkwayRoutePoints(originCoords, destCoords) {
-    const toPixels = coords => ({
-      x: (coords.x / 100) * this.CANVAS_WIDTH,
-      y: (coords.y / 100) * this.CANVAS_HEIGHT
-    });
-    const origin = toPixels(originCoords);
-    const destination = toPixels(destCoords);
-    const network = window.VirtualResortMap;
+  /**
+   * Snaps a coordinate outside building polygons to its designated outdoor walkway entrance.
+   * Completely prevents route lines from passing over or cutting through any building rooftop.
+   */
+  snapPointOutsideBuildings(pt, network) {
+    if (!network || !network.nodes || !pt) return pt;
+    const buildings = [
+      {
+        name: "Wing N",
+        x1: 140,
+        y1: 550,
+        x2: 240,
+        y2: 670,
+        entranceKey: "poi_n_wing",
+      },
+      {
+        name: "Wing S",
+        x1: 500,
+        y1: 550,
+        x2: 600,
+        y2: 670,
+        entranceKey: "poi_s_wing",
+      },
+      {
+        name: "Lobby M",
+        x1: 210,
+        y1: 740,
+        x2: 350,
+        y2: 825,
+        entranceKey: "poi_m_lobby",
+      },
+      {
+        name: "MLS Mall",
+        x1: 110,
+        y1: 930,
+        x2: 210,
+        y2: 1030,
+        entranceKey: "poi_mls_mall",
+      },
+    ];
+    for (const b of buildings) {
+      if (pt.x >= b.x1 && pt.x <= b.x2 && pt.y >= b.y1 && pt.y <= b.y2) {
+        if (network.nodes[b.entranceKey]) {
+          return {
+            x: network.nodes[b.entranceKey].x,
+            y: network.nodes[b.entranceKey].y,
+          };
+        }
+      }
+    }
+    return pt;
+  },
 
-    if (!network || !network.nodes || typeof network.findPath !== 'function') {
+  /**
+   * Computes the walkway route as an array of pixel {x,y} points.
+   * Uses edge-projection to cleanly enter/exit the graph, snaps building interiors
+   * to outdoor entrances, and runs A* for the collision-free walkway path.
+   */
+  getWalkwayRoutePoints(originCoords, destCoords) {
+    const toPixels = (coords) => ({
+      x: (coords.x / 100) * this.CANVAS_WIDTH,
+      y: (coords.y / 100) * this.CANVAS_HEIGHT,
+    });
+    const network = window.VirtualResortMap;
+    let origin = toPixels(originCoords);
+    let destination = toPixels(destCoords);
+
+    // Safeguard: snap coordinates outside buildings so line never cuts across roofs
+    origin = this.snapPointOutsideBuildings(origin, network);
+    destination = this.snapPointOutsideBuildings(destination, network);
+
+    if (!network || !network.nodes || typeof network.findPath !== "function") {
       return [origin, destination];
     }
 
-    // Direct closest node lookup on the precision 74-node network
-    const nearestNodeKey = point => {
-      let bestKey = null;
-      let minDistance = Infinity;
-      for (const [key, node] of Object.entries(network.nodes)) {
-        const d = Math.hypot(node.x - point.x, node.y - point.y);
-        if (d < minDistance) {
-          minDistance = d;
-          bestKey = key;
-        }
-      }
-      return bestKey;
-    };
+    // ── Edge-aware entry/exit: find nearest graph edge for start & end ──
+    const startEdge =
+      typeof network.getNearestEdgePoint === "function"
+        ? network.getNearestEdgePoint(origin.x, origin.y)
+        : null;
+    const endEdge =
+      typeof network.getNearestEdgePoint === "function"
+        ? network.getNearestEdgePoint(destination.x, destination.y)
+        : null;
 
-    const startKey = nearestNodeKey(origin);
-    const destinationKey = nearestNodeKey(destination);
+    // Determine A* start/end keys from edge endpoints (pick the one closer to center)
+    const startKey = startEdge
+      ? Math.hypot(
+          network.nodes[startEdge.fromKey].x - origin.x,
+          network.nodes[startEdge.fromKey].y - origin.y,
+        ) <
+        Math.hypot(
+          network.nodes[startEdge.toKey].x - origin.x,
+          network.nodes[startEdge.toKey].y - origin.y,
+        )
+        ? startEdge.fromKey
+        : startEdge.toKey
+      : network.getNearestNodeKey(origin.x, origin.y);
+
+    const destinationKey = endEdge
+      ? Math.hypot(
+          network.nodes[endEdge.fromKey].x - destination.x,
+          network.nodes[endEdge.fromKey].y - destination.y,
+        ) <
+        Math.hypot(
+          network.nodes[endEdge.toKey].x - destination.x,
+          network.nodes[endEdge.toKey].y - destination.y,
+        )
+        ? endEdge.fromKey
+        : endEdge.toKey
+      : network.getNearestNodeKey(destination.x, destination.y);
 
     if (!startKey || !destinationKey) {
       return [origin, destination];
     }
 
     const graphPath = network.findPath(startKey, destinationKey) || [];
-    const waypoints = [origin];
+
+    // Build waypoints: real origin → (edge entry proj) → graph nodes → (edge exit proj) → real dest
+    const waypoints = [];
+    const firstNode = graphPath[0];
+    if (
+      !firstNode ||
+      Math.hypot(origin.x - firstNode.x, origin.y - firstNode.y) > 8
+    ) {
+      waypoints.push(origin);
+      if (startEdge && startEdge.dist > 15) {
+        const entryProj = { x: startEdge.projX, y: startEdge.projY };
+        if (
+          Math.hypot(entryProj.x - origin.x, entryProj.y - origin.y) > 8 &&
+          (!firstNode ||
+            Math.hypot(entryProj.x - firstNode.x, entryProj.y - firstNode.y) >
+              8)
+        ) {
+          waypoints.push(entryProj);
+        }
+      }
+    }
 
     for (const node of graphPath) {
-      if (node && typeof node.x === 'number' && typeof node.y === 'number') {
+      if (node && typeof node.x === "number" && typeof node.y === "number") {
         waypoints.push({ x: node.x, y: node.y });
       }
     }
 
-    waypoints.push(destination);
+    const lastNode = graphPath[graphPath.length - 1];
+    if (
+      !lastNode ||
+      Math.hypot(destination.x - lastNode.x, destination.y - lastNode.y) > 8
+    ) {
+      if (endEdge && endEdge.dist > 15) {
+        const exitProj = { x: endEdge.projX, y: endEdge.projY };
+        if (
+          Math.hypot(exitProj.x - destination.x, exitProj.y - destination.y) >
+            8 &&
+          (!lastNode ||
+            Math.hypot(exitProj.x - lastNode.x, exitProj.y - lastNode.y) > 8)
+        ) {
+          waypoints.push(exitProj);
+        }
+      }
+      waypoints.push(destination);
+    }
 
-    // Filter out redundant points within 2.5px
-    const filtered = waypoints.filter((point, index) => {
-      if (index === 0) return true;
-      return Math.hypot(point.x - waypoints[index - 1].x, point.y - waypoints[index - 1].y) > 2.5;
+    // Filter out points within 3px of each other to avoid micro-jitter
+    const filtered = waypoints.filter((pt, i) => {
+      if (i === 0) return true;
+      return (
+        Math.hypot(pt.x - waypoints[i - 1].x, pt.y - waypoints[i - 1].y) > 3
+      );
     });
 
     return filtered.length >= 2 ? filtered : [origin, destination];
   },
 
+  /**
+   * Converts an array of {x,y} polyline points into a smooth SVG path
+   * string using Catmull-Rom → Cubic Bezier conversion.
+   * Tension 0.22 ensures smooth filleted turns without bulging off-path.
+   *
+   * @param {Array<{x,y}>} points - Waypoint array (≥2 points)
+   * @param {number} tension - Catmull-Rom tension 0–1 (default 0.22)
+   * @returns {string} SVG path 'd' attribute string
+   */
+  buildBezierPath(points, tension = 0.22) {
+    if (!points || points.length < 2) return "";
+    if (points.length === 2) {
+      return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+    }
+
+    let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+
+      // Catmull-Rom → Cubic Bezier control points with calibrated tension
+      const cp1x = p1.x + ((p2.x - p0.x) * tension) / 3;
+      const cp1y = p1.y + ((p2.y - p0.y) * tension) / 3;
+      const cp2x = p2.x - ((p3.x - p1.x) * tension) / 3;
+      const cp2y = p2.y - ((p3.y - p1.y) * tension) / 3;
+
+      d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
+    return d;
+  },
+
+  /**
+   * Builds rich turn-by-turn step instructions for the computed route.
+   * Classifies turns into 6 categories, adds per-step distance, and
+   * injects landmark cues when passing named graph nodes.
+   */
   buildWalkwaySteps(originPoi, targetPoi, lang, isAccessible = false) {
     const t = i18n[lang] || i18n.ar;
-    const origin = (typeof getLocalizedPoi === 'function' && !originPoi.isLiveLocation) 
-      ? getLocalizedPoi(originPoi, lang) 
-      : { name: originPoi.isLiveLocation ? ((lang === 'ar') ? 'موقعي الحالي' : 'My Live Location') : (originPoi.nameAr || 'المبنى الرئيسي') };
-    const target = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(targetPoi, lang) : { name: targetPoi.nameAr };
-    const points = this.getWalkwayRoutePoints(originPoi.coords, targetPoi.coords);
-    const toCoords = point => ({
-      x: (point.x / this.CANVAS_WIDTH) * 100,
-      y: (point.y / this.CANVAS_HEIGHT) * 100
+    const isAr = lang === "ar";
+    const isRu = lang === "ru";
+    const isDe = lang === "de";
+
+    const origin =
+      typeof getLocalizedPoi === "function" && !originPoi.isLiveLocation
+        ? getLocalizedPoi(originPoi, lang)
+        : {
+            name: originPoi.isLiveLocation
+              ? isAr
+                ? "موقعي الحالي"
+                : isRu
+                  ? "Мое место"
+                  : isDe
+                    ? "Mein Standort"
+                    : "My Location"
+              : originPoi.nameAr || "المبنى الرئيسي",
+          };
+    const target =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(targetPoi, lang)
+        : { name: targetPoi.nameAr };
+
+    const points = this.getWalkwayRoutePoints(
+      originPoi.coords,
+      targetPoi.coords,
+    );
+    const toCoords = (pt) => ({
+      x: (pt.x / this.CANVAS_WIDTH) * 100,
+      y: (pt.y / this.CANVAS_HEIGHT) * 100,
     });
-    const steps = [{
-      stepNum: 1,
-      icon: '🚶‍♂️',
-      coords: toCoords(points[0]),
-      title: `${t.nav_route_start_title || 'ابدأ من'} [${origin.name}]`,
-      instruction: isAccessible
-        ? t.nav_route_accessibility_notice
-        : t.nav_route_start_instruction
-    }];
 
-    for (let index = 1; index < points.length - 1; index++) {
-      const previous = points[index - 1];
-      const current = points[index];
-      const next = points[index + 1];
-      const firstX = current.x - previous.x;
-      const firstY = current.y - previous.y;
-      const nextX = next.x - current.x;
-      const nextY = next.y - current.y;
-      const turn = Math.atan2(firstX * nextY - firstY * nextX, firstX * nextX + firstY * nextY);
-      if (Math.abs(turn) < 0.66) continue;
+    // ── Precompute cumulative pixel distances along walkway path ──
+    const cumDistPx = [0];
+    let totalAccumPx = 0;
+    for (let p = 1; p < points.length; p++) {
+      totalAccumPx += Math.hypot(
+        points[p].x - points[p - 1].x,
+        points[p].y - points[p - 1].y,
+      );
+      cumDistPx.push(totalAccumPx);
+    }
 
-      const direction = turn > 0 ? t.nav_route_right : t.nav_route_left;
+    // ── Helper: compute distance in meters between two pixel points ──
+    const segMeters = (a, b) =>
+      Math.round(Math.hypot(b.x - a.x, b.y - a.y) * 0.42);
+
+    // ── Classify turn angle (radians, signed) into human instruction ──
+    const classifyTurn = (angleDeg, isRight) => {
+      const abs = Math.abs(angleDeg);
+      if (abs < 12) return null; // straight — skip
+      const dir = isRight
+        ? isAr
+          ? "يمين"
+          : isRu
+            ? "направо"
+            : isDe
+              ? "rechts"
+              : "right"
+        : isAr
+          ? "شمال"
+          : isRu
+            ? "налево"
+            : isDe
+              ? "links"
+              : "left";
+
+      if (abs >= 150) {
+        // U-turn
+        return {
+          icon: "🔄",
+          title: isAr
+            ? "استدير وارجع لورا"
+            : isRu
+              ? `Разворот ${dir}`
+              : isDe
+                ? `Wenden ${dir}`
+                : `U-turn ${dir}`,
+          instruction: isAr
+            ? "استدير وارجع لورا، وكمل مع الممشى."
+            : "Make a full U-turn and follow the path.",
+        };
+      } else if (abs >= 100) {
+        // Sharp turn
+        return {
+          icon: isRight ? "↱" : "↰",
+          title: isAr
+            ? `اكسر ${dir} جامد`
+            : isRu
+              ? `Резкий поворот ${dir}`
+              : isDe
+                ? `Scharfe Kurve ${dir}`
+                : `Sharp turn ${dir}`,
+          instruction: isAr
+            ? `اكسر ${dir} جامد مع الممر.`
+            : `Make a sharp ${dir} turn at the junction.`,
+        };
+      } else if (abs >= 45) {
+        // Normal turn
+        return {
+          icon: isRight ? "↪️" : "↩️",
+          title: isAr
+            ? `حود ${dir} عند الممر`
+            : (t.nav_route_turn_title || "انعطف {direction} عند الممر").replace(
+                "{direction}",
+                dir,
+              ),
+          instruction: isAr
+            ? `حود ${dir} وامشي مع الممر.`
+            : (
+                t.nav_route_turn_instruction ||
+                "اتبع الممر {direction} حتى نقطة الانعطاف التالية."
+              ).replace("{direction}", dir),
+        };
+      } else {
+        // Slight bend
+        return {
+          icon: isRight ? "↗️" : "↖️",
+          title: isAr
+            ? `ميل ${dir} شوية`
+            : isRu
+              ? `Небольшой поворот ${dir}`
+              : isDe
+                ? `Leicht ${dir}`
+                : `Slight ${dir}`,
+          instruction: isAr
+            ? `ميل ${dir} شوية مع الممشى.`
+            : `Continue with a slight bend ${dir} along the path.`,
+        };
+      }
+    };
+
+    // ── Find nearest named graph node for landmark cues ──
+    const network = window.VirtualResortMap;
+    const findNearestLandmark = (pt) => {
+      if (!network || !network.nodes) return null;
+      let nearestName = null;
+      let nearestDist = 28; // only use landmarks within 28px (~12m)
+      for (const node of Object.values(network.nodes)) {
+        if (!node.name) continue;
+        const d = Math.hypot(node.x - pt.x, node.y - pt.y);
+        if (d < nearestDist) {
+          nearestDist = d;
+          nearestName = node.name;
+        }
+      }
+      return nearestName;
+    };
+
+    // ── Build first step (departure) ──
+    const totalMeters = segMeters(points[0], points[points.length - 1]);
+    const steps = [
+      {
+        stepNum: 1,
+        icon: "🚶‍♂️",
+        coords: toCoords(points[0]),
+        cumDistPx: 0,
+        distMeters: totalMeters,
+        title: isAr
+          ? `ابدأ من [${origin.name}]`
+          : `${t.nav_route_start_title || "ابدأ من"} [${origin.name}]`,
+        instruction: isAr
+          ? isAccessible
+            ? "المسار محدد للوصول الميسر. يلا بينا، امشي مع الممشى."
+            : "يلا بينا! امشي مع الممشى اللي قدامك."
+          : isAccessible
+            ? t.nav_route_accessibility_notice ||
+              "♿ المسار المحدد مُعدَّل للوصول الميسر والكراسي المتحركة."
+            : t.nav_route_start_instruction ||
+              "توجه نحو أقرب ممشى معبد مستعيناً بالخريطة أعلاه.",
+      },
+    ];
+
+    for (let i = 1; i < points.length - 1; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const next = points[i + 1];
+
+      // Vector cross product (z-component) for signed turn angle
+      const vAx = curr.x - prev.x,
+        vAy = curr.y - prev.y;
+      const vBx = next.x - curr.x,
+        vBy = next.y - curr.y;
+      const cross = vAx * vBy - vAy * vBx; // + = right (clockwise), - = left
+      const dot = vAx * vBx + vAy * vBy;
+      const turnRad = Math.atan2(Math.abs(cross), dot);
+      const turnDeg = turnRad * (180 / Math.PI);
+
+      if (turnDeg < 12) continue; // straight segment — skip
+
+      const isRight = cross > 0; // positive cross product = right turn
+      const classification = classifyTurn(turnDeg, isRight);
+      if (!classification) continue;
+
+      // Distance from this turn to next turn (or destination)
+      const nextPointDist =
+        i + 1 < points.length - 1
+          ? segMeters(curr, points[i + 1])
+          : segMeters(curr, points[points.length - 1]);
+
+      const landmark = findNearestLandmark(curr);
+      const landmarkCue = landmark
+        ? isAr
+          ? ` جنب ${landmark}`
+          : ` (near ${landmark})`
+        : "";
+
       steps.push({
         stepNum: steps.length + 1,
-        icon: turn > 0 ? '↪️' : '↩️',
-        coords: toCoords(current),
-        title: (t.nav_route_turn_title || 'انعطف {direction} عند الممر').replace('{direction}', direction),
-        instruction: (t.nav_route_turn_instruction || 'اتبع الممر {direction} حتى نقطة الانعطاف التالية.').replace('{direction}', direction)
+        icon: classification.icon,
+        coords: toCoords(curr),
+        cumDistPx: cumDistPx[i],
+        distMeters: nextPointDist,
+        title:
+          classification.title + (landmark ? ` (${landmarkCue.trim()})` : ""),
+        instruction:
+          classification.instruction +
+          (landmarkCue ? ` ${landmarkCue}` : "") +
+          (nextPointDist > 5
+            ? isAr
+              ? `، وكمل ${nextPointDist} متر.`
+              : ` Then walk ${nextPointDist}m.`
+            : "."),
       });
     }
 
+    // ── Final arrival step ──
     steps.push({
       stepNum: steps.length + 1,
-      icon: '🎯',
+      icon: "🎯",
       coords: toCoords(points[points.length - 1]),
-      title: (t.nav_route_arrive_title || 'وصلت إلى {destination}').replace('{destination}', target.name),
-      instruction: (t.nav_route_arrive_instruction || 'وصلت إلى {destination}.').replace('{destination}', target.name)
+      cumDistPx: totalAccumPx,
+      distMeters: 0,
+      title: isAr
+        ? `وصلت إلى ${target.name}`
+        : (t.nav_route_arrive_title || "وصلت إلى {destination}").replace(
+            "{destination}",
+            target.name,
+          ),
+      instruction: isAr
+        ? `حمد الله ع السلامة! نورت ${target.name}، اتفضل استمتع بوقتك.`
+        : (t.nav_route_arrive_instruction || "وصلت إلى {destination}.").replace(
+            "{destination}",
+            target.name,
+          ),
     });
+
     return steps;
   },
 
   renderRouteHud(originTitle, destTitle, meters, minutes) {
-    let hud = document.getElementById('mapRouteHud');
-    const viewport = document.getElementById('mapViewport');
-    if (!viewport) return;
-
-    if (!hud) {
-      hud = document.createElement('div');
-      hud.id = 'mapRouteHud';
-      hud.className = 'map-route-hud';
-      viewport.appendChild(hud);
-    }
-
-    hud.innerHTML = `
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
-          🚶‍♂️
-        </div>
-        <div class="leading-tight">
-          <div class="flex items-center gap-2">
-            <span class="text-xs sm:text-sm font-black text-amber-300 font-mono" id="routeHudMetrics">${minutes} دقيقة (${meters} م)</span>
-            ${(originTitle && originTitle.includes('موقعي')) || this.lastGuestPosition 
-              ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 font-bold border border-blue-400/40 flex items-center gap-1 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span> تتبع حي مباشر</span>'
-              : '<span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">مسار ممهد</span>'}
-          </div>
-          <p class="text-[10px] text-slate-300 mt-0.5 truncate max-w-[180px] sm:max-w-xs">${originTitle || 'موقعك'} ➔ ${destTitle || 'الوجهة'}</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-1.5 shrink-0">
-        <button onclick="MapEngine.startLiveWalkSimulation()" class="tap-effect px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow-md flex items-center gap-1">
-          <span>🚶‍♂️</span>
-          <span class="hidden sm:inline">محاكاة السير</span>
-        </button>
-        <button onclick="MapEngine.clearRoute()" class="tap-effect px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white text-xs font-bold transition">
-          ✕
-        </button>
-      </div>
-    `;
-    hud.style.display = 'flex';
+    const existingHud = document.getElementById("mapRouteHud");
+    if (existingHud) existingHud.remove();
   },
 
   clearRoute() {
@@ -889,12 +1414,15 @@ const MapEngine = {
     this.offRouteCounter = 0;
     this.closePopover();
     this.removeRoomBeacon();
-    const svgLayer = document.getElementById('routeSvgLayer');
-    if (svgLayer) svgLayer.innerHTML = '';
-    const hud = document.getElementById('mapRouteHud');
-    if (hud) hud.style.display = 'none';
-    const banner = document.getElementById('routeResultBanner');
-    if (banner) banner.classList.add('hidden');
+    this.removeDestinationLocationPin();
+    const svgLayer = document.getElementById("routeSvgLayer");
+    if (svgLayer) svgLayer.innerHTML = "";
+    const hud = document.getElementById("mapRouteHud");
+    if (hud) hud.remove();
+    const simHud = document.getElementById("walkSimulationHud");
+    if (simHud) simHud.remove();
+    const banner = document.getElementById("routeResultBanner");
+    if (banner) banner.classList.add("hidden");
   },
 
   // 3D Live Walkthrough Camera Simulation
@@ -902,17 +1430,17 @@ const MapEngine = {
     this.stopLiveWalkSimulation();
     this.stopOrbitTour();
 
-    const svgLayer = document.getElementById('routeSvgLayer');
+    const svgLayer = document.getElementById("routeSvgLayer");
     if (!svgLayer || !this.lastRoutePoints || this.lastRoutePoints.length < 2) {
-      if (typeof App !== 'undefined' && App.showToast) {
-        App.showToast('يرجى تحديد مسار أولاً لبدء المحاكاة 🗺️', '📍');
+      if (typeof App !== "undefined" && App.showToast) {
+        App.showToast("يرجى تحديد مسار أولاً لبدء المحاكاة 🗺️", "📍");
       }
       return;
     }
 
     const points = this.lastRoutePoints;
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) || {};
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const t = (typeof i18n !== "undefined" && i18n[lang]) || {};
 
     this.isWalkingSimulating = true;
     this.isSimulatingWalk = true;
@@ -930,29 +1458,20 @@ const MapEngine = {
     }
     this.set3DButtonsActive(this.is3D);
 
-    const viewport = document.getElementById('mapViewport');
-    if (viewport && this.is3D) viewport.classList.add('mode-3d');
+    const viewport = document.getElementById("mapViewport");
+    if (viewport && this.is3D) viewport.classList.add("mode-3d");
 
-    // Create or show Simulation HUD
-    let simHud = document.getElementById('walkSimulationHud');
-    if (!simHud && viewport) {
-      simHud = document.createElement('div');
-      simHud.id = 'walkSimulationHud';
-      simHud.className = 'walk-simulation-hud absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 w-[94%] sm:w-[540px] max-w-lg z-40 rounded-2xl p-3 bg-slate-950/92 backdrop-blur-xl border border-amber-500/40 text-white shadow-2xl flex flex-col gap-2 select-none';
-      viewport.appendChild(simHud);
-    }
-    if (simHud) {
-      simHud.classList.remove('hidden');
-      simHud.style.display = 'flex';
-    }
+    // Clean up any legacy in-viewport simulation HUDs
+    const oldSimHud = document.getElementById("walkSimulationHud");
+    if (oldSimHud) oldSimHud.remove();
 
     // Create or show Sim Walker Avatar on pinsOverlay
-    const overlay = document.getElementById('pinsOverlay');
-    let walker = document.getElementById('simWalkerMarker');
+    const overlay = document.getElementById("pinsOverlay");
+    let walker = document.getElementById("simWalkerMarker");
     if (!walker && overlay) {
-      walker = document.createElement('div');
-      walker.id = 'simWalkerMarker';
-      walker.className = 'sim-walker-marker absolute pointer-events-none z-50';
+      walker = document.createElement("div");
+      walker.id = "simWalkerMarker";
+      walker.className = "sim-walker-marker absolute pointer-events-none z-50";
       walker.innerHTML = `
         <div class="sim-walker-heading" id="simWalkerHeading">
           <div class="sim-walker-beam"></div>
@@ -961,15 +1480,15 @@ const MapEngine = {
         <div class="sim-walker-aura"></div>
         <div class="sim-walker-avatar-wrapper" id="simWalkerAvatarWrapper">
           <div class="sim-walker-dot">🚶‍♂️</div>
-          <div class="sim-walker-label">${lang === 'ar' ? 'أنت الآن' : lang === 'ru' ? 'Вы здесь' : lang === 'de' ? 'Ihr Standort' : 'You are here'}</div>
+          <div class="sim-walker-label">${lang === "ar" ? "أنت الآن" : lang === "ru" ? "Вы здесь" : lang === "de" ? "Ihr Standort" : "You are here"}</div>
         </div>
       `;
       overlay.appendChild(walker);
     }
-    if (walker) walker.style.display = 'block';
+    if (walker) walker.style.display = "block";
 
-    const headingEl = document.getElementById('simWalkerHeading');
-    const avatarWrapper = document.getElementById('simWalkerAvatarWrapper');
+    const headingEl = document.getElementById("simWalkerHeading");
+    const avatarWrapper = document.getElementById("simWalkerAvatarWrapper");
     if (avatarWrapper && this.is3D) {
       avatarWrapper.style.transform = `rotateX(${-this.pitch}deg)`;
     }
@@ -978,7 +1497,10 @@ const MapEngine = {
     const segmentDistances = [];
     let totalDistPx = 0;
     for (let i = 0; i < points.length - 1; i++) {
-      const d = Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+      const d = Math.hypot(
+        points[i + 1].x - points[i].x,
+        points[i + 1].y - points[i].y,
+      );
       segmentDistances.push(d);
       totalDistPx += d;
     }
@@ -986,12 +1508,24 @@ const MapEngine = {
 
     let progressPx = 0;
     let lastTime = performance.now();
-    const baseSpeedPxPerSec = 45; // Smooth walking pace (~19 m/s visual simulation)
+
+    // ── Natural Egyptian Audio-Walk Pacing ──
+    // Egyptian Arabic turn instructions take ~3.8 to 4.5s per turn.
+    // Ensure total duration allows every instruction to be spoken clearly without rushing or audio cutoffs.
+    const navSteps =
+      (this.activeNavigation && this.activeNavigation.steps) || [];
+    const minTimeForVoice = Math.max(14, navSteps.length * 4.4);
+    const minTimeForDist = totalDistPx / 20; // gentle ~50 m/min resort stroll pace
+    const simDuration = Math.max(minTimeForVoice, minTimeForDist);
+    const baseSpeedPxPerSec = totalDistPx / simDuration;
     let currentHeading = 0;
 
     // Initial heading towards first waypoint
     if (points.length >= 2) {
-      const angleRad = Math.atan2(points[1].x - points[0].x, -(points[1].y - points[0].y));
+      const angleRad = Math.atan2(
+        points[1].x - points[0].x,
+        -(points[1].y - points[0].y),
+      );
       currentHeading = (angleRad * 180) / Math.PI;
       if (headingEl) headingEl.style.transform = `rotate(${currentHeading}deg)`;
     }
@@ -1006,70 +1540,28 @@ const MapEngine = {
     }
     this.centerCameraOnWalker(startPctX, startPctY);
 
-    // Voice announcement of start
-    try {
-      if (typeof ConciergeAudioGuide !== 'undefined' && !ConciergeAudioGuide.isMuted) {
-        ConciergeAudioGuide.speak(t.wf_start_simulation || 'بدء محاكاة السير الحي', lang);
+    // Spoken departure confirmation on simulation start
+    const targetTitle =
+      this.lastRouteDestTitle || this.activeNavigation?.targetPoi?.nameAr || "";
+    if (typeof VoiceConcierge !== "undefined" && !VoiceConcierge.isMuted) {
+      VoiceConcierge.lastSpokenStepIdx = 0;
+      if (typeof ConciergeAudioGuide !== "undefined") {
+        ConciergeAudioGuide.stop();
       }
-    } catch (e) {}
+      setTimeout(() => {
+        VoiceConcierge.speak(
+          `يلا بينا! بدأنا التحرك لـ ${targetTitle}، امشي مع الممشى اللي قدامك.`,
+        );
+      }, 120);
+    }
 
     const updateHud = (remainingMeters) => {
-      if (!simHud) return;
       const pct = Math.min(100, (progressPx / totalDistPx) * 100);
       const estMin = Math.max(1, Math.round(remainingMeters / 65));
-
-      // Get current active step title if available
-      let stepText = '';
-      let stepIcon = '🚶‍♂️';
-      if (this.activeNavigation && this.activeNavigation.steps) {
-        const step = this.activeNavigation.steps[this.activeNavigation.currentStepIdx];
-        if (step) {
-          stepText = step.instruction || step.title;
-          stepIcon = step.icon || '🚶‍♂️';
-        }
-      }
-
-      simHud.innerHTML = `
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center animate-subtle-float shrink-0 shadow-md">
-              🚶‍♂️
-            </span>
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-black text-white truncate">${t.wf_start_simulation || 'محاكاة السير الحي'}</span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 shrink-0">GPS 60fps</span>
-              </div>
-              <p class="text-[11px] text-amber-300 font-bold mt-0.5 truncate">
-                ${remainingMeters > 5 ? `${remainingMeters} ${t.wf_meters || 'متر متبقي'} • ${estMin} دقيقة` : (t.wf_sim_arrived || 'وصلت إلى وجهتك 🎉')}
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="MapEngine.toggleSimPause()" class="px-2.5 py-1 rounded-lg ${this.isSimPaused ? 'bg-amber-500 text-slate-950 font-black' : 'bg-white/10 hover:bg-white/20 text-white font-bold'} text-xs transition tap-effect" title="${this.isSimPaused ? 'استئناف' : 'إيقاف مؤقت'}">
-              ${this.isSimPaused ? '▶️' : '⏸️'}
-            </button>
-            <button onclick="MapEngine.toggleSimSpeed()" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-bold transition tap-effect" title="سرعة المحاكاة">
-              ⚡ ${this.simSpeed}x
-            </button>
-            <button onclick="MapEngine.stopLiveWalkSimulation()" class="w-7 h-7 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center transition tap-effect" title="${t.wf_stop_simulation || 'إنهاء'}">
-              ✕
-            </button>
-          </div>
-        </div>
-
-        ${stepText ? `
-        <div class="text-[11px] text-slate-200 truncate bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 flex items-center gap-1.5">
-          <span class="shrink-0">${stepIcon}</span>
-          <span class="truncate">${stepText}</span>
-        </div>
-        ` : ''}
-
-        <div class="w-full bg-white/15 h-1.5 rounded-full overflow-hidden mt-0.5">
-          <div class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all duration-100" style="width: ${pct}%"></div>
-        </div>
-      `;
+      const bar = document.querySelector("#turnNavHud .turn-progress-bar");
+      if (bar) bar.style.width = `${pct}%`;
+      const metrics = document.getElementById("turnHudMetrics");
+      if (metrics) metrics.innerText = `⏱️ ${estMin} د (${remainingMeters}م)`;
     };
 
     const animateWalk = (now) => {
@@ -1084,7 +1576,28 @@ const MapEngine = {
       const dt = Math.min(0.1, (now - lastTime) / 1000);
       lastTime = now;
 
-      progressPx += baseSpeedPxPerSec * this.simSpeed * dt;
+      // Natural walking speed with gentle pause/slowdown if turn audio instruction is still speaking
+      let currentSpeedMult = this.simSpeed;
+      const isVoiceActive =
+        typeof ConciergeAudioGuide !== "undefined" &&
+        ConciergeAudioGuide.isSpeaking;
+      if (
+        isVoiceActive &&
+        this.activeNavigation &&
+        this.activeNavigation.steps
+      ) {
+        const nextStepIdx = this.activeNavigation.currentStepIdx + 1;
+        const nextStep = this.activeNavigation.steps[nextStepIdx];
+        if (nextStep && typeof nextStep.cumDistPx === "number") {
+          const distToTurn = nextStep.cumDistPx - progressPx;
+          if (distToTurn > 0 && distToTurn < 25) {
+            // Near upcoming turn: slow down so guest hears instruction before turning
+            currentSpeedMult *= 0.4;
+          }
+        }
+      }
+
+      progressPx += baseSpeedPxPerSec * currentSpeedMult * dt;
       this.walkProgress = Math.min(1, progressPx / totalDistPx);
 
       if (progressPx >= totalDistPx) {
@@ -1101,15 +1614,22 @@ const MapEngine = {
         updateHud(0);
 
         if (this.activeNavigation && this.activeNavigation.steps) {
-          this.activeNavigation.currentStepIdx = this.activeNavigation.steps.length - 1;
+          this.activeNavigation.currentStepIdx =
+            this.activeNavigation.steps.length - 1;
           this.renderTurnStep(false);
         }
 
-        if (typeof PromoAudioEngine !== 'undefined') {
-          PromoAudioEngine.playTransitionChime();
-        }
-        if (typeof ConciergeAudioGuide !== 'undefined' && !ConciergeAudioGuide.isMuted) {
-          ConciergeAudioGuide.speak(t.wf_sim_arrived || 'لقد وصلت إلى وجهتك بنجاح', lang);
+        const targetPoi = this.activeNavigation
+          ? this.activeNavigation.targetPoi
+          : null;
+        if (
+          typeof VoiceConcierge !== "undefined" &&
+          VoiceConcierge.onDestinationArrived
+        ) {
+          VoiceConcierge.onDestinationArrived(
+            targetPoi,
+            targetPoi ? targetPoi.nameAr || targetPoi.name : "",
+          );
         }
 
         setTimeout(() => {
@@ -1118,27 +1638,55 @@ const MapEngine = {
         return;
       }
 
-      let accumulated = 0;
-      let segIdx = 0;
-      for (let i = 0; i < segmentDistances.length; i++) {
-        if (accumulated + segmentDistances[i] >= progressPx) {
-          segIdx = i;
-          break;
+      let curX, curY, targetHeading;
+      const svgPath = document.getElementById("liveRouteSvgPath");
+
+      if (
+        svgPath &&
+        typeof svgPath.getTotalLength === "function" &&
+        svgPath.getTotalLength() > 0
+      ) {
+        // High-precision smooth Bezier curve traversal
+        const pathLen = svgPath.getTotalLength();
+        const curDist = Math.max(
+          0,
+          Math.min(pathLen, this.walkProgress * pathLen),
+        );
+        const pt = svgPath.getPointAtLength(curDist);
+        curX = pt.x;
+        curY = pt.y;
+
+        // Tangent heading calculated from lookahead point on spline
+        const lookaheadDist = Math.min(pathLen, curDist + 4);
+        const ptAhead = svgPath.getPointAtLength(lookaheadDist);
+        const angleRad = Math.atan2(ptAhead.x - pt.x, -(ptAhead.y - pt.y));
+        targetHeading = (angleRad * 180) / Math.PI;
+      } else {
+        // Fallback: segment-by-segment linear interpolation
+        let accumulated = 0;
+        let segIdx = 0;
+        for (let i = 0; i < segmentDistances.length; i++) {
+          if (accumulated + segmentDistances[i] >= progressPx) {
+            segIdx = i;
+            break;
+          }
+          accumulated += segmentDistances[i];
         }
-        accumulated += segmentDistances[i];
+
+        const p1 = points[segIdx];
+        const p2 = points[segIdx + 1] || p1;
+        const segLen = segmentDistances[segIdx] || 1;
+        const segProg = Math.max(
+          0,
+          Math.min(1, (progressPx - accumulated) / segLen),
+        );
+
+        curX = p1.x + (p2.x - p1.x) * segProg;
+        curY = p1.y + (p2.y - p1.y) * segProg;
+
+        const angleRad = Math.atan2(p2.x - p1.x, -(p2.y - p1.y));
+        targetHeading = (angleRad * 180) / Math.PI;
       }
-
-      const p1 = points[segIdx];
-      const p2 = points[segIdx + 1];
-      const segLen = segmentDistances[segIdx] || 1;
-      const segProg = Math.max(0, Math.min(1, (progressPx - accumulated) / segLen));
-
-      const curX = p1.x + (p2.x - p1.x) * segProg;
-      const curY = p1.y + (p2.y - p1.y) * segProg;
-
-      // Target heading of current walkway segment
-      const angleRad = Math.atan2(p2.x - p1.x, -(p2.y - p1.y));
-      const targetHeading = (angleRad * 180) / Math.PI;
 
       // Smooth heading transition so arrow smoothly curves along turns
       let diff = (targetHeading - currentHeading) % 360;
@@ -1160,18 +1708,31 @@ const MapEngine = {
       // Smooth camera centering on walker position without map rotation
       this.centerCameraOnWalker(curPctX, curPctY);
 
-      // Advance turn-by-turn steps if active
+      // Advance turn-by-turn steps synchronized with physical route distance
       if (this.activeNavigation && this.activeNavigation.steps) {
         const steps = this.activeNavigation.steps;
-        const targetStep = Math.min(steps.length - 1, Math.max(0, Math.floor(this.walkProgress * steps.length)));
+        let targetStep = 0;
+        for (let s = 0; s < steps.length; s++) {
+          const stepDist =
+            typeof steps[s].cumDistPx === "number"
+              ? steps[s].cumDistPx
+              : s * (totalDistPx / steps.length);
+          // Trigger step instruction ~20px (~8 meters) before turn
+          if (progressPx >= Math.max(0, stepDist - 20)) {
+            targetStep = s;
+          }
+        }
         if (targetStep !== this.activeNavigation.currentStepIdx) {
           this.activeNavigation.currentStepIdx = targetStep;
           this.renderTurnStep(false);
-          if (typeof App !== 'undefined' && App.playBeep) App.playBeep(850);
+          if (typeof App !== "undefined" && App.playBeep) App.playBeep(850);
         }
       }
 
-      const remainingMeters = Math.max(0, Math.round((totalDistPx - progressPx) * 0.42));
+      const remainingMeters = Math.max(
+        0,
+        Math.round((totalDistPx - progressPx) * 0.42),
+      );
       updateHud(remainingMeters);
 
       this.simRafId = requestAnimationFrame(animateWalk);
@@ -1183,14 +1744,20 @@ const MapEngine = {
 
   toggleSimPause() {
     this.isSimPaused = !this.isSimPaused;
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(650);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(650);
     this.renderTurnStep(false);
   },
 
   toggleSimSpeed() {
-    this.simSpeed = this.simSpeed === 1 ? 2 : (this.simSpeed === 2 ? 3 : 1);
+    this.simSpeed = this.simSpeed === 1 ? 2 : this.simSpeed === 2 ? 3 : 1;
     this.walkSpeed = this.simSpeed;
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(750);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(750);
+    if (
+      typeof ConciergeAudioGuide !== "undefined" &&
+      typeof ConciergeAudioGuide.setSimulationRateMultiplier === "function"
+    ) {
+      ConciergeAudioGuide.setSimulationRateMultiplier(this.simSpeed);
+    }
     this.renderTurnStep(false);
   },
 
@@ -1202,15 +1769,15 @@ const MapEngine = {
       cancelAnimationFrame(this.simRafId);
       this.simRafId = null;
     }
-    const simHud = document.getElementById('walkSimulationHud');
+    const simHud = document.getElementById("walkSimulationHud");
     if (simHud) {
-      simHud.classList.add('hidden');
-      simHud.style.display = 'none';
+      simHud.classList.add("hidden");
+      simHud.style.display = "none";
     }
-    const walker = document.getElementById('simWalkerMarker');
+    const walker = document.getElementById("simWalkerMarker");
     if (walker) walker.remove();
 
-    if (typeof ConciergeAudioGuide !== 'undefined') {
+    if (typeof ConciergeAudioGuide !== "undefined") {
       ConciergeAudioGuide.stop();
     }
 
@@ -1227,13 +1794,19 @@ const MapEngine = {
   },
 
   bindEvents() {
-    const viewport = document.getElementById('mapViewport');
+    const viewport = document.getElementById("mapViewport");
     if (!viewport) return;
 
     // Mouse Drag Pan
-    viewport.addEventListener('mousedown', (e) => {
+    viewport.addEventListener("mousedown", (e) => {
       // Don't pan if clicking buttons, compass, popover or pins
-      if (e.target.closest('.map-pin') || e.target.closest('button') || e.target.closest('.earth-compass-gizmo') || e.target.closest('.map-popover-card')) return;
+      if (
+        e.target.closest(".map-pin") ||
+        e.target.closest("button") ||
+        e.target.closest(".earth-compass-gizmo") ||
+        e.target.closest(".map-popover-card")
+      )
+        return;
       this.stopOrbitTour();
       this.closePopover();
       this.isPanning = true;
@@ -1241,7 +1814,7 @@ const MapEngine = {
       this.panStartY = e.clientY - this.panY;
     });
 
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener("mousemove", (e) => {
       if (!this.isPanning) return;
       this.panX = e.clientX - this.panStartX;
       this.panY = e.clientY - this.panStartY;
@@ -1249,7 +1822,7 @@ const MapEngine = {
       this.applyTransform();
     });
 
-    window.addEventListener('mouseup', () => {
+    window.addEventListener("mouseup", () => {
       this.isPanning = false;
     });
 
@@ -1261,71 +1834,100 @@ const MapEngine = {
     let isPinching = false;
     let lastTapTime = 0;
 
-    viewport.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.map-pin') || e.target.closest('button') || e.target.closest('.earth-compass-gizmo') || e.target.closest('.map-popover-card')) return;
-      this.stopOrbitTour();
-
-      if (e.touches.length === 1) {
-        // Detect double-tap to zoom
-        const now = Date.now();
-        if (now - lastTapTime < 320) {
-          e.preventDefault();
-          const rect = viewport.getBoundingClientRect();
-          const tapX = e.touches[0].clientX - rect.left;
-          const tapY = e.touches[0].clientY - rect.top;
-          this.zoomAtPoint(1.45, tapX, tapY);
-          lastTapTime = 0;
+    viewport.addEventListener(
+      "touchstart",
+      (e) => {
+        if (
+          e.target.closest(".map-pin") ||
+          e.target.closest("button") ||
+          e.target.closest(".earth-compass-gizmo") ||
+          e.target.closest(".map-popover-card")
+        )
           return;
-        }
-        lastTapTime = now;
+        this.stopOrbitTour();
 
-        this.closePopover();
-        this.isPanning = true;
-        this.panStartX = e.touches[0].clientX - this.panX;
-        this.panStartY = e.touches[0].clientY - this.panY;
-      } else if (e.touches.length === 2) {
-        this.isPanning = false;
-        isPinching = true;
-        const t1 = e.touches[0];
-        const t2 = e.touches[1];
-        initialPinchDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-        initialScale = this.scale;
-        const rect = viewport.getBoundingClientRect();
-        pinchMidX = ((t1.clientX + t2.clientX) / 2) - rect.left;
-        pinchMidY = ((t1.clientY + t2.clientY) / 2) - rect.top;
-      }
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-      if (isPinching && e.touches.length === 2) {
-        e.preventDefault();
-        const t1 = e.touches[0];
-        const t2 = e.touches[1];
-        const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-        if (initialPinchDist > 0) {
-          const factor = currentDist / initialPinchDist;
-          const targetScale = Math.min(Math.max(this.minScale, initialScale * factor), this.maxScale);
-          const oldScale = this.scale;
-          if (Math.abs(targetScale - oldScale) >= 0.001) {
-            this.scale = targetScale;
-            const cx = this.CANVAS_WIDTH / 2;
-            const cy = this.CANVAS_HEIGHT / 2;
-            this.panX = pinchMidX - cx - (pinchMidX - this.panX - cx) * (this.scale / oldScale);
-            this.panY = pinchMidY - cy - (pinchMidY - this.panY - cy) * (this.scale / oldScale);
-            this.clampPan();
-            this.applyTransform(false);
+        if (e.touches.length === 1) {
+          // Detect double-tap to zoom
+          const now = Date.now();
+          if (now - lastTapTime < 320) {
+            e.preventDefault();
+            const rect = viewport.getBoundingClientRect();
+            const tapX = e.touches[0].clientX - rect.left;
+            const tapY = e.touches[0].clientY - rect.top;
+            this.zoomAtPoint(1.45, tapX, tapY);
+            lastTapTime = 0;
+            return;
           }
-        }
-      } else if (this.isPanning && e.touches.length === 1) {
-        if (e.cancelable) e.preventDefault();
-        this.panX = e.touches[0].clientX - this.panStartX;
-        this.panY = e.touches[0].clientY - this.panStartY;
-        this.clampPan();
-        this.applyTransform(false);
-      }
-    }, { passive: false });
+          lastTapTime = now;
 
-    window.addEventListener('touchend', (e) => {
+          this.closePopover();
+          this.isPanning = true;
+          this.panStartX = e.touches[0].clientX - this.panX;
+          this.panStartY = e.touches[0].clientY - this.panY;
+        } else if (e.touches.length === 2) {
+          this.isPanning = false;
+          isPinching = true;
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          initialPinchDist = Math.hypot(
+            t1.clientX - t2.clientX,
+            t1.clientY - t2.clientY,
+          );
+          initialScale = this.scale;
+          const rect = viewport.getBoundingClientRect();
+          pinchMidX = (t1.clientX + t2.clientX) / 2 - rect.left;
+          pinchMidY = (t1.clientY + t2.clientY) / 2 - rect.top;
+        }
+      },
+      { passive: false },
+    );
+
+    window.addEventListener(
+      "touchmove",
+      (e) => {
+        if (isPinching && e.touches.length === 2) {
+          e.preventDefault();
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          const currentDist = Math.hypot(
+            t1.clientX - t2.clientX,
+            t1.clientY - t2.clientY,
+          );
+          if (initialPinchDist > 0) {
+            const factor = currentDist / initialPinchDist;
+            const targetScale = Math.min(
+              Math.max(this.minScale, initialScale * factor),
+              this.maxScale,
+            );
+            const oldScale = this.scale;
+            if (Math.abs(targetScale - oldScale) >= 0.001) {
+              this.scale = targetScale;
+              const cx = this.CANVAS_WIDTH / 2;
+              const cy = this.CANVAS_HEIGHT / 2;
+              this.panX =
+                pinchMidX -
+                cx -
+                (pinchMidX - this.panX - cx) * (this.scale / oldScale);
+              this.panY =
+                pinchMidY -
+                cy -
+                (pinchMidY - this.panY - cy) * (this.scale / oldScale);
+              this.clampPan();
+              this.applyTransform(false);
+            }
+          }
+        } else if (this.isPanning && e.touches.length === 1) {
+          if (e.cancelable) e.preventDefault();
+          this.panX = e.touches[0].clientX - this.panStartX;
+          this.panY = e.touches[0].clientY - this.panStartY;
+          this.clampPan();
+          this.applyTransform(false);
+        }
+      },
+      { passive: false },
+    );
+
+    window.addEventListener("touchend", (e) => {
       if (e.touches.length === 0) {
         this.isPanning = false;
         isPinching = false;
@@ -1338,21 +1940,25 @@ const MapEngine = {
     });
 
     // Mouse Wheel Zoom
-    viewport.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      this.stopOrbitTour();
-      const rect = viewport.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
-      this.zoomAtPoint(zoomFactor, mouseX, mouseY, false);
-    }, { passive: false });
+    viewport.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        this.stopOrbitTour();
+        const rect = viewport.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
+        this.zoomAtPoint(zoomFactor, mouseX, mouseY, false);
+      },
+      { passive: false },
+    );
   },
 
   zoom(factor) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(700);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(700);
     this.stopOrbitTour();
-    const viewport = document.getElementById('mapViewport');
+    const viewport = document.getElementById("mapViewport");
     const vw = viewport ? viewport.clientWidth : 800;
     const vh = viewport ? viewport.clientHeight : 600;
 
@@ -1361,10 +1967,10 @@ const MapEngine = {
   },
 
   zoomAtPoint(factor, focalX, focalY, smooth = true) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(700);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(700);
     this.stopOrbitTour();
 
-    const viewport = document.getElementById('mapViewport');
+    const viewport = document.getElementById("mapViewport");
     const vw = viewport ? viewport.clientWidth : 800;
     const vh = viewport ? viewport.clientHeight : 600;
 
@@ -1372,7 +1978,10 @@ const MapEngine = {
     if (focalY == null) focalY = vh / 2;
 
     const oldScale = this.scale;
-    const targetScale = Math.min(Math.max(this.minScale, this.scale * factor), this.maxScale);
+    const targetScale = Math.min(
+      Math.max(this.minScale, this.scale * factor),
+      this.maxScale,
+    );
     if (Math.abs(targetScale - oldScale) < 0.001) return;
 
     this.scale = targetScale;
@@ -1381,16 +1990,18 @@ const MapEngine = {
     const cy = this.CANVAS_HEIGHT / 2;
 
     // Exact mathematical formula for transformOrigin: 50% 50%
-    this.panX = focalX - cx - (focalX - this.panX - cx) * (this.scale / oldScale);
-    this.panY = focalY - cy - (focalY - this.panY - cy) * (this.scale / oldScale);
+    this.panX =
+      focalX - cx - (focalX - this.panX - cx) * (this.scale / oldScale);
+    this.panY =
+      focalY - cy - (focalY - this.panY - cy) * (this.scale / oldScale);
 
     this.clampPan();
     this.applyTransform(smooth);
   },
 
   updateMiniMap() {
-    const box = document.getElementById('miniMapBox');
-    const viewport = document.getElementById('mapViewport');
+    const box = document.getElementById("miniMapBox");
+    const viewport = document.getElementById("mapViewport");
     if (!box || !viewport) return;
 
     const vw = viewport.clientWidth;
@@ -1418,31 +2029,36 @@ const MapEngine = {
   },
 
   searchPois(query) {
-    const dropdown = document.getElementById('mapPoiSearchResults');
-    const clearBtn = document.getElementById('mapPoiSearchClear');
+    const dropdown = document.getElementById("mapPoiSearchResults");
+    const clearBtn = document.getElementById("mapPoiSearchClear");
     if (clearBtn) {
       if (query && query.trim().length > 0) {
-        clearBtn.classList.remove('hidden');
+        clearBtn.classList.remove("hidden");
       } else {
-        clearBtn.classList.add('hidden');
+        clearBtn.classList.add("hidden");
       }
     }
     if (!dropdown) return;
-    const q = (query || '').trim().toLowerCase();
+    const q = (query || "").trim().toLowerCase();
     if (!q) {
-      dropdown.classList.add('hidden');
-      dropdown.innerHTML = '';
+      dropdown.classList.add("hidden");
+      dropdown.innerHTML = "";
       return;
     }
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const matches = resortPois.filter(p => {
-      const numMatch = String(p.num).toLowerCase().includes(q) || String(p.id).toLowerCase().includes(q);
-      const nameArMatch = p.nameAr && p.nameAr.toLowerCase().includes(q);
-      const nameEnMatch = p.nameEn && p.nameEn.toLowerCase().includes(q);
-      const tagMatch = p.tagAr && p.tagAr.toLowerCase().includes(q);
-      return numMatch || nameArMatch || nameEnMatch || tagMatch;
-    }).slice(0, 7);
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const matches = resortPois
+      .filter((p) => {
+        const numMatch =
+          String(p.num).toLowerCase().includes(q) ||
+          String(p.id).toLowerCase().includes(q);
+        const nameArMatch = p.nameAr && p.nameAr.toLowerCase().includes(q);
+        const nameEnMatch = p.nameEn && p.nameEn.toLowerCase().includes(q);
+        const tagMatch = p.tagAr && p.tagAr.toLowerCase().includes(q);
+        return numMatch || nameArMatch || nameEnMatch || tagMatch;
+      })
+      .slice(0, 7);
 
     if (matches.length === 0) {
       dropdown.innerHTML = `
@@ -1450,123 +2066,187 @@ const MapEngine = {
           لا توجد نتائج مطابقة لمصطلح البحث
         </div>
       `;
-      dropdown.classList.remove('hidden');
+      dropdown.classList.remove("hidden");
       return;
     }
 
-    dropdown.innerHTML = matches.map(poi => {
-      const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, hours: poi.hours };
-      const icon = this.getPoiIcon(poi);
-      return `
+    dropdown.innerHTML = matches
+      .map((poi) => {
+        const loc =
+          typeof getLocalizedPoi === "function"
+            ? getLocalizedPoi(poi, lang)
+            : { name: poi.nameAr, hours: poi.hours };
+        const icon = this.getPoiIcon(poi);
+        return `
         <div onclick="MapEngine.selectFromSearch('${poi.id}')" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 last:border-none transition rounded-xl">
           <div class="flex items-center gap-2">
             <span class="w-7 h-7 rounded-xl ${poi.badgeColor} text-white font-bold text-xs flex items-center justify-center shadow-sm">${icon}</span>
             <div>
               <div class="text-xs font-black text-slate-800 dark:text-white">${loc.name}</div>
-              <div class="text-[10px] text-slate-400">${poi.categoryNameAr || ''}</div>
+              <div class="text-[10px] text-slate-400">${poi.categoryNameAr || ""}</div>
             </div>
           </div>
           <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-mono font-bold">#${poi.num}</span>
         </div>
       `;
-    }).join('');
+      })
+      .join("");
 
-    dropdown.classList.remove('hidden');
+    dropdown.classList.remove("hidden");
   },
 
   selectFromSearch(id) {
-    const dropdown = document.getElementById('mapPoiSearchResults');
-    const input = document.getElementById('mapPoiSearchInput');
-    const clearBtn = document.getElementById('mapPoiSearchClear');
-    if (dropdown) dropdown.classList.add('hidden');
-    if (input) input.value = '';
-    if (clearBtn) clearBtn.classList.add('hidden');
+    const dropdown = document.getElementById("mapPoiSearchResults");
+    const input = document.getElementById("mapPoiSearchInput");
+    const clearBtn = document.getElementById("mapPoiSearchClear");
+    if (dropdown) dropdown.classList.add("hidden");
+    if (input) input.value = "";
+    if (clearBtn) clearBtn.classList.add("hidden");
     this.selectPoi(id);
   },
 
   focusPreset(id) {
-    const strId = String(id != null ? id : '').trim();
+    const strId = String(id != null ? id : "").trim();
     // Update visual active state on preset chips
-    document.querySelectorAll('.landmark-preset-btn').forEach(b => {
-      const bId = b.getAttribute('data-preset-id');
+    document.querySelectorAll(".landmark-preset-btn").forEach((b) => {
+      const bId = b.getAttribute("data-preset-id");
       if (bId && bId.toUpperCase() === strId.toUpperCase()) {
-        b.classList.add('bg-amber-500', 'text-slate-950', 'border-amber-400', 'shadow-sm');
-        b.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+        b.classList.add(
+          "bg-amber-500",
+          "text-slate-950",
+          "border-amber-400",
+          "shadow-sm",
+        );
+        b.classList.remove(
+          "bg-slate-100",
+          "dark:bg-slate-800",
+          "text-slate-700",
+          "dark:text-slate-300",
+        );
       } else {
-        b.classList.remove('bg-amber-500', 'text-slate-950', 'border-amber-400', 'shadow-sm');
-        b.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+        b.classList.remove(
+          "bg-amber-500",
+          "text-slate-950",
+          "border-amber-400",
+          "shadow-sm",
+        );
+        b.classList.add(
+          "bg-slate-100",
+          "dark:bg-slate-800",
+          "text-slate-700",
+          "dark:text-slate-300",
+        );
       }
     });
 
     // Make sure the target pin is not dimmed if category filtering was active
     const targetPin = document.getElementById(`pin-${strId}`);
     if (targetPin) {
-      targetPin.classList.remove('dimmed');
-      targetPin.style.opacity = '1';
+      targetPin.classList.remove("dimmed");
+      targetPin.style.opacity = "1";
     }
 
     this.selectPoi(strId, true);
   },
 
   resetTransform() {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(500);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(500);
     this.stopOrbitTour();
     this.closePopover();
     this.bearing = 0;
     this.pitch = 0;
     this.is3D = false;
-    this.currentCategoryFilter = 'all';
+    this.currentCategoryFilter = "all";
     this.isOpenNowFilter = false;
 
     this.set3DButtonsActive(false);
 
     // Reset Category buttons
-    document.querySelectorAll('.map-cat-btn').forEach(b => {
-      b.classList.remove('bg-brand-navy', 'text-white', 'shadow-sm', 'active');
-      b.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200');
+    document.querySelectorAll(".map-cat-btn").forEach((b) => {
+      b.classList.remove("bg-brand-navy", "text-white", "shadow-sm", "active");
+      b.classList.add(
+        "bg-slate-100",
+        "dark:bg-slate-800",
+        "text-slate-700",
+        "dark:text-slate-200",
+      );
     });
     const allCatBtn = document.querySelector('.map-cat-btn[data-cat="all"]');
     if (allCatBtn) {
-      allCatBtn.classList.add('bg-brand-navy', 'text-white', 'shadow-sm', 'active');
-      allCatBtn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200');
+      allCatBtn.classList.add(
+        "bg-brand-navy",
+        "text-white",
+        "shadow-sm",
+        "active",
+      );
+      allCatBtn.classList.remove(
+        "bg-slate-100",
+        "dark:bg-slate-800",
+        "text-slate-700",
+        "dark:text-slate-200",
+      );
     }
 
     // Reset Open Now button
-    const openNowBtn = document.getElementById('btnMapOpenNow');
+    const openNowBtn = document.getElementById("btnMapOpenNow");
     if (openNowBtn) {
-      openNowBtn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'active');
-      openNowBtn.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200');
+      openNowBtn.classList.remove(
+        "bg-emerald-600",
+        "text-white",
+        "shadow-md",
+        "active",
+      );
+      openNowBtn.classList.add(
+        "bg-slate-100",
+        "dark:bg-slate-800",
+        "text-slate-700",
+        "dark:text-slate-200",
+      );
     }
 
     // Reset Landmark Preset chips
-    document.querySelectorAll('.landmark-preset-btn').forEach(b => {
-      b.classList.remove('bg-amber-500', 'text-slate-950', 'border-amber-400', 'shadow-sm');
-      b.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+    document.querySelectorAll(".landmark-preset-btn").forEach((b) => {
+      b.classList.remove(
+        "bg-amber-500",
+        "text-slate-950",
+        "border-amber-400",
+        "shadow-sm",
+      );
+      b.classList.add(
+        "bg-slate-100",
+        "dark:bg-slate-800",
+        "text-slate-700",
+        "dark:text-slate-300",
+      );
     });
 
     this.fitToViewport();
     this.clearRoute();
 
-    document.querySelectorAll('.map-pin, .virtual-resort-pin').forEach(p => {
-      p.classList.remove('active-pin', 'dimmed');
-      p.style.opacity = '1';
+    document.querySelectorAll(".map-pin, .virtual-resort-pin").forEach((p) => {
+      p.classList.remove("active-pin", "dimmed");
+      p.style.opacity = "1";
     });
-    const poiBadge = document.getElementById('activePoiText');
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const defTxt = (typeof i18n !== 'undefined' && i18n[lang] && i18n[lang].map_active_badge_default) 
-      ? i18n[lang].map_active_badge_default 
-      : 'انقر على أي نقطة في الخريطة لمعاينة التفاصيل';
+    const poiBadge = document.getElementById("activePoiText");
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const defTxt =
+      typeof i18n !== "undefined" &&
+      i18n[lang] &&
+      i18n[lang].map_active_badge_default
+        ? i18n[lang].map_active_badge_default
+        : "انقر على أي نقطة في الخريطة لمعاينة التفاصيل";
     if (poiBadge) poiBadge.innerText = defTxt;
-    const banner = document.getElementById('routeResultBanner');
-    if (banner) banner.classList.add('hidden');
+    const banner = document.getElementById("routeResultBanner");
+    if (banner) banner.classList.add("hidden");
 
-    const beacon = document.getElementById('active3DBeacon');
+    const beacon = document.getElementById("active3DBeacon");
     if (beacon) beacon.remove();
   },
 
   focusCoordinate(pctX, pctY, targetScale = 1.45, smooth = true) {
     this.stopOrbitTour();
-    const viewport = document.getElementById('mapViewport');
+    const viewport = document.getElementById("mapViewport");
     if (!viewport) return;
 
     const vw = viewport.clientWidth;
@@ -1584,21 +2264,28 @@ const MapEngine = {
 
     const dx = canvasCenterX - targetPixelX;
     // In 3D tilted view, offset Y slightly to account for perspective foreshortening
-    const tiltOffset = this.is3D ? (this.pitch * 1.8) : 0;
+    const tiltOffset = this.is3D ? this.pitch * 1.8 : 0;
     const dy = canvasCenterY - targetPixelY + tiltOffset;
 
-    this.panX = (vw - this.CANVAS_WIDTH) / 2 + (dx * this.scale);
-    this.panY = (vh - this.CANVAS_HEIGHT) / 2 + (dy * this.scale);
+    this.panX = (vw - this.CANVAS_WIDTH) / 2 + dx * this.scale;
+    this.panY = (vh - this.CANVAS_HEIGHT) / 2 + dy * this.scale;
 
     this.clampPan();
     this.applyTransform(smooth);
   },
 
   // Ultra-Smooth 3D Cinematic Fly-To Camera Transition with Exact Geometric Framing
-  flyToCinematic(pctX, pctY, targetScale = 1.65, targetPitch = 48, targetBearing = 0, durationMs = 1600) {
+  flyToCinematic(
+    pctX,
+    pctY,
+    targetScale = 1.65,
+    targetPitch = 48,
+    targetBearing = 0,
+    durationMs = 1600,
+  ) {
     this.stopOrbitTour();
-    const viewport = document.getElementById('mapViewport');
-    const canvas = document.getElementById('mapCanvasWrapper');
+    const viewport = document.getElementById("mapViewport");
+    const canvas = document.getElementById("mapCanvasWrapper");
     if (!viewport || !canvas) return;
 
     this.is3D = true;
@@ -1649,9 +2336,9 @@ const MapEngine = {
     this.panX = desiredScreenX - cx - projX;
     this.panY = desiredScreenY - cy - projY;
 
-    if (viewport) viewport.classList.add('mode-3d');
+    if (viewport) viewport.classList.add("mode-3d");
     canvas.style.transition = `transform ${durationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`;
-    canvas.style.transformOrigin = '50% 50%';
+    canvas.style.transformOrigin = "50% 50%";
 
     const currentPitch = this.pitch;
     canvas.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale}) rotateX(${currentPitch}deg) rotateZ(${this.bearing}deg)`;
@@ -1664,32 +2351,34 @@ const MapEngine = {
 
   // 3D Sonar Radar Spotlight & Overhead Tag on Active POI
   showTourSpotlight(poi, tourIndex, totalSteps) {
-    const overlay = document.getElementById('pinsOverlay');
+    const overlay = document.getElementById("pinsOverlay");
     if (!overlay || !poi || !poi.coords) return;
 
     // 1. Spotlight the active pin & dim background pins
-    const pins = document.querySelectorAll('.map-pin');
-    pins.forEach(pin => {
-      const isTarget = String(pin.id).replace('pin-', '').trim().toUpperCase() === String(poi.id).trim().toUpperCase();
+    const pins = document.querySelectorAll(".map-pin");
+    pins.forEach((pin) => {
+      const isTarget =
+        String(pin.id).replace("pin-", "").trim().toUpperCase() ===
+        String(poi.id).trim().toUpperCase();
       if (isTarget) {
-        pin.classList.remove('tour-dimmed-pin');
-        pin.classList.add('active-pin', 'active-tour-pin');
-        pin.style.opacity = '1';
-        pin.style.zIndex = '60';
+        pin.classList.remove("tour-dimmed-pin");
+        pin.classList.add("active-pin", "active-tour-pin");
+        pin.style.opacity = "1";
+        pin.style.zIndex = "60";
       } else {
-        pin.classList.remove('active-pin', 'active-tour-pin');
-        pin.classList.add('tour-dimmed-pin');
-        pin.style.opacity = '0.32';
-        pin.style.zIndex = '10';
+        pin.classList.remove("active-pin", "active-tour-pin");
+        pin.classList.add("tour-dimmed-pin");
+        pin.style.opacity = "0.32";
+        pin.style.zIndex = "10";
       }
     });
 
     // 2. 3D Sonar Beacon (ripples expanding across resort ground)
-    let beacon = document.getElementById('tourSpotlightBeacon');
+    let beacon = document.getElementById("tourSpotlightBeacon");
     if (!beacon) {
-      beacon = document.createElement('div');
-      beacon.id = 'tourSpotlightBeacon';
-      beacon.className = 'tour-spotlight-beacon pointer-events-none absolute';
+      beacon = document.createElement("div");
+      beacon.id = "tourSpotlightBeacon";
+      beacon.className = "tour-spotlight-beacon pointer-events-none absolute";
       overlay.appendChild(beacon);
     }
     beacon.style.left = `${poi.coords.x}%`;
@@ -1703,33 +2392,35 @@ const MapEngine = {
     `;
 
     // Remove old 3D canvas callout if present (now rendered crisp in 2D HUD)
-    const oldCallout = document.getElementById('tourSpotlightCallout');
+    const oldCallout = document.getElementById("tourSpotlightCallout");
     if (oldCallout) oldCallout.remove();
 
     this.updatePinBillboards();
   },
 
   clearTourSpotlight() {
-    const beacon = document.getElementById('tourSpotlightBeacon');
+    const beacon = document.getElementById("tourSpotlightBeacon");
     if (beacon) beacon.remove();
-    const oldCallout = document.getElementById('tourSpotlightCallout');
+    const oldCallout = document.getElementById("tourSpotlightCallout");
     if (oldCallout) oldCallout.remove();
 
-    const pins = document.querySelectorAll('.map-pin');
-    pins.forEach(pin => {
-      pin.classList.remove('active-pin', 'active-tour-pin', 'tour-dimmed-pin');
-      pin.style.opacity = '1';
-      pin.style.zIndex = '';
+    const pins = document.querySelectorAll(".map-pin");
+    pins.forEach((pin) => {
+      pin.classList.remove("active-pin", "active-tour-pin", "tour-dimmed-pin");
+      pin.style.opacity = "1";
+      pin.style.zIndex = "";
     });
 
     this.updatePinBillboards();
   },
 
   selectPoi(id, shouldScroll = false) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(750);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(750);
     this.stopOrbitTour();
-    const strId = String(id != null ? id : '').trim();
-    const poi = resortPois.find(p => String(p.id).trim().toUpperCase() === strId.toUpperCase());
+    const strId = String(id != null ? id : "").trim();
+    const poi = resortPois.find(
+      (p) => String(p.id).trim().toUpperCase() === strId.toUpperCase(),
+    );
     if (!poi) {
       console.warn(`[MapEngine] POI not found for id: "${id}"`);
       return;
@@ -1738,19 +2429,29 @@ const MapEngine = {
     if (this.isPickingLocation) {
       this.isPickingLocation = false;
       this.closePopover();
-      const button = document.getElementById('mapPickLocationBtn');
+      const button = document.getElementById("mapPickLocationBtn");
       if (button) {
-        button.classList.remove('active-mode');
-        button.setAttribute('aria-pressed', 'false');
+        button.classList.remove("active-mode");
+        button.setAttribute("aria-pressed", "false");
       }
-      const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-      const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr };
+      const lang =
+        typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+      const loc =
+        typeof getLocalizedPoi === "function"
+          ? getLocalizedPoi(poi, lang)
+          : { name: poi.nameAr };
       this.setGuestLocation(poi.coords, loc.name, poi.id);
-      const originSelect = document.getElementById('selectOrigin');
+      const originSelect = document.getElementById("selectOrigin");
       if (originSelect) originSelect.value = poi.id;
       const t = i18n[lang] || i18n.ar;
-      if (typeof App !== 'undefined' && App.showToast) {
-        App.showToast((t.map_pick_location_saved || 'تم تحديد نقطة البداية قرب {name} (موقع تقريبي).').replace('{name}', loc.name), '📍');
+      if (typeof App !== "undefined" && App.showToast) {
+        App.showToast(
+          (
+            t.map_pick_location_saved ||
+            "تم تحديد نقطة البداية قرب {name} (موقع تقريبي)."
+          ).replace("{name}", loc.name),
+          "📍",
+        );
       }
       return;
     }
@@ -1760,76 +2461,126 @@ const MapEngine = {
     }
 
     // Highlight Pin & undim
-    document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active-pin'));
+    document
+      .querySelectorAll(".map-pin")
+      .forEach((p) => p.classList.remove("active-pin"));
     const pinEl = document.getElementById(`pin-${poi.id}`);
     if (pinEl) {
-      pinEl.classList.remove('dimmed');
-      pinEl.style.opacity = '1';
-      pinEl.classList.add('active-pin');
+      pinEl.classList.remove("dimmed");
+      pinEl.style.opacity = "1";
+      pinEl.classList.add("active-pin");
     }
 
     // Smooth focus on the POI
     this.focusCoordinate(poi.coords.x, poi.coords.y, 1.55, true);
 
-    // Drop Google Earth light beacon beam on the selected pin
-    this.dropLightBeacon(poi.coords);
+    // Clean up any room beacon and legacy 3D light beam line
+    this.removeRoomBeacon();
+    this.dropLightBeacon();
 
-    // Show interactive popover card on the map
+    // Drop high-visibility 3D Location Pin Marker 📍 on the selected place
+    this.dropDestinationLocationPin(poi);
+
+    // Show interactive popover card outside the map
     this.showPopover(poi);
 
     // Update bottom badge
-    const badge = document.getElementById('activePoiText');
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const loc = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, category: poi.categoryNameAr };
+    const badge = document.getElementById("activePoiText");
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const loc =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(poi, lang)
+        : { name: poi.nameAr, category: poi.categoryNameAr };
     const icon = this.getPoiIcon(poi);
     if (badge) {
-      badge.innerHTML = `${icon} <strong>${loc.name}</strong> (${loc.category || poi.categoryNameAr || ''})`;
+      badge.innerHTML = `${icon} <strong>${loc.name}</strong> (${loc.category || poi.categoryNameAr || ""})`;
     }
   },
 
-  dropLightBeacon(coords) {
-    let beacon = document.getElementById('active3DBeacon');
-    if (!beacon) {
-      beacon = document.createElement('div');
-      beacon.id = 'active3DBeacon';
-      beacon.className = 'absolute pointer-events-none z-30 transition-all duration-300';
-      beacon.innerHTML = `<div class="active-3d-beacon-beam"></div>`;
-      const overlay = document.getElementById('pinsOverlay');
-      if (overlay) overlay.appendChild(beacon);
-    }
+  dropDestinationLocationPin(poi) {
+    this.removeDestinationLocationPin();
+    if (!poi || !poi.coords) return;
 
-    beacon.style.left = `${coords.x}%`;
-    beacon.style.top = `${coords.y}%`;
+    // If an active room beacon is already displayed on this building, do not double-drop a generic pin
+    if (document.getElementById("activeRoomBeacon")) return;
+
+    const overlay = document.getElementById("pinsOverlay");
+    if (!overlay) return;
+
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const loc =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(poi, lang)
+        : { name: poi.nameAr, category: poi.categoryNameAr };
+
+    const marker = document.createElement("div");
+    marker.id = "activeDestinationLocationPin";
+    marker.className = "destination-location-pin";
+    marker.style.left = `${poi.coords.x}%`;
+    marker.style.top = `${poi.coords.y}%`;
+    marker.innerHTML = `
+      <div class="dest-pin-ground-pulse"></div>
+      <div class="dest-pin-ground-target"></div>
+      <div class="dest-pin-body">
+        <div class="dest-pin-badge">
+          <span class="dest-pin-icon">📍</span>
+          <div class="dest-pin-text">
+            <span class="dest-pin-name">${loc.name}</span>
+            <span class="dest-pin-cat">${loc.category || poi.categoryNameAr || ""}</span>
+          </div>
+        </div>
+        <div class="dest-pin-pointer"></div>
+      </div>
+    `;
+
+    overlay.appendChild(marker);
+  },
+
+  removeDestinationLocationPin() {
+    const marker = document.getElementById("activeDestinationLocationPin");
+    if (marker) marker.remove();
+  },
+
+  dropLightBeacon() {
+    const beacon = document.getElementById("active3DBeacon");
+    if (beacon) beacon.remove();
   },
 
   applyPinFilters() {
-    const cat = this.currentCategoryFilter || 'all';
+    const cat = this.currentCategoryFilter || "all";
     const openNow = this.isOpenNowFilter || false;
     const now = new Date();
     const currentHour = now.getHours();
     const currentMin = now.getMinutes();
     const currentTimeVal = currentHour * 60 + currentMin;
 
-    const pins = document.querySelectorAll('.map-pin, .virtual-resort-pin');
-    pins.forEach(pin => {
-      const pinId = pin.id.replace('pin-', '').replace('vpin-', '');
-      const poi = resortPois.find(p => String(p.id).trim().toUpperCase() === pinId.trim().toUpperCase());
+    const pins = document.querySelectorAll(".map-pin, .virtual-resort-pin");
+    pins.forEach((pin) => {
+      const pinId = pin.id.replace("pin-", "").replace("vpin-", "");
+      const poi = resortPois.find(
+        (p) => String(p.id).trim().toUpperCase() === pinId.trim().toUpperCase(),
+      );
       if (!poi) return;
 
-      const pinCat = poi.category || pin.getAttribute('data-category');
-      const catMatch = (cat === 'all' || pinCat === cat);
+      const pinCat = poi.category || pin.getAttribute("data-category");
+      const catMatch = cat === "all" || pinCat === cat;
 
       let openMatch = true;
       if (openNow) {
-        const hStr = poi.hours || '';
-        if (hStr.includes('24') || hStr.includes('مفتوح دائماً')) {
+        const hStr = poi.hours || "";
+        if (hStr.includes("24") || hStr.includes("مفتوح دائماً")) {
           openMatch = true;
-        } else if (hStr.includes('غروب الشمس')) {
+        } else if (hStr.includes("غروب الشمس")) {
           openMatch = currentHour >= 7 && currentHour < 18;
         } else {
-          const timeMatch = hStr.match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
+          const timeMatch = hStr.match(
+            /(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/,
+          );
           if (timeMatch) {
-            const startVal = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
+            const startVal =
+              parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
             const endVal = parseInt(timeMatch[3]) * 60 + parseInt(timeMatch[4]);
             openMatch = currentTimeVal >= startVal && currentTimeVal <= endVal;
           }
@@ -1837,48 +2588,64 @@ const MapEngine = {
       }
 
       if (catMatch && openMatch) {
-        pin.classList.remove('dimmed');
-        pin.style.opacity = '1';
+        pin.classList.remove("dimmed");
+        pin.style.opacity = "1";
       } else {
-        pin.classList.add('dimmed');
-        pin.style.opacity = '0.25';
+        pin.classList.add("dimmed");
+        pin.style.opacity = "0.25";
       }
     });
   },
 
   filterCategory(cat, btn) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(550);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(550);
     this.currentCategoryFilter = cat;
 
     // Only update category buttons, do NOT strip Open Now styling
-    document.querySelectorAll('.map-cat-btn').forEach(b => {
-      b.classList.remove('bg-brand-navy', 'text-white', 'shadow-sm', 'active');
-      b.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200');
+    document.querySelectorAll(".map-cat-btn").forEach((b) => {
+      b.classList.remove("bg-brand-navy", "text-white", "shadow-sm", "active");
+      b.classList.add(
+        "bg-slate-100",
+        "dark:bg-slate-800",
+        "text-slate-700",
+        "dark:text-slate-200",
+      );
     });
 
     if (btn) {
-      btn.classList.add('bg-brand-navy', 'text-white', 'shadow-sm', 'active');
-      btn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200');
+      btn.classList.add("bg-brand-navy", "text-white", "shadow-sm", "active");
+      btn.classList.remove(
+        "bg-slate-100",
+        "dark:bg-slate-800",
+        "text-slate-700",
+        "dark:text-slate-200",
+      );
     }
 
     this.applyPinFilters();
 
     // Synchronize directory cards filter
-    const matchingCategoryBtn = document.querySelector(`.category-btn[onclick*="'${cat}'"]`);
-    if (matchingCategoryBtn && typeof App !== 'undefined' && App.filterCategory) {
+    const matchingCategoryBtn = document.querySelector(
+      `.category-btn[onclick*="'${cat}'"]`,
+    );
+    if (
+      matchingCategoryBtn &&
+      typeof App !== "undefined" &&
+      App.filterCategory
+    ) {
       App.filterCategory(cat, matchingCategoryBtn);
     }
   },
 
   toggleFullscreen() {
-    const vp = document.getElementById('mapViewport');
+    const vp = document.getElementById("mapViewport");
     if (!vp) return;
 
     // Check if we are already in pseudo-fullscreen
-    if (vp.classList.contains('fullscreen-active')) {
-      vp.classList.remove('fullscreen-active');
-      document.body.classList.remove('map-is-fullscreen');
-      const exitBtn = document.getElementById('mapExitFullscreenBtn');
+    if (vp.classList.contains("fullscreen-active")) {
+      vp.classList.remove("fullscreen-active");
+      document.body.classList.remove("map-is-fullscreen");
+      const exitBtn = document.getElementById("mapExitFullscreenBtn");
       if (exitBtn) exitBtn.remove();
       this.syncExternalNavParent();
       setTimeout(() => this.fitToViewport(), 150);
@@ -1887,32 +2654,37 @@ const MapEngine = {
 
     // Attempt native Fullscreen API first
     if (!document.fullscreenElement && vp.requestFullscreen) {
-      vp.requestFullscreen().then(() => {
-        this.syncExternalNavParent();
-        setTimeout(() => this.fitToViewport(), 150);
-      }).catch(() => {
-        this.enablePseudoFullscreen(vp);
-      });
+      vp.requestFullscreen()
+        .then(() => {
+          this.syncExternalNavParent();
+          setTimeout(() => this.fitToViewport(), 150);
+        })
+        .catch(() => {
+          this.enablePseudoFullscreen(vp);
+        });
     } else if (document.fullscreenElement) {
-      document.exitFullscreen().then(() => {
-        this.syncExternalNavParent();
-        setTimeout(() => this.fitToViewport(), 150);
-      }).catch(() => {});
+      document
+        .exitFullscreen()
+        .then(() => {
+          this.syncExternalNavParent();
+          setTimeout(() => this.fitToViewport(), 150);
+        })
+        .catch(() => {});
     } else {
       this.enablePseudoFullscreen(vp);
     }
   },
 
   enablePseudoFullscreen(vp) {
-    vp.classList.add('fullscreen-active');
-    document.body.classList.add('map-is-fullscreen');
+    vp.classList.add("fullscreen-active");
+    document.body.classList.add("map-is-fullscreen");
 
-    let exitBtn = document.getElementById('mapExitFullscreenBtn');
+    let exitBtn = document.getElementById("mapExitFullscreenBtn");
     if (!exitBtn) {
-      exitBtn = document.createElement('button');
-      exitBtn.id = 'mapExitFullscreenBtn';
-      exitBtn.className = 'map-exit-fullscreen-btn tap-effect';
-      exitBtn.innerHTML = '✕ خروج من ملء الشاشة';
+      exitBtn = document.createElement("button");
+      exitBtn.id = "mapExitFullscreenBtn";
+      exitBtn.className = "map-exit-fullscreen-btn tap-effect";
+      exitBtn.innerHTML = "✕ خروج من ملء الشاشة";
       exitBtn.onclick = () => this.toggleFullscreen();
       vp.appendChild(exitBtn);
     }
@@ -1921,25 +2693,40 @@ const MapEngine = {
   },
 
   scrollToMap(target = null) {
-    const el = target || document.getElementById('mapViewport') || document.getElementById('map-section');
+    const extNav = document.getElementById("mapExternalNavContainer");
+    const isNavActive =
+      extNav &&
+      extNav.offsetHeight > 20 &&
+      !extNav.classList.contains("hidden");
+    const el =
+      target ||
+      (isNavActive
+        ? extNav
+        : document.getElementById("mapViewport") ||
+          document.getElementById("map-section"));
     if (!el) return;
-    const header = document.querySelector('header');
+    const header = document.querySelector("header");
     const headerHeight = header ? header.offsetHeight : 64;
     const extraMargin = 14;
-    const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerHeight - extraMargin;
+    const targetY =
+      el.getBoundingClientRect().top +
+      window.pageYOffset -
+      headerHeight -
+      extraMargin;
     window.scrollTo({
       top: Math.max(0, targetY),
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   },
 
   dropRoomBeacon(coords, roomNum, buildingName, floorName) {
-    let beacon = document.getElementById('activeRoomBeacon');
+    this.removeDestinationLocationPin(); // Clean up generic location pin so it never layers over room beacon
+    let beacon = document.getElementById("activeRoomBeacon");
     if (!beacon) {
-      beacon = document.createElement('div');
-      beacon.id = 'activeRoomBeacon';
-      beacon.className = 'active-room-beacon';
-      const overlay = document.getElementById('pinsOverlay');
+      beacon = document.createElement("div");
+      beacon.id = "activeRoomBeacon";
+      beacon.className = "active-room-beacon";
+      const overlay = document.getElementById("pinsOverlay");
       if (overlay) overlay.appendChild(beacon);
     }
 
@@ -1951,7 +2738,7 @@ const MapEngine = {
         <span class="room-beacon-icon">🔑</span>
         <div class="room-beacon-text">
           <span class="room-num">غرفة ${roomNum}</span>
-          <span class="room-floor">${buildingName ? buildingName + ' • ' : ''}${floorName || ''}</span>
+          <span class="room-floor">${buildingName ? buildingName + " • " : ""}${floorName || ""}</span>
         </div>
       </div>
       <div class="room-beacon-pin-pointer"></div>
@@ -1959,7 +2746,7 @@ const MapEngine = {
   },
 
   removeRoomBeacon() {
-    const beacon = document.getElementById('activeRoomBeacon');
+    const beacon = document.getElementById("activeRoomBeacon");
     if (beacon) beacon.remove();
   },
 
@@ -1969,20 +2756,20 @@ const MapEngine = {
   guestLocation: null,
 
   setGuestLocation(coords, name, poiId = null) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(900);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(900);
     this.guestLocation = { coords, name };
     this.guestLocationPoiId = poiId;
 
-    let marker = document.getElementById('myLocationMarker');
+    let marker = document.getElementById("myLocationMarker");
     if (!marker) {
-      marker = document.createElement('div');
-      marker.id = 'myLocationMarker';
-      marker.className = 'my-location-marker';
+      marker = document.createElement("div");
+      marker.id = "myLocationMarker";
+      marker.className = "my-location-marker";
       marker.innerHTML = `
         <div class="my-location-pulse"></div>
         <div class="my-location-dot"></div>
       `;
-      const overlay = document.getElementById('pinsOverlay');
+      const overlay = document.getElementById("pinsOverlay");
       if (overlay) overlay.appendChild(marker);
     }
 
@@ -1993,35 +2780,45 @@ const MapEngine = {
     this.focusCoordinate(coords.x, coords.y, 1.6);
 
     // Update bottom badge
-    const badge = document.getElementById('activePoiText');
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
+    const badge = document.getElementById("activePoiText");
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
     if (badge) {
-      badge.innerHTML = `📍 <strong>${t.wai_my_location_set || 'تم تحديد موقعك الحالي'}</strong> (${name})`;
+      badge.innerHTML = `📍 <strong>${t.wai_my_location_set || "تم تحديد موقعك الحالي"}</strong> (${name})`;
     }
   },
 
   clearGuestLocation() {
     this.guestLocation = null;
     this.guestLocationPoiId = null;
-    const marker = document.getElementById('myLocationMarker');
+    const marker = document.getElementById("myLocationMarker");
     if (marker) marker.remove();
   },
 
   beginLocationPick() {
     this.isPickingLocation = !this.isPickingLocation;
-    const button = document.getElementById('mapPickLocationBtn');
+    const button = document.getElementById("mapPickLocationBtn");
     if (button) {
-      button.classList.toggle('active-mode', this.isPickingLocation);
-      button.setAttribute('aria-pressed', String(this.isPickingLocation));
+      button.classList.toggle("active-mode", this.isPickingLocation);
+      button.setAttribute("aria-pressed", String(this.isPickingLocation));
     }
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
     const t = i18n[lang] || i18n.ar;
     if (this.isPickingLocation) this.closePopover();
-    if (typeof App !== 'undefined' && App.showToast) {
-      const message = this.isPickingLocation ? t.map_pick_location_hint : t.map_pick_location_cancel;
-      App.showToast(message || (this.isPickingLocation ? 'اختر أقرب معلم على الخريطة لموقعك.' : 'تم إلغاء اختيار الموقع.'), '📍');
+    if (typeof App !== "undefined" && App.showToast) {
+      const message = this.isPickingLocation
+        ? t.map_pick_location_hint
+        : t.map_pick_location_cancel;
+      App.showToast(
+        message ||
+          (this.isPickingLocation
+            ? "اختر أقرب معلم على الخريطة لموقعك."
+            : "تم إلغاء اختيار الموقع."),
+        "📍",
+      );
     }
   },
 
@@ -2029,26 +2826,49 @@ const MapEngine = {
   isOpenNowFilter: false,
 
   toggleOpenNowFilter(btn) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(650);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(650);
     this.isOpenNowFilter = !this.isOpenNowFilter;
 
-    const openNowBtn = btn || document.getElementById('btnMapOpenNow');
+    const openNowBtn = btn || document.getElementById("btnMapOpenNow");
     if (openNowBtn) {
       if (this.isOpenNowFilter) {
-        openNowBtn.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'active');
-        openNowBtn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200');
+        openNowBtn.classList.add(
+          "bg-emerald-600",
+          "text-white",
+          "shadow-md",
+          "active",
+        );
+        openNowBtn.classList.remove(
+          "bg-slate-100",
+          "dark:bg-slate-800",
+          "text-slate-700",
+          "dark:text-slate-200",
+        );
       } else {
-        openNowBtn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'active');
-        openNowBtn.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-200');
+        openNowBtn.classList.remove(
+          "bg-emerald-600",
+          "text-white",
+          "shadow-md",
+          "active",
+        );
+        openNowBtn.classList.add(
+          "bg-slate-100",
+          "dark:bg-slate-800",
+          "text-slate-700",
+          "dark:text-slate-200",
+        );
       }
     }
 
     this.applyPinFilters();
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
-    if (this.isOpenNowFilter && typeof App !== 'undefined' && App.showToast) {
-      App.showToast(t.mf_open_now || 'تم تصفية الخريطة لعرض الأماكن المفتوحة الآن فقط ⚡');
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
+    if (this.isOpenNowFilter && typeof App !== "undefined" && App.showToast) {
+      App.showToast(
+        t.mf_open_now || "تم تصفية الخريطة لعرض الأماكن المفتوحة الآن فقط ⚡",
+      );
     }
   },
 
@@ -2059,23 +2879,35 @@ const MapEngine = {
   walkSpeed: 1,
   walkAnimFrame: null,
 
-  startTurnByTurn(originPoi, targetPoi, isAccessible = false, recenterCamera = true) {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(850);
+  startTurnByTurn(
+    originPoi,
+    targetPoi,
+    isAccessible = false,
+    recenterCamera = true,
+  ) {
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(850);
     this.closePopover(); // Always close POI popover so it never clutters the map
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+
     // Fallbacks if not provided
     if (!originPoi) {
       if (this.lastGuestPosition) {
         originPoi = {
-          id: 'LIVE_GUEST_LOCATION',
-          nameAr: (lang === 'ar' ? 'موقعي الحالي' : 'My Live Location'),
-          nameEn: 'My Live Location',
-          coords: { x: this.lastGuestPosition.pctX, y: this.lastGuestPosition.pctY },
-          isLiveLocation: true
+          id: "LIVE_GUEST_LOCATION",
+          nameAr: lang === "ar" ? "موقعي الحالي" : "My Live Location",
+          nameEn: "My Live Location",
+          coords: {
+            x: this.lastGuestPosition.pctX,
+            y: this.lastGuestPosition.pctY,
+          },
+          isLiveLocation: true,
         };
       } else {
-        originPoi = resortPois.find(p => p.id === 'M') || { coords: { x: 31.55, y: 68.36 }, nameAr: 'المبنى الرئيسي (Lobby M)' };
+        originPoi = resortPois.find((p) => p.id === "M") || {
+          coords: { x: 31.55, y: 68.36 },
+          nameAr: "المبنى الرئيسي (Lobby M)",
+        };
       }
     }
     if (!targetPoi) return;
@@ -2084,17 +2916,33 @@ const MapEngine = {
       this.activeLiveNavDestination = targetPoi;
       this.lastNavRecalcPos = {
         x: (originPoi.coords.x / 100) * this.CANVAS_WIDTH,
-        y: (originPoi.coords.y / 100) * this.CANVAS_HEIGHT
+        y: (originPoi.coords.y / 100) * this.CANVAS_HEIGHT,
       };
     } else {
       this.activeLiveNavDestination = null;
     }
 
-    const steps = this.buildWalkwaySteps(originPoi, targetPoi, lang, isAccessible);
-    const originName = originPoi.isLiveLocation ? ((lang === 'ar') ? '📍 موقعي الحالي' : '📍 My Location') : originPoi.nameAr;
-    
+    const steps = this.buildWalkwaySteps(
+      originPoi,
+      targetPoi,
+      lang,
+      isAccessible,
+    );
+    const originName = originPoi.isLiveLocation
+      ? lang === "ar"
+        ? "📍 موقعي الحالي"
+        : "📍 My Location"
+      : originPoi.nameAr;
+
     // Draw route path and retrieve calculated metrics
-    const routeInfo = this.drawRoute(originPoi.coords, targetPoi.coords, originName, targetPoi.nameAr, isAccessible, recenterCamera);
+    const routeInfo = this.drawRoute(
+      originPoi.coords,
+      targetPoi.coords,
+      originName,
+      targetPoi.nameAr,
+      isAccessible,
+      recenterCamera,
+    );
 
     this.activeNavigation = {
       originPoi,
@@ -2103,39 +2951,55 @@ const MapEngine = {
       steps,
       currentStepIdx: 0,
       meters: routeInfo ? routeInfo.meters : 120,
-      minutes: routeInfo ? routeInfo.minutes : 2
+      minutes: routeInfo ? routeInfo.minutes : 2,
     };
-    document.body.classList.add('turn-navigation-active');
+    document.body.classList.add("turn-navigation-active");
 
     this.walkProgress = 0;
     this.isSimulatingWalk = false;
 
     // Show HUD docked inside external container (or inside mapViewport if in fullscreen)
-    let hud = document.getElementById('turnNavHud');
+    let hud = document.getElementById("turnNavHud");
     const targetParent = this.getNavContainer();
     if (!hud) {
-      hud = document.createElement('div');
-      hud.id = 'turnNavHud';
-      hud.className = 'turn-nav-bar';
+      hud = document.createElement("div");
+      hud.id = "turnNavHud";
+      hud.className = "turn-nav-bar";
     }
     if (targetParent && hud.parentElement !== targetParent) {
       targetParent.appendChild(hud);
     }
-    hud.classList.remove('hidden');
+    hud.classList.remove("hidden");
 
     // Place initial walker marker at the starting coordinate only if NOT live location
     if (!originPoi.isLiveLocation) {
       this.initWalkerMarker(originPoi.coords);
     } else {
-      const marker = document.getElementById('liveWalkerMarker');
-      if (marker) marker.style.display = 'none';
+      const marker = document.getElementById("liveWalkerMarker");
+      if (marker) marker.style.display = "none";
       this.ensureBlueDotMarker();
     }
 
+    this.isHudCollapsed = false;
     this.renderTurnStep(recenterCamera);
     if (recenterCamera) {
       this.scrollToMap();
     }
+
+    // Mark the destination point with the 📍 Location Pin ONLY IF not already marked by a room beacon
+    if (targetPoi && !document.getElementById("activeRoomBeacon")) {
+      this.dropDestinationLocationPin(targetPoi);
+    }
+
+    // Auto-start live walking simulation along the path immediately without waiting for manual clicks!
+    this.startLiveWalkSimulation();
+  },
+
+  isHudCollapsed: false,
+
+  toggleHudCollapse() {
+    this.isHudCollapsed = !this.isHudCollapsed;
+    this.renderTurnStep(false);
   },
 
   renderTurnStep(recenterCamera = true) {
@@ -2143,10 +3007,11 @@ const MapEngine = {
     const nav = this.activeNavigation;
     const step = nav.steps[nav.currentStepIdx] || nav.steps[0];
     const total = nav.steps.length;
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
 
-    const hud = document.getElementById('turnNavHud');
+    const hud = document.getElementById("turnNavHud");
     if (!hud) return;
 
     const isSimActive = this.isWalkingSimulating || this.isSimulatingWalk;
@@ -2154,84 +3019,163 @@ const MapEngine = {
     const isLiveNav = !!(nav.originPoi && nav.originPoi.isLiveLocation);
 
     const progressPct = isSimActive
-      ? (this.walkProgress * 100)
-      : (((nav.currentStepIdx + 1) / total) * 100);
+      ? this.walkProgress * 100
+      : ((nav.currentStepIdx + 1) / total) * 100;
 
-    const stepOfText = (t.nav_step_of || 'الخطوة {current} من {total}')
-      .replace('{current}', nav.currentStepIdx + 1)
-      .replace('{total}', total);
+    const stepOfText = (t.nav_step_of || "الخطوة {current} من {total}")
+      .replace("{current}", nav.currentStepIdx + 1)
+      .replace("{total}", total);
 
     const isLastStep = nav.currentStepIdx === total - 1;
 
     const simBtnText = isSimActive
-      ? (isPaused
-          ? (lang === 'ar' ? 'استئناف السير' : lang === 'ru' ? 'Продолжить' : lang === 'de' ? 'Fortsetzen' : 'Resume')
-          : (lang === 'ar' ? 'إيقاف مؤقت' : lang === 'ru' ? 'Пауза' : lang === 'de' ? 'Pause' : 'Pause'))
+      ? isPaused
+        ? lang === "ar"
+          ? "استئناف السير"
+          : lang === "ru"
+            ? "Продолжить"
+            : lang === "de"
+              ? "Fortsetzen"
+              : "Resume"
+        : lang === "ar"
+          ? "إيقاف مؤقت"
+          : lang === "ru"
+            ? "Пауза"
+            : lang === "de"
+              ? "Pause"
+              : "Pause"
       : this.walkProgress >= 1
-      ? (lang === 'ar' ? 'إعادة السير' : lang === 'ru' ? 'Заново' : lang === 'de' ? 'Neustart' : 'Restart')
-      : (lang === 'ar' ? 'محاكاة السير الحي' : lang === 'ru' ? 'Живая ходьба' : lang === 'de' ? 'Live-Simulation' : 'Live Walk');
+        ? lang === "ar"
+          ? "إعادة السير"
+          : lang === "ru"
+            ? "Заново"
+            : lang === "de"
+              ? "Neustart"
+              : "Restart"
+        : lang === "ar"
+          ? "محاكاة السير الحي"
+          : lang === "ru"
+            ? "Живая ходьба"
+            : lang === "de"
+              ? "Live-Simulation"
+              : "Live Walk";
 
     const simBtnIcon = isSimActive
-      ? (isPaused ? '▶️' : '⏸️')
-      : this.walkProgress >= 1 ? '🔄' : '▶️';
-    const simBtnClass = isSimActive
-      ? (isPaused ? 'bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black' : 'bg-amber-500 text-slate-950 font-black')
+      ? isPaused
+        ? "▶️"
+        : "⏸️"
       : this.walkProgress >= 1
-      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black'
-      : 'bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black';
+        ? "🔄"
+        : "▶️";
+    const simBtnClass = isSimActive
+      ? isPaused
+        ? "bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black"
+        : "bg-amber-500 text-slate-950 font-black"
+      : this.walkProgress >= 1
+        ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black"
+        : "bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black";
 
-    hud.innerHTML = `
-      <div class="turn-progress-track">
-        <div class="turn-progress-bar" style="width: ${progressPct}%;"></div>
-      </div>
+    if (this.isHudCollapsed) {
+      hud.classList.add("is-collapsed");
+      hud.innerHTML = `
+        <div class="turn-progress-track" style="margin-bottom: 0.35rem;">
+          <div class="turn-progress-bar" style="width: ${progressPct}%;"></div>
+        </div>
 
-      <div class="flex items-center justify-between gap-2 mb-1.5">
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
-            ${stepOfText}
-          </span>
-          <span class="text-[10px] font-mono text-cyan-300 font-bold" id="turnHudMetrics">
-            ⏱️ ${nav.minutes} د (${nav.meters}م)
-          </span>
-          ${isLiveNav ? `
-            <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 font-bold border border-blue-400/40 flex items-center gap-1 shadow-sm">
-              <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
-              ${lang === 'ar' ? 'تتبع مباشر' : 'Live Tracking'}
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0 flex-1 cursor-pointer select-none tap-effect" onclick="MapEngine.toggleHudCollapse()" title="${lang === "ar" ? "انقر لتوسيع تفاصيل التوجيه" : "Tap to expand details"}">
+            <span class="text-xl shrink-0 leading-none">${step.icon}</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30 shrink-0">
+                  ${stepOfText}
+                </span>
+                <h4 class="text-xs font-black text-white truncate">${step.title}</h4>
+              </div>
+              <div class="text-[10px] font-mono text-cyan-300 font-bold truncate">
+                ⏱️ ${nav.minutes} د (${nav.meters}م)
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            <button id="btnSimulateWalk" onclick="MapEngine.toggleLiveWalkSimulation()" class="tap-effect py-1 px-2.5 rounded-lg ${simBtnClass} text-xs flex items-center gap-1 shadow">
+              <span>${simBtnIcon}</span>
+              <span class="text-[10px] font-bold hidden sm:inline">${simBtnText}</span>
+            </button>
+            <button onclick="MapEngine.toggleHudCollapse()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 font-bold flex items-center justify-center text-xs transition tap-effect" title="${lang === "ar" ? "توسيع التفاصيل" : "Expand"}">
+              ▼
+            </button>
+            <button onclick="MapEngine.endTurnByTurn()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-white font-bold flex items-center justify-center text-xs transition tap-effect" title="${t.nav_end || "إنهاء الملاحة"}">
+              ✕
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      hud.classList.remove("is-collapsed");
+      hud.innerHTML = `
+        <div class="turn-progress-track">
+          <div class="turn-progress-bar" style="width: ${progressPct}%;"></div>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
+              ${stepOfText}
             </span>
-          ` : ''}
-          <button onclick="MapEngine.toggleStepFree()" class="text-[9px] px-2 py-0.5 rounded-full ${nav.isAccessible ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-300'} font-bold transition">
-            ${nav.isAccessible ? '♿ مسار ميسر' : '♿ ميسر'}
+            <span class="text-[10px] font-mono text-cyan-300 font-bold" id="turnHudMetrics">
+              ⏱️ ${nav.minutes} د (${nav.meters}م)
+            </span>
+            ${
+              isLiveNav
+                ? `
+              <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/25 text-blue-300 font-bold border border-blue-400/40 flex items-center gap-1 shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
+                ${lang === "ar" ? "تتبع مباشر" : "Live Tracking"}
+              </span>
+            `
+                : ""
+            }
+            <button onclick="MapEngine.toggleStepFree()" class="text-[9px] px-2 py-0.5 rounded-full ${nav.isAccessible ? "bg-emerald-500 text-white" : "bg-white/10 text-slate-300"} font-bold transition">
+              ${nav.isAccessible ? "♿ مسار ميسر" : "♿ ميسر"}
+            </button>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="MapEngine.toggleHudCollapse()" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-amber-300 font-bold flex items-center justify-center text-xs transition tap-effect" title="${lang === "ar" ? "تصغير الشريط" : "Collapse"}">
+              ▲
+            </button>
+            <button onclick="MapEngine.endTurnByTurn()" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white font-bold flex items-center justify-center text-xs transition tap-effect" title="${t.nav_end || "إنهاء الملاحة"}">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2 mb-2">
+          <span class="text-2xl shrink-0 mt-0.5">${step.icon}</span>
+          <div class="min-w-0 flex-1">
+            <h4 class="text-xs sm:text-sm font-black text-white leading-tight">${step.title}</h4>
+            <p class="text-[11px] text-slate-300 leading-snug mt-0.5 line-clamp-2">${step.instruction}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
+          <button id="btnSimulateWalk" onclick="MapEngine.toggleLiveWalkSimulation()" class="tap-effect flex-1 py-1.5 px-2 rounded-xl ${simBtnClass} text-xs flex items-center justify-center gap-1 shadow">
+            <span>${simBtnIcon}</span>
+            <span class="truncate">${simBtnText}</span>
+          </button>
+          <button onclick="MapEngine.toggleSimSpeed()" class="tap-effect py-1.5 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 font-bold text-xs" title="سرعة المحاكاة">
+            ${this.simSpeed || this.walkSpeed || 1}x ⚡
+          </button>
+          <button onclick="MapEngine.prevTurnStep()" ${nav.currentStepIdx === 0 ? "disabled" : ""} class="tap-effect py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-25 text-white font-bold text-xs" title="السابقة">
+            ⬅️
+          </button>
+          <button onclick="${isLastStep ? "MapEngine.endTurnByTurn()" : "MapEngine.nextTurnStep()"}" class="tap-effect py-1.5 px-3 rounded-xl ${isLastStep ? "bg-emerald-500 text-white font-black" : "bg-white/15 hover:bg-white/25 text-white font-bold"} text-xs">
+            ${isLastStep ? t.nav_step_finish || "إنهاء ✓" : t.nav_step_next || "التالية ➔"}
           </button>
         </div>
-        <button onclick="MapEngine.endTurnByTurn()" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white font-bold flex items-center justify-center text-xs transition" title="إنهاء الملاحة">
-          ✕
-        </button>
-      </div>
-
-      <div class="flex items-start gap-2 mb-2">
-        <span class="text-2xl shrink-0 mt-0.5">${step.icon}</span>
-        <div class="min-w-0 flex-1">
-          <h4 class="text-xs sm:text-sm font-black text-white leading-tight">${step.title}</h4>
-          <p class="text-[11px] text-slate-300 leading-snug mt-0.5 line-clamp-2">${step.instruction}</p>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
-        <button id="btnSimulateWalk" onclick="MapEngine.toggleLiveWalkSimulation()" class="tap-effect flex-1 py-1.5 px-2 rounded-xl ${simBtnClass} text-xs flex items-center justify-center gap-1 shadow">
-          <span>${simBtnIcon}</span>
-          <span class="truncate">${simBtnText}</span>
-        </button>
-        <button onclick="MapEngine.toggleSimSpeed()" class="tap-effect py-1.5 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 font-bold text-xs" title="سرعة المحاكاة">
-          ${(this.simSpeed || this.walkSpeed || 1)}x ⚡
-        </button>
-        <button onclick="MapEngine.prevTurnStep()" ${nav.currentStepIdx === 0 ? 'disabled' : ''} class="tap-effect py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-25 text-white font-bold text-xs" title="السابقة">
-          ⬅️
-        </button>
-        <button onclick="${isLastStep ? 'MapEngine.endTurnByTurn()' : 'MapEngine.nextTurnStep()'}" class="tap-effect py-1.5 px-3 rounded-xl ${isLastStep ? 'bg-emerald-500 text-white font-black' : 'bg-white/15 hover:bg-white/25 text-white font-bold'} text-xs">
-          ${isLastStep ? (t.nav_step_finish || 'إنهاء ✓') : (t.nav_step_next || 'التالية ➔')}
-        </button>
-      </div>
-    `;
+      `;
+    }
 
     // Recenter camera on step coordinates if not simulating walk and NOT live navigation
     if (recenterCamera && !isSimActive && !isLiveNav && step.coords) {
@@ -2240,7 +3184,7 @@ const MapEngine = {
     }
 
     // AI Voice Concierge turn-by-turn spoken guidance
-    if (typeof VoiceConcierge !== 'undefined' && VoiceConcierge.onTurnStep) {
+    if (typeof VoiceConcierge !== "undefined" && VoiceConcierge.onTurnStep) {
       VoiceConcierge.onTurnStep(step, nav.currentStepIdx, total);
     }
   },
@@ -2267,19 +3211,19 @@ const MapEngine = {
   },
 
   initWalkerMarker(coords) {
-    let marker = document.getElementById('liveWalkerMarker');
+    let marker = document.getElementById("liveWalkerMarker");
     if (!marker) {
-      marker = document.createElement('div');
-      marker.id = 'liveWalkerMarker';
-      marker.className = 'live-walker-avatar';
+      marker = document.createElement("div");
+      marker.id = "liveWalkerMarker";
+      marker.className = "live-walker-avatar";
       marker.innerHTML = `
         <div class="live-walker-pulse"></div>
         <div class="live-walker-disc">🚶‍♂️</div>
       `;
-      const overlay = document.getElementById('pinsOverlay');
+      const overlay = document.getElementById("pinsOverlay");
       if (overlay) overlay.appendChild(marker);
     }
-    marker.style.display = 'block';
+    marker.style.display = "block";
     marker.style.left = `${coords.x}%`;
     marker.style.top = `${coords.y}%`;
   },
@@ -2290,20 +3234,20 @@ const MapEngine = {
     const xPct = (pt.x / this.CANVAS_WIDTH) * 100;
     const yPct = (pt.y / this.CANVAS_HEIGHT) * 100;
 
-    let marker = document.getElementById('liveWalkerMarker');
+    let marker = document.getElementById("liveWalkerMarker");
     if (!marker) {
-      marker = document.createElement('div');
-      marker.id = 'liveWalkerMarker';
-      marker.className = 'live-walker-avatar';
+      marker = document.createElement("div");
+      marker.id = "liveWalkerMarker";
+      marker.className = "live-walker-avatar";
       marker.innerHTML = `
         <div class="live-walker-pulse"></div>
         <div class="live-walker-disc">🚶‍♂️</div>
       `;
-      const overlay = document.getElementById('pinsOverlay');
+      const overlay = document.getElementById("pinsOverlay");
       if (overlay) overlay.appendChild(marker);
     }
 
-    marker.style.display = 'block';
+    marker.style.display = "block";
     marker.style.left = `${xPct}%`;
     marker.style.top = `${yPct}%`;
 
@@ -2311,12 +3255,12 @@ const MapEngine = {
     this.centerCameraOnWalker(xPct, yPct);
 
     // Update progress bar in HUD
-    const bar = document.querySelector('#turnNavHud .turn-progress-bar');
+    const bar = document.querySelector("#turnNavHud .turn-progress-bar");
     if (bar) bar.style.width = `${t * 100}%`;
   },
 
   centerCameraOnWalker(pctX, pctY) {
-    const viewport = document.getElementById('mapViewport');
+    const viewport = document.getElementById("mapViewport");
     if (!viewport) return;
     const vw = viewport.clientWidth;
     const vh = viewport.clientHeight;
@@ -2327,11 +3271,11 @@ const MapEngine = {
     const canvasCenterY = this.CANVAS_HEIGHT / 2;
 
     const dx = canvasCenterX - targetPixelX;
-    const tiltOffset = this.is3D ? (this.pitch * 1.8) : 0;
+    const tiltOffset = this.is3D ? this.pitch * 1.8 : 0;
     const dy = canvasCenterY - targetPixelY + tiltOffset;
 
-    this.panX = (vw - this.CANVAS_WIDTH) / 2 + (dx * this.scale);
-    this.panY = (vh - this.CANVAS_HEIGHT) / 2 + (dy * this.scale);
+    this.panX = (vw - this.CANVAS_WIDTH) / 2 + dx * this.scale;
+    this.panY = (vh - this.CANVAS_HEIGHT) / 2 + dy * this.scale;
     this.clampPan();
     this.applyTransform(false); // immediate 60fps frame update
   },
@@ -2339,25 +3283,30 @@ const MapEngine = {
   onWalkSimulationComplete() {
     this.isSimulatingWalk = false;
     if (this.walkAnimFrame) cancelAnimationFrame(this.walkAnimFrame);
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(1200);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(1200);
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const toastMsg = (lang === 'ar')
-      ? '🎉 لقد وصلت إلى وجهتك بسلام!'
-      : (lang === 'ru') ? '🎉 Вы успешно прибыли в пункт назначения!'
-      : (lang === 'de') ? '🎉 Sie haben Ihr Ziel erreicht!'
-      : '🎉 You have arrived at your destination!';
-    if (typeof App !== 'undefined' && App.showToast) App.showToast(toastMsg);
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const toastMsg =
+      lang === "ar"
+        ? "🎉 لقد وصلت إلى وجهتك بسلام!"
+        : lang === "ru"
+          ? "🎉 Вы успешно прибыли в пункт назначения!"
+          : lang === "de"
+            ? "🎉 Sie haben Ihr Ziel erreicht!"
+            : "🎉 You have arrived at your destination!";
+    if (typeof App !== "undefined" && App.showToast) App.showToast(toastMsg);
 
     this.renderTurnStep(false);
   },
 
   updateWalkerBeacon(coords) {
-    let beacon = document.getElementById('walkerBeacon');
+    let beacon = document.getElementById("walkerBeacon");
     if (!beacon) {
-      beacon = document.createElement('div');
-      beacon.id = 'walkerBeacon';
-      beacon.className = 'absolute z-30 pointer-events-none transition-all duration-500 ease-out';
+      beacon = document.createElement("div");
+      beacon.id = "walkerBeacon";
+      beacon.className =
+        "absolute z-30 pointer-events-none transition-all duration-500 ease-out";
       beacon.innerHTML = `
         <div class="relative -translate-x-1/2 -translate-y-1/2">
           <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-950 font-black text-sm flex items-center justify-center shadow-2xl border-2 border-white animate-bounce">
@@ -2366,7 +3315,7 @@ const MapEngine = {
           <div class="w-8 h-8 rounded-full bg-amber-400/40 animate-ping absolute inset-0"></div>
         </div>
       `;
-      const overlay = document.getElementById('pinsOverlay');
+      const overlay = document.getElementById("pinsOverlay");
       if (overlay) overlay.appendChild(beacon);
     }
 
@@ -2376,8 +3325,11 @@ const MapEngine = {
 
   nextTurnStep() {
     if (!this.activeNavigation) return;
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(750);
-    if (this.activeNavigation.currentStepIdx < this.activeNavigation.steps.length - 1) {
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(750);
+    if (
+      this.activeNavigation.currentStepIdx <
+      this.activeNavigation.steps.length - 1
+    ) {
       this.activeNavigation.currentStepIdx++;
       this.renderTurnStep();
     }
@@ -2385,7 +3337,7 @@ const MapEngine = {
 
   prevTurnStep() {
     if (!this.activeNavigation) return;
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(600);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(600);
     if (this.activeNavigation.currentStepIdx > 0) {
       this.activeNavigation.currentStepIdx--;
       this.renderTurnStep();
@@ -2394,39 +3346,40 @@ const MapEngine = {
 
   toggleStepFree() {
     if (!this.activeNavigation) return;
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(800);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(800);
     this.activeNavigation.isAccessible = !this.activeNavigation.isAccessible;
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
     this.activeNavigation.steps = this.buildWalkwaySteps(
       this.activeNavigation.originPoi,
       this.activeNavigation.targetPoi,
       lang,
-      this.activeNavigation.isAccessible
+      this.activeNavigation.isAccessible,
     );
     this.drawRoute(
       this.activeNavigation.originPoi.coords,
       this.activeNavigation.targetPoi.coords,
       this.activeNavigation.originPoi.nameAr,
       this.activeNavigation.targetPoi.nameAr,
-      this.activeNavigation.isAccessible
+      this.activeNavigation.isAccessible,
     );
     this.renderTurnStep();
   },
 
   endTurnByTurn() {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(500);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(500);
     this.pauseLiveWalkSimulation();
     this.activeNavigation = null;
     this.activeLiveNavDestination = null;
     this.lastNavRecalcPos = null;
     this.walkProgress = 0;
-    document.body.classList.remove('turn-navigation-active');
+    document.body.classList.remove("turn-navigation-active");
 
-    const hud = document.getElementById('turnNavHud');
-    if (hud) hud.classList.add('hidden');
-    const beacon = document.getElementById('walkerBeacon');
+    const hud = document.getElementById("turnNavHud");
+    if (hud) hud.classList.add("hidden");
+    const beacon = document.getElementById("walkerBeacon");
     if (beacon) beacon.remove();
-    const marker = document.getElementById('liveWalkerMarker');
+    const marker = document.getElementById("liveWalkerMarker");
     if (marker) marker.remove();
     this.removeRoomBeacon();
   },
@@ -2438,17 +3391,25 @@ const MapEngine = {
   initLiveGuestTracking() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const paramMac = urlParams.get('mac') || urlParams.get('client_mac') || urlParams.get('device_mac') || urlParams.get('clientMac') || urlParams.get('mac_address');
+      const paramMac =
+        urlParams.get("mac") ||
+        urlParams.get("client_mac") ||
+        urlParams.get("device_mac") ||
+        urlParams.get("clientMac") ||
+        urlParams.get("mac_address");
 
       if (paramMac) {
         this.guestMac = paramMac.trim().toLowerCase();
         try {
-          sessionStorage.setItem('moreno_guest_mac', this.guestMac);
-          localStorage.setItem('moreno_guest_mac', this.guestMac);
+          sessionStorage.setItem("moreno_guest_mac", this.guestMac);
+          localStorage.setItem("moreno_guest_mac", this.guestMac);
         } catch (e) {}
       } else {
         try {
-          this.guestMac = sessionStorage.getItem('moreno_guest_mac') || localStorage.getItem('moreno_guest_mac') || null;
+          this.guestMac =
+            sessionStorage.getItem("moreno_guest_mac") ||
+            localStorage.getItem("moreno_guest_mac") ||
+            null;
         } catch (e) {}
       }
 
@@ -2458,35 +3419,46 @@ const MapEngine = {
       }
 
       // Device Orientation for directional heading beam
-      if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
-        window.addEventListener('deviceorientation', (e) => {
-          if (e.alpha != null) {
-            this.liveTrackingHeading = e.alpha;
-            const headingCone = document.getElementById('blueDotHeadingCone');
-            if (headingCone) {
-              headingCone.style.transform = `rotate(${-this.bearing - this.liveTrackingHeading}deg)`;
+      if (typeof window !== "undefined" && window.DeviceOrientationEvent) {
+        window.addEventListener(
+          "deviceorientation",
+          (e) => {
+            if (e.alpha != null) {
+              this.liveTrackingHeading = e.alpha;
+              const headingCone = document.getElementById("blueDotHeadingCone");
+              if (headingCone) {
+                headingCone.style.transform = `rotate(${-this.bearing - this.liveTrackingHeading}deg)`;
+              }
             }
-          }
-        }, { passive: true });
+          },
+          { passive: true },
+        );
       }
     } catch (err) {
-      console.warn('[MapEngine] Live tracking initialization bypassed:', err);
+      console.warn("[MapEngine] Live tracking initialization bypassed:", err);
     }
   },
 
   ensureBlueDotMarker() {
-    const overlay = document.getElementById('pinsOverlay');
+    const overlay = document.getElementById("pinsOverlay");
     if (!overlay) return null;
 
-    let marker = document.getElementById('liveGuestBlueDotMarker');
+    let marker = document.getElementById("liveGuestBlueDotMarker");
     if (!marker) {
-      marker = document.createElement('div');
-      marker.id = 'liveGuestBlueDotMarker';
-      marker.className = 'live-guest-blue-dot';
-      marker.style.display = 'none';
+      marker = document.createElement("div");
+      marker.id = "liveGuestBlueDotMarker";
+      marker.className = "live-guest-blue-dot";
+      marker.style.display = "none";
 
-      const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-      const label = (lang === 'ar') ? 'أنت هنا' : (lang === 'ru') ? 'Вы здесь' : (lang === 'de') ? 'Sie sind hier' : 'You are here';
+      const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+      const label =
+        lang === "ar"
+          ? "أنت هنا"
+          : lang === "ru"
+            ? "Вы здесь"
+            : lang === "de"
+              ? "Sie sind hier"
+              : "You are here";
 
       marker.innerHTML = `
         <div class="blue-dot-accuracy-circle" id="blueDotAccuracyCircle"></div>
@@ -2520,8 +3492,8 @@ const MapEngine = {
         this.liveTrackerWs = null;
       }
 
-      const host = window.location.hostname || 'localhost';
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.hostname || "localhost";
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${wsProtocol}//${host}:3001?mac=${encodeURIComponent(this.guestMac)}`;
 
       const ws = new WebSocket(wsUrl);
@@ -2531,11 +3503,22 @@ const MapEngine = {
         try {
           const payload = JSON.parse(event.data);
           const data = payload.data || payload;
-          if (data && typeof data.pctX === 'number' && typeof data.pctY === 'number') {
+          if (
+            data &&
+            typeof data.pctX === "number" &&
+            typeof data.pctY === "number"
+          ) {
             this.lastApTelemetry = data;
-            this.updateGuestLiveLocation(data.pctX, data.pctY, data.accuracyRadiusMeters || data.accuracyMeters);
+            this.updateGuestLiveLocation(
+              data.pctX,
+              data.pctY,
+              data.accuracyRadiusMeters || data.accuracyMeters,
+            );
             if (this.isApDebugActive) {
-              this.updateApRadiusCircles(data.activeAps || [], { pctX: data.pctX, pctY: data.pctY });
+              this.updateApRadiusCircles(data.activeAps || [], {
+                pctX: data.pctX,
+                pctY: data.pctY,
+              });
               this.renderApDebugHud(data);
             }
           }
@@ -2566,9 +3549,16 @@ const MapEngine = {
           if (data && data.success && data.location) {
             const loc = data.location;
             this.lastApTelemetry = loc;
-            this.updateGuestLiveLocation(loc.pctX, loc.pctY, loc.accuracyRadiusMeters || loc.accuracyMeters);
+            this.updateGuestLiveLocation(
+              loc.pctX,
+              loc.pctY,
+              loc.accuracyRadiusMeters || loc.accuracyMeters,
+            );
             if (this.isApDebugActive) {
-              this.updateApRadiusCircles(loc.activeAps || [], { pctX: loc.pctX, pctY: loc.pctY });
+              this.updateApRadiusCircles(loc.activeAps || [], {
+                pctX: loc.pctX,
+                pctY: loc.pctY,
+              });
               this.renderApDebugHud(loc);
             }
           }
@@ -2591,7 +3581,7 @@ const MapEngine = {
     let matchResult = null;
 
     // Apply snap-to-path map matching and obstacle avoidance
-    if (typeof MapMatcher !== 'undefined' && MapMatcher.matchLocation) {
+    if (typeof MapMatcher !== "undefined" && MapMatcher.matchLocation) {
       const rawPxX = (pctX / 100) * this.CANVAS_WIDTH;
       const rawPxY = (pctY / 100) * this.CANVAS_HEIGHT;
       matchResult = MapMatcher.matchLocation(rawPxX, rawPxY);
@@ -2608,17 +3598,17 @@ const MapEngine = {
       zone: matchResult ? matchResult.zone : null,
       edge: matchResult ? matchResult.edge : null,
       accuracyMeters: Number(accuracyMeters) || 3.0,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
-    marker.style.display = 'block';
+    marker.style.display = "block";
     marker.style.left = `${displayPctX}%`;
     marker.style.top = `${displayPctY}%`;
 
     // Scale accuracy circle (pixels on map: 1 meter = 2.381 px)
-    const accuracyCircle = document.getElementById('blueDotAccuracyCircle');
+    const accuracyCircle = document.getElementById("blueDotAccuracyCircle");
     if (accuracyCircle) {
-      const radiusPx = (this.lastGuestPosition.accuracyMeters * 2.381);
+      const radiusPx = this.lastGuestPosition.accuracyMeters * 2.381;
       const diamPx = Math.max(30, Math.min(240, radiusPx * 2));
       accuracyCircle.style.width = `${diamPx}px`;
       accuracyCircle.style.height = `${diamPx}px`;
@@ -2634,18 +3624,29 @@ const MapEngine = {
 
     // Auto-update AP calibration circles and debug HUD if active
     if (this.isApDebugActive && this.lastApTelemetry) {
-      this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], { pctX: displayPctX, pctY: displayPctY });
+      this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], {
+        pctX: displayPctX,
+        pctY: displayPctY,
+      });
       this.renderApDebugHud(this.lastApTelemetry);
     }
 
     // Contextual Geofencing Check around resort facilities
-    if (typeof GeofenceService !== 'undefined' && GeofenceService.updatePosition) {
+    if (
+      typeof GeofenceService !== "undefined" &&
+      GeofenceService.updatePosition
+    ) {
       GeofenceService.updatePosition(displayPctX, displayPctY);
     }
 
     // Auto-follow camera if requested by guest
     if (this.isAutoFollowingGuest) {
-      this.focusCoordinate(displayPctX, displayPctY, Math.max(1.5, this.scale), false);
+      this.focusCoordinate(
+        displayPctX,
+        displayPctY,
+        Math.max(1.5, this.scale),
+        false,
+      );
     }
   },
 
@@ -2667,8 +3668,12 @@ const MapEngine = {
     const distToTargetPx = Math.hypot(destPxX - curPxX, destPxY - curPxY);
     const distToTargetMeters = Math.round(distToTargetPx * 0.42);
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const locDest = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(destPoi, lang) : { name: destPoi.nameAr };
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const locDest =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(destPoi, lang)
+        : { name: destPoi.nameAr };
 
     // 1. Check Arrival (< 4.5 meters)
     if (distToTargetMeters <= 4.5) {
@@ -2677,13 +3682,25 @@ const MapEngine = {
     }
 
     const liveOrigin = { x: pctX, y: pctY };
-    const liveTitle = (lang === 'ar') ? 'موقعي الحالي' : (lang === 'ru') ? 'Мое местоположение' : (lang === 'de') ? 'Mein Standort' : 'My Live Location';
-    const isAccessible = this.activeNavigation ? this.activeNavigation.isAccessible : false;
+    const liveTitle =
+      lang === "ar"
+        ? "موقعي الحالي"
+        : lang === "ru"
+          ? "Мое местоположение"
+          : lang === "de"
+            ? "Mein Standort"
+            : "My Live Location";
+    const isAccessible = this.activeNavigation
+      ? this.activeNavigation.isAccessible
+      : false;
 
     // 2. Measure perpendicular deviation from the active polyline drawn on #routeSvgLayer
     const routePoints = this.lastRoutePoints;
-    const { distMeters: perpDistMeters, nearestSegmentIdx, nearestProjPoint } = 
-      this.calculatePerpendicularDistanceToRoute(curPxX, curPxY, routePoints);
+    const {
+      distMeters: perpDistMeters,
+      nearestSegmentIdx,
+      nearestProjPoint,
+    } = this.calculatePerpendicularDistanceToRoute(curPxX, curPxY, routePoints);
 
     // 3. Dynamic Off-Route Threshold (> 8 meters, approx. 19 pixels)
     const OFF_ROUTE_THRESHOLD_METERS = 8.0;
@@ -2700,29 +3717,55 @@ const MapEngine = {
       this.lastNavRecalcPos = { x: curPxX, y: curPxY };
 
       // Re-route from guest's new position to destination without resetting camera or clearing destination
-      const routeInfo = this.drawRoute(liveOrigin, destPoi.coords, liveTitle, locDest.name, isAccessible, false);
+      const routeInfo = this.drawRoute(
+        liveOrigin,
+        destPoi.coords,
+        liveTitle,
+        locDest.name,
+        isAccessible,
+        false,
+      );
 
       // Subtle notification on auto-reroute
-      if (typeof App !== 'undefined' && App.showToast) {
-        const rerouteMsg = (lang === 'ar') 
-          ? '🔄 تم تعديل المسار تلقائياً بناءً على موقعك الجديد' 
-          : (lang === 'ru') ? '🔄 Маршрут перестроен с вашего нового положения'
-          : (lang === 'de') ? '🔄 Route automatisch an Ihren Standort angepasst'
-          : '🔄 Route recalculated from your new location';
+      if (typeof App !== "undefined" && App.showToast) {
+        const rerouteMsg =
+          lang === "ar"
+            ? "🔄 تم تعديل المسار تلقائياً بناءً على موقعك الجديد"
+            : lang === "ru"
+              ? "🔄 Маршрут перестроен с вашего нового положения"
+              : lang === "de"
+                ? "🔄 Route automatisch an Ihren Standort angepasst"
+                : "🔄 Route recalculated from your new location";
         App.showToast(rerouteMsg, 3000);
       }
 
       if (this.activeNavigation) {
-        this.activeNavigation.meters = routeInfo ? routeInfo.meters : distToTargetMeters;
-        this.activeNavigation.minutes = routeInfo ? routeInfo.minutes : Math.max(1, Math.round(distToTargetMeters / 65));
-        const originVirtual = { id: 'LIVE_GUEST_LOCATION', coords: liveOrigin, nameAr: liveTitle, isLiveLocation: true };
-        this.activeNavigation.steps = this.buildWalkwaySteps(originVirtual, destPoi, lang, isAccessible);
+        this.activeNavigation.meters = routeInfo
+          ? routeInfo.meters
+          : distToTargetMeters;
+        this.activeNavigation.minutes = routeInfo
+          ? routeInfo.minutes
+          : Math.max(1, Math.round(distToTargetMeters / 65));
+        const originVirtual = {
+          id: "LIVE_GUEST_LOCATION",
+          coords: liveOrigin,
+          nameAr: liveTitle,
+          isLiveLocation: true,
+        };
+        this.activeNavigation.steps = this.buildWalkwaySteps(
+          originVirtual,
+          destPoi,
+          lang,
+          isAccessible,
+        );
         this.renderTurnStep(false);
       }
 
       this.updateLiveRouteHudMetrics(
         routeInfo ? routeInfo.meters : distToTargetMeters,
-        routeInfo ? routeInfo.minutes : Math.max(1, Math.round(distToTargetMeters / 65))
+        routeInfo
+          ? routeInfo.minutes
+          : Math.max(1, Math.round(distToTargetMeters / 65)),
       );
       return;
     }
@@ -2731,15 +3774,24 @@ const MapEngine = {
     let remDistPx = 0;
     if (nearestProjPoint && routePoints && routePoints.length >= 2) {
       // Distance from guest to projection on the segment
-      remDistPx += Math.hypot(curPxX - nearestProjPoint.x, curPxY - nearestProjPoint.y);
+      remDistPx += Math.hypot(
+        curPxX - nearestProjPoint.x,
+        curPxY - nearestProjPoint.y,
+      );
       // Distance from projection to next waypoint
       const nextWp = routePoints[nearestSegmentIdx + 1];
       if (nextWp) {
-        remDistPx += Math.hypot(nextWp.x - nearestProjPoint.x, nextWp.y - nearestProjPoint.y);
+        remDistPx += Math.hypot(
+          nextWp.x - nearestProjPoint.x,
+          nextWp.y - nearestProjPoint.y,
+        );
       }
       // Remaining subsequent segments
       for (let i = nearestSegmentIdx + 1; i < routePoints.length - 1; i++) {
-        remDistPx += Math.hypot(routePoints[i + 1].x - routePoints[i].x, routePoints[i + 1].y - routePoints[i].y);
+        remDistPx += Math.hypot(
+          routePoints[i + 1].x - routePoints[i].x,
+          routePoints[i + 1].y - routePoints[i].y,
+        );
       }
     } else {
       remDistPx = distToTargetPx;
@@ -2759,12 +3811,22 @@ const MapEngine = {
     this.updateLiveRouteHudMetrics(remainingMeters, remainingMinutes);
 
     // Smoothly trim traveled route behind the guest so line starts cleanly at live position
-    this.trimLiveRouteSvgPath(curPxX, curPxY, nearestSegmentIdx, nearestProjPoint);
+    this.trimLiveRouteSvgPath(
+      curPxX,
+      curPxY,
+      nearestSegmentIdx,
+      nearestProjPoint,
+    );
   },
 
   calculatePerpendicularDistanceToRoute(curPxX, curPxY, routePoints) {
     if (!routePoints || routePoints.length < 2) {
-      return { distMeters: 999, distPx: 999, nearestSegmentIdx: 0, nearestProjPoint: null };
+      return {
+        distMeters: 999,
+        distPx: 999,
+        nearestSegmentIdx: 0,
+        nearestProjPoint: null,
+      };
     }
 
     let minPerpDistPx = Infinity;
@@ -2784,7 +3846,10 @@ const MapEngine = {
       if (lenSq < 0.0001) {
         dPx = Math.hypot(curPxX - p1.x, curPxY - p1.y);
       } else {
-        const t = Math.max(0, Math.min(1, ((curPxX - p1.x) * dx + (curPxY - p1.y) * dy) / lenSq));
+        const t = Math.max(
+          0,
+          Math.min(1, ((curPxX - p1.x) * dx + (curPxY - p1.y) * dy) / lenSq),
+        );
         proj = { x: p1.x + t * dx, y: p1.y + t * dy };
         dPx = Math.hypot(curPxX - proj.x, curPxY - proj.y);
       }
@@ -2801,36 +3866,39 @@ const MapEngine = {
       distMeters,
       distPx: minPerpDistPx,
       nearestSegmentIdx,
-      nearestProjPoint
+      nearestProjPoint,
     };
   },
 
   updateLiveRouteHudMetrics(meters, minutes) {
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const minText = (lang === 'ar') ? `${minutes} دقيقة (${meters} م)` : `${minutes} min (${meters}m)`;
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const minText =
+      lang === "ar"
+        ? `${minutes} دقيقة (${meters} م)`
+        : `${minutes} min (${meters}m)`;
 
     // Update #routeHudMetrics inside #mapRouteHud
-    const routeMetrics = document.getElementById('routeHudMetrics');
+    const routeMetrics = document.getElementById("routeHudMetrics");
     if (routeMetrics) {
       routeMetrics.textContent = minText;
     }
 
     // Update #turnHudMetrics inside #turnNavHud
-    const turnMetrics = document.getElementById('turnHudMetrics');
+    const turnMetrics = document.getElementById("turnHudMetrics");
     if (turnMetrics) {
       turnMetrics.textContent = `⏱️ ${minText}`;
     }
 
     // Update routeResultBanner if visible
-    const banner = document.getElementById('routeResultBanner');
-    if (banner && !banner.classList.contains('hidden')) {
-      const bannerMeters = banner.querySelector('.route-banner-dist');
+    const banner = document.getElementById("routeResultBanner");
+    if (banner && !banner.classList.contains("hidden")) {
+      const bannerMeters = banner.querySelector(".route-banner-dist");
       if (bannerMeters) bannerMeters.textContent = `${meters} م`;
     }
   },
 
   trimLiveRouteSvgPath(curPxX, curPxY, segmentIdx, projPoint) {
-    const svgPath = document.getElementById('liveRouteSvgPath');
+    const svgPath = document.getElementById("liveRouteSvgPath");
     const routePoints = this.lastRoutePoints;
     if (!svgPath || !routePoints || routePoints.length < 2) return;
 
@@ -2844,8 +3912,10 @@ const MapEngine = {
     }
 
     if (remainingPoints.length >= 2) {
-      const newD = remainingPoints.map((pt, idx) => `${idx === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`).join(' ');
-      svgPath.setAttribute('d', newD);
+      const newD = remainingPoints
+        .map((pt, idx) => `${idx === 0 ? "M" : "L"} ${pt.x} ${pt.y}`)
+        .join(" ");
+      svgPath.setAttribute("d", newD);
     }
   },
 
@@ -2859,7 +3929,8 @@ const MapEngine = {
     if (nextStep && nextStep.coords) {
       const stepPxX = (nextStep.coords.x / 100) * this.CANVAS_WIDTH;
       const stepPxY = (nextStep.coords.y / 100) * this.CANVAS_HEIGHT;
-      const distToStepMeters = Math.hypot(stepPxX - curPxX, stepPxY - curPxY) * 0.42;
+      const distToStepMeters =
+        Math.hypot(stepPxX - curPxX, stepPxY - curPxY) * 0.42;
       if (distToStepMeters < 5.0) {
         nav.currentStepIdx += 1;
         this.renderTurnStep(false);
@@ -2868,27 +3939,30 @@ const MapEngine = {
   },
 
   onGuestArrivedAtDestination(destPoi, destName) {
-    if (typeof App !== 'undefined' && App.playBeep) {
+    if (typeof App !== "undefined" && App.playBeep) {
       App.playBeep(1100);
       setTimeout(() => App.playBeep(1400), 200);
     }
-    const lang = (typeof App !== 'undefined' && App.currentLang) ? App.currentLang : 'ar';
-    const arriveMsg = (lang === 'ar')
-      ? `🎉 لقد وصلت بنجاح إلى: ${destName}!`
-      : (lang === 'ru') ? `🎉 Вы успешно прибыли в: ${destName}!`
-      : (lang === 'de') ? `🎉 Sie haben Ihr Ziel erreicht: ${destName}!`
-      : `🎉 You have arrived at: ${destName}!`;
+    const lang =
+      typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
+    const arriveMsg =
+      lang === "ar"
+        ? `🎉 لقد وصلت بنجاح إلى: ${destName}!`
+        : lang === "ru"
+          ? `🎉 Вы успешно прибыли в: ${destName}!`
+          : lang === "de"
+            ? `🎉 Sie haben Ihr Ziel erreicht: ${destName}!`
+            : `🎉 You have arrived at: ${destName}!`;
 
-    if (typeof App !== 'undefined' && App.showToast) {
+    if (typeof App !== "undefined" && App.showToast) {
       App.showToast(arriveMsg, 6000);
     }
 
-    if (typeof ConciergeAudioGuide !== 'undefined' && ConciergeAudioGuide.speak) {
-      ConciergeAudioGuide.speak(arriveMsg, lang);
-    }
-
     // AI Voice Concierge arrival announcement & celebration chime
-    if (typeof VoiceConcierge !== 'undefined' && VoiceConcierge.onDestinationArrived) {
+    if (
+      typeof VoiceConcierge !== "undefined" &&
+      VoiceConcierge.onDestinationArrived
+    ) {
       VoiceConcierge.onDestinationArrived(destPoi, destName);
     }
 
@@ -2896,15 +3970,15 @@ const MapEngine = {
     this.lastNavRecalcPos = null;
 
     // Update HUD to show arrival
-    const hud = document.getElementById('turnNavHud');
+    const hud = document.getElementById("turnNavHud");
     if (hud) {
       hud.innerHTML = `
         <div class="p-3 text-center animate-scaleUp">
           <div class="text-3xl mb-1">🎉</div>
           <h4 class="text-sm font-black text-emerald-400 mb-1">${arriveMsg}</h4>
-          <p class="text-xs text-slate-300 mb-3">${lang === 'ar' ? 'نتمنى لك قضاء وقت ممتع في هذا المرفق.' : 'Enjoy your time at this facility!'}</p>
+          <p class="text-xs text-slate-300 mb-3">${lang === "ar" ? "نتمنى لك قضاء وقت ممتع في هذا المرفق." : "Enjoy your time at this facility!"}</p>
           <button onclick="MapEngine.endTurnByTurn()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-lg tap-effect">
-            ${lang === 'ar' ? 'تم الوصول ✓' : 'Done ✓'}
+            ${lang === "ar" ? "تم الوصول ✓" : "Done ✓"}
           </button>
         </div>
       `;
@@ -2912,61 +3986,77 @@ const MapEngine = {
   },
 
   syncOriginSelectOptions() {
-    const select = document.getElementById('selectOrigin');
+    const select = document.getElementById("selectOrigin");
     if (!select) return;
     let liveOpt = select.querySelector('option[value="LIVE_GUEST_LOCATION"]');
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const label = (lang === 'ar') ? '📍 موقعي الحالي (Live Blue Dot)' : '📍 My Live Location (Live Blue Dot)';
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const label =
+      lang === "ar"
+        ? "📍 موقعي الحالي (Live Blue Dot)"
+        : "📍 My Live Location (Live Blue Dot)";
     if (!liveOpt) {
-      liveOpt = document.createElement('option');
-      liveOpt.value = 'LIVE_GUEST_LOCATION';
+      liveOpt = document.createElement("option");
+      liveOpt.value = "LIVE_GUEST_LOCATION";
       liveOpt.textContent = label;
       select.insertBefore(liveOpt, select.firstChild);
     } else {
       liveOpt.textContent = label;
     }
-    if (this.lastGuestPosition && select.value !== 'LIVE_GUEST_LOCATION') {
-      select.value = 'LIVE_GUEST_LOCATION';
+    if (this.lastGuestPosition && select.value !== "LIVE_GUEST_LOCATION") {
+      select.value = "LIVE_GUEST_LOCATION";
     }
   },
 
   locateMe() {
-    if (typeof App !== 'undefined' && App.playBeep) App.playBeep(900);
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(900);
     this.stopOrbitTour();
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const btn = document.getElementById('btnLocateMe');
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const btn = document.getElementById("btnLocateMe");
 
     // 1. If we already have a real-time position fix
     if (this.lastGuestPosition) {
       this.isAutoFollowingGuest = true;
-      if (btn) btn.classList.add('btn-locate-active');
+      if (btn) btn.classList.add("btn-locate-active");
 
-      this.focusCoordinate(this.lastGuestPosition.pctX, this.lastGuestPosition.pctY, 1.65, true);
+      this.focusCoordinate(
+        this.lastGuestPosition.pctX,
+        this.lastGuestPosition.pctY,
+        1.65,
+        true,
+      );
 
-      const msg = (lang === 'ar')
-        ? `🎯 تم تحديد موقعك الحالي (دقة ±${Math.round(this.lastGuestPosition.accuracyMeters)}م)`
-        : (lang === 'ru') ? `🎯 Ваше местоположение на карте (точность ±${Math.round(this.lastGuestPosition.accuracyMeters)}м)`
-        : (lang === 'de') ? `🎯 Ihr Standort erfasst (Genauigkeit ±${Math.round(this.lastGuestPosition.accuracyMeters)}m)`
-        : `🎯 Your live location focused (accuracy ±${Math.round(this.lastGuestPosition.accuracyMeters)}m)`;
+      const msg =
+        lang === "ar"
+          ? `🎯 تم تحديد موقعك الحالي (دقة ±${Math.round(this.lastGuestPosition.accuracyMeters)}م)`
+          : lang === "ru"
+            ? `🎯 Ваше местоположение на карте (точность ±${Math.round(this.lastGuestPosition.accuracyMeters)}м)`
+            : lang === "de"
+              ? `🎯 Ihr Standort erfasst (Genauigkeit ±${Math.round(this.lastGuestPosition.accuracyMeters)}m)`
+              : `🎯 Your live location focused (accuracy ±${Math.round(this.lastGuestPosition.accuracyMeters)}m)`;
 
-      if (typeof App !== 'undefined' && App.showToast) App.showToast(msg);
+      if (typeof App !== "undefined" && App.showToast) App.showToast(msg);
       return;
     }
 
     // 2. If a MAC is configured but no signal packet arrived yet
     if (this.guestMac) {
-      const msg = (lang === 'ar')
-        ? `📡 جارٍ جلب إشارة الواي فاي لجهازك (${this.guestMac})...`
-        : `📡 Fetching WiFi positioning signal for device (${this.guestMac})...`;
-      if (typeof App !== 'undefined' && App.showToast) App.showToast(msg);
+      const msg =
+        lang === "ar"
+          ? `📡 جارٍ جلب إشارة الواي فاي لجهازك (${this.guestMac})...`
+          : `📡 Fetching WiFi positioning signal for device (${this.guestMac})...`;
+      if (typeof App !== "undefined" && App.showToast) App.showToast(msg);
 
       // Attempt immediate API sync
       fetch(`/api/location?mac=${encodeURIComponent(this.guestMac)}`)
-        .then(r => r.json())
-        .then(data => {
+        .then((r) => r.json())
+        .then((data) => {
           if (data && data.success && data.location) {
-            this.updateGuestLiveLocation(data.location.pctX, data.location.pctY, data.location.accuracyRadiusMeters);
+            this.updateGuestLiveLocation(
+              data.location.pctX,
+              data.location.pctY,
+              data.location.accuracyRadiusMeters,
+            );
             this.locateMe();
           }
         })
@@ -2979,16 +4069,17 @@ const MapEngine = {
   },
 
   openLocateGuestModal() {
-    let modal = document.getElementById('locateGuestModal');
+    let modal = document.getElementById("locateGuestModal");
     if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'locateGuestModal';
-      modal.className = 'fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4';
+      modal = document.createElement("div");
+      modal.id = "locateGuestModal";
+      modal.className =
+        "fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4";
       document.body.appendChild(modal);
     }
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const isAr = lang === 'ar';
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const isAr = lang === "ar";
 
     modal.innerHTML = `
       <div class="relative w-full max-w-md bg-slate-900 border border-blue-500/40 rounded-3xl p-5 sm:p-6 text-white shadow-2xl animate-scaleUp">
@@ -2999,31 +4090,33 @@ const MapEngine = {
             🎯
           </div>
           <div>
-            <h3 class="text-base font-black text-white">${isAr ? 'تحديد موقعك داخل المنتجع' : 'Live Resort Positioning'}</h3>
-            <p class="text-[11px] text-blue-300 font-semibold">${isAr ? 'نظام WiFi Indoor Positioning الذكي' : 'WiFi Indoor Positioning System'}</p>
+            <h3 class="text-base font-black text-white">${isAr ? "تحديد موقعك داخل المنتجع" : "Live Resort Positioning"}</h3>
+            <p class="text-[11px] text-blue-300 font-semibold">${isAr ? "نظام WiFi Indoor Positioning الذكي" : "WiFi Indoor Positioning System"}</p>
           </div>
         </div>
 
         <p class="text-xs text-slate-300 leading-relaxed mb-4">
-          ${isAr 
-            ? 'يتم تفعيل النقطة الزرقاء الحية تلقائياً عند تسجيل الدخول لشبكة واي فاي الفندق عبر الرابط المخصص. يمكنك ربط جهازك بإدخال عنوان MAC أو تجربة المحاكاة التفاعلية.' 
-            : 'Your live Blue Dot is automatically activated when connecting to the hotel guest WiFi. You can link your device via MAC address or start interactive demo simulation.'}
+          ${
+            isAr
+              ? "يتم تفعيل النقطة الزرقاء الحية تلقائياً عند تسجيل الدخول لشبكة واي فاي الفندق عبر الرابط المخصص. يمكنك ربط جهازك بإدخال عنوان MAC أو تجربة المحاكاة التفاعلية."
+              : "Your live Blue Dot is automatically activated when connecting to the hotel guest WiFi. You can link your device via MAC address or start interactive demo simulation."
+          }
         </p>
 
         <!-- MAC Input Form -->
         <div class="space-y-3 mb-4">
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">${isAr ? 'عنوان MAC الخاص بجهازك:' : 'Your Device MAC Address:'}</label>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">${isAr ? "عنوان MAC الخاص بجهازك:" : "Your Device MAC Address:"}</label>
             <div class="flex items-center gap-2">
               <input 
                 type="text" 
                 id="inputGuestMacAddress" 
                 placeholder="A4:C3:F0:12:34:56" 
-                value="${this.guestMac || ''}"
+                value="${this.guestMac || ""}"
                 class="flex-1 px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
               <button onclick="MapEngine.saveGuestMacFromInput()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition tap-effect">
-                ${isAr ? 'ربط' : 'Save'}
+                ${isAr ? "ربط" : "Save"}
               </button>
             </div>
           </div>
@@ -3033,39 +4126,41 @@ const MapEngine = {
         <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-white/10 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-black text-amber-300 flex items-center gap-1.5">
-              <span>🚀</span> ${isAr ? 'تجربة المحاكاة الحية' : 'Live Interactive Demo'}
+              <span>🚀</span> ${isAr ? "تجربة المحاكاة الحية" : "Live Interactive Demo"}
             </span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">1-Click Live</span>
           </div>
           <p class="text-[11px] text-slate-400">
-            ${isAr 
-              ? 'توليد إشارات واي فاي تجريبية لجهازك والتنقل به في ردهة الاستقبال والمسابح.' 
-              : 'Generate synthetic WiFi RSSI signals to test real-time Blue Dot positioning.'}
+            ${
+              isAr
+                ? "توليد إشارات واي فاي تجريبية لجهازك والتنقل به في ردهة الاستقبال والمسابح."
+                : "Generate synthetic WiFi RSSI signals to test real-time Blue Dot positioning."
+            }
           </p>
           <button onclick="MapEngine.startDemoLocationSimulation()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-slate-950 font-black text-xs transition tap-effect flex items-center justify-center gap-1.5 shadow-md">
             <span>✨</span>
-            <span>${isAr ? 'تشغيل النقطة الزرقاء التجريبية' : 'Start Demo Blue Dot Tracker'}</span>
+            <span>${isAr ? "تشغيل النقطة الزرقاء التجريبية" : "Start Demo Blue Dot Tracker"}</span>
           </button>
         </div>
       </div>
     `;
-    modal.style.display = 'flex';
+    modal.style.display = "flex";
   },
 
   closeLocateGuestModal() {
-    const modal = document.getElementById('locateGuestModal');
-    if (modal) modal.style.display = 'none';
+    const modal = document.getElementById("locateGuestModal");
+    if (modal) modal.style.display = "none";
   },
 
   saveGuestMacFromInput() {
-    const input = document.getElementById('inputGuestMacAddress');
+    const input = document.getElementById("inputGuestMacAddress");
     if (!input || !input.value.trim()) return;
     const mac = input.value.trim().toLowerCase();
 
     this.guestMac = mac;
     try {
-      sessionStorage.setItem('moreno_guest_mac', mac);
-      localStorage.setItem('moreno_guest_mac', mac);
+      sessionStorage.setItem("moreno_guest_mac", mac);
+      localStorage.setItem("moreno_guest_mac", mac);
     } catch (e) {}
 
     this.closeLocateGuestModal();
@@ -3075,17 +4170,17 @@ const MapEngine = {
 
   startDemoLocationSimulation() {
     this.closeLocateGuestModal();
-    const demoMac = 'A4:C3:F0:77:88:99';
+    const demoMac = "A4:C3:F0:77:88:99";
     this.guestMac = demoMac;
 
     // Waypoints for demo walking across the resort (Lobby -> Sirena -> Lotus Pool -> La Mama -> Beach)
     const demoWaypoints = [
-      { x: 283, y: 820, name: 'بهو الاستقبال M' },
-      { x: 310, y: 795, name: 'مطعم سيرينا' },
-      { x: 344, y: 665, name: 'مسبح لوتس' },
-      { x: 348, y: 575, name: 'مطعم لا ماما' },
-      { x: 428, y: 340, name: 'بار الشاطئ' },
-      { x: 381, y: 281, name: 'منطقة المارينا والشاطئ' }
+      { x: 283, y: 820, name: "بهو الاستقبال M" },
+      { x: 310, y: 795, name: "مطعم سيرينا" },
+      { x: 344, y: 665, name: "مسبح لوتس" },
+      { x: 348, y: 575, name: "مطعم لا ماما" },
+      { x: 428, y: 340, name: "بار الشاطئ" },
+      { x: 381, y: 281, name: "منطقة المارينا والشاطئ" },
     ];
 
     let wpIdx = 0;
@@ -3093,39 +4188,47 @@ const MapEngine = {
       const wp = demoWaypoints[wpIdx];
       wpIdx = (wpIdx + 1) % demoWaypoints.length;
 
-      fetch('/api/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mac: demoMac, x: wp.x, y: wp.y })
+      fetch("/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mac: demoMac, x: wp.x, y: wp.y }),
       })
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.success && data.result) {
-          const loc = data.result;
-          this.updateGuestLiveLocation(loc.pctX, loc.pctY, loc.accuracyRadiusMeters || 2.2);
+        .then((r) => r.json())
+        .then((data) => {
+          if (data && data.success && data.result) {
+            const loc = data.result;
+            this.updateGuestLiveLocation(
+              loc.pctX,
+              loc.pctY,
+              loc.accuracyRadiusMeters || 2.2,
+            );
+            if (wpIdx === 1) {
+              this.locateMe();
+            }
+          }
+        })
+        .catch(() => {
+          // Fallback internal simulation if backend simulation endpoint not reached
+          const pctX = Number(((wp.x / this.CANVAS_WIDTH) * 100).toFixed(2));
+          const pctY = Number(((wp.y / this.CANVAS_HEIGHT) * 100).toFixed(2));
+          this.updateGuestLiveLocation(pctX, pctY, 2.0);
           if (wpIdx === 1) {
             this.locateMe();
           }
-        }
-      })
-      .catch(() => {
-        // Fallback internal simulation if backend simulation endpoint not reached
-        const pctX = Number(((wp.x / this.CANVAS_WIDTH) * 100).toFixed(2));
-        const pctY = Number(((wp.y / this.CANVAS_HEIGHT) * 100).toFixed(2));
-        this.updateGuestLiveLocation(pctX, pctY, 2.0);
-        if (wpIdx === 1) {
-          this.locateMe();
-        }
-      });
+        });
     };
 
     sendDemoPing();
     if (this.demoTimer) clearInterval(this.demoTimer);
     this.demoTimer = setInterval(sendDemoPing, 3500);
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast(lang === 'ar' ? '🚀 تم تفعيل النقطة الزرقاء الحية في وضع العرض التفاعلي!' : '🚀 Live Blue Dot tracking activated in interactive demo mode!');
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(
+        lang === "ar"
+          ? "🚀 تم تفعيل النقطة الزرقاء الحية في وضع العرض التفاعلي!"
+          : "🚀 Live Blue Dot tracking activated in interactive demo mode!",
+      );
     }
   },
 
@@ -3140,23 +4243,23 @@ const MapEngine = {
       this.isApDebugActive = !this.isApDebugActive;
     }
 
-    const btn = document.getElementById('btnToggleApDebug');
+    const btn = document.getElementById("btnToggleApDebug");
     if (btn) {
       if (this.isApDebugActive) {
-        btn.classList.add('bg-amber-500', 'text-slate-950', 'active');
-        btn.classList.remove('text-amber-600', 'dark:text-amber-400');
+        btn.classList.add("bg-amber-500", "text-slate-950", "active");
+        btn.classList.remove("text-amber-600", "dark:text-amber-400");
       } else {
-        btn.classList.remove('bg-amber-500', 'text-slate-950', 'active');
-        btn.classList.add('text-amber-600', 'dark:text-amber-400');
+        btn.classList.remove("bg-amber-500", "text-slate-950", "active");
+        btn.classList.add("text-amber-600", "dark:text-amber-400");
       }
     }
 
-    const svgLayer = document.getElementById('apRadiusSvgLayer');
-    const pinsLayer = document.getElementById('apPinsOverlay');
+    const svgLayer = document.getElementById("apRadiusSvgLayer");
+    const pinsLayer = document.getElementById("apPinsOverlay");
 
     if (this.isApDebugActive) {
-      if (svgLayer) svgLayer.classList.remove('hidden');
-      if (pinsLayer) pinsLayer.classList.remove('hidden');
+      if (svgLayer) svgLayer.classList.remove("hidden");
+      if (pinsLayer) pinsLayer.classList.remove("hidden");
 
       if (!this.cachedAccessPoints || this.cachedAccessPoints.length === 0) {
         this.fetchAccessPointsForCalibration();
@@ -3166,25 +4269,27 @@ const MapEngine = {
 
       this.renderApDebugHud(this.lastApTelemetry);
 
-      if (typeof App !== 'undefined' && App.showToast) {
-        App.showToast('📡 تم تفعيل وضع معايرة نقاط الوصول (AP Calibration & Debug Mode)');
+      if (typeof App !== "undefined" && App.showToast) {
+        App.showToast(
+          "📡 تم تفعيل وضع معايرة نقاط الوصول (AP Calibration & Debug Mode)",
+        );
       }
     } else {
       if (svgLayer) {
-        svgLayer.classList.add('hidden');
-        svgLayer.innerHTML = '';
+        svgLayer.classList.add("hidden");
+        svgLayer.innerHTML = "";
       }
       if (pinsLayer) {
-        pinsLayer.classList.add('hidden');
+        pinsLayer.classList.add("hidden");
       }
-      const hud = document.getElementById('apDebugHud');
+      const hud = document.getElementById("apDebugHud");
       if (hud) hud.remove();
     }
   },
 
   async fetchAccessPointsForCalibration() {
     try {
-      const res = await fetch('/api/access-points');
+      const res = await fetch("/api/access-points");
       if (res.ok) {
         const data = await res.json();
         if (data && data.success && Array.isArray(data.accessPoints)) {
@@ -3192,29 +4297,39 @@ const MapEngine = {
           this.renderApMarkers();
           this.renderApDebugHud(this.lastApTelemetry);
           if (this.lastApTelemetry && this.lastGuestPosition) {
-            this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], this.lastGuestPosition);
+            this.updateApRadiusCircles(
+              this.lastApTelemetry.activeAps || [],
+              this.lastGuestPosition,
+            );
           }
         }
       }
     } catch (err) {
-      console.warn('[MapEngine] Failed to fetch access points:', err);
+      console.warn("[MapEngine] Failed to fetch access points:", err);
     }
   },
 
   renderApMarkers() {
-    const overlay = document.getElementById('apPinsOverlay');
+    const overlay = document.getElementById("apPinsOverlay");
     if (!overlay) return;
-    overlay.innerHTML = '';
+    overlay.innerHTML = "";
 
     const currentPitch = this.is3D ? this.pitch : 0;
-    const rotateStyle = (this.is3D && currentPitch > 0) ? `rotateX(${-currentPitch}deg)` : 'none';
+    const rotateStyle =
+      this.is3D && currentPitch > 0 ? `rotateX(${-currentPitch}deg)` : "none";
 
-    this.cachedAccessPoints.forEach(ap => {
-      const pin = document.createElement('div');
+    this.cachedAccessPoints.forEach((ap) => {
+      const pin = document.createElement("div");
       pin.id = `apMarker_${ap.id}`;
-      pin.className = 'ap-marker';
-      const pctX = ap.pctX != null ? ap.pctX : Number(((ap.x / this.CANVAS_WIDTH) * 100).toFixed(2));
-      const pctY = ap.pctY != null ? ap.pctY : Number(((ap.y / this.CANVAS_HEIGHT) * 100).toFixed(2));
+      pin.className = "ap-marker";
+      const pctX =
+        ap.pctX != null
+          ? ap.pctX
+          : Number(((ap.x / this.CANVAS_WIDTH) * 100).toFixed(2));
+      const pctY =
+        ap.pctY != null
+          ? ap.pctY
+          : Number(((ap.y / this.CANVAS_HEIGHT) * 100).toFixed(2));
       pin.style.left = `${pctX}%`;
       pin.style.top = `${pctY}%`;
 
@@ -3228,7 +4343,7 @@ const MapEngine = {
         </div>
       `;
 
-      pin.addEventListener('click', (e) => {
+      pin.addEventListener("click", (e) => {
         e.stopPropagation();
         this.showApInspector(ap.id);
       });
@@ -3238,16 +4353,20 @@ const MapEngine = {
   },
 
   updateApRadiusCircles(activeAps = [], guestPos = null) {
-    const svgLayer = document.getElementById('apRadiusSvgLayer');
+    const svgLayer = document.getElementById("apRadiusSvgLayer");
     if (!svgLayer) return;
 
     if (!this.showRadiusCircles || !activeAps || !activeAps.length) {
-      svgLayer.innerHTML = '';
+      svgLayer.innerHTML = "";
       return;
     }
 
-    const guestPxX = guestPos ? (guestPos.pctX / 100) * this.CANVAS_WIDTH : null;
-    const guestPxY = guestPos ? (guestPos.pctY / 100) * this.CANVAS_HEIGHT : null;
+    const guestPxX = guestPos
+      ? (guestPos.pctX / 100) * this.CANVAS_WIDTH
+      : null;
+    const guestPxY = guestPos
+      ? (guestPos.pctY / 100) * this.CANVAS_HEIGHT
+      : null;
 
     let circlesSvg = `
       <defs>
@@ -3270,30 +4389,39 @@ const MapEngine = {
     `;
 
     // Highlight detecting AP pins
-    document.querySelectorAll('.ap-marker').forEach(m => m.classList.remove('active-detect'));
+    document
+      .querySelectorAll(".ap-marker")
+      .forEach((m) => m.classList.remove("active-detect"));
 
-    activeAps.forEach(meas => {
-      const ap = this.cachedAccessPoints.find(a => 
-        (a.id && a.id.toUpperCase() === String(meas.id || meas.apId).toUpperCase()) ||
-        (a.bssid && a.bssid.toLowerCase() === String(meas.bssid || meas['ap-bssid']).toLowerCase())
+    activeAps.forEach((meas) => {
+      const ap = this.cachedAccessPoints.find(
+        (a) =>
+          (a.id &&
+            a.id.toUpperCase() ===
+              String(meas.id || meas.apId).toUpperCase()) ||
+          (a.bssid &&
+            a.bssid.toLowerCase() ===
+              String(meas.bssid || meas["ap-bssid"]).toLowerCase()),
       );
       if (!ap) return;
 
       const markerEl = document.getElementById(`apMarker_${ap.id}`);
-      if (markerEl) markerEl.classList.add('active-detect');
+      if (markerEl) markerEl.classList.add("active-detect");
 
-      const distM = Number(meas.distM || meas.distanceMeters || meas.distance || 4.5);
+      const distM = Number(
+        meas.distM || meas.distanceMeters || meas.distance || 4.5,
+      );
       const radiusPx = distM * 2.381; // 1 meter = 2.381 pixels
       const rssi = Number(meas.rssi || -65);
 
-      let strokeColor = '#10b981';
-      let gradFill = 'url(#apRssiGradStrong)';
+      let strokeColor = "#10b981";
+      let gradFill = "url(#apRssiGradStrong)";
       if (rssi < -75) {
-        strokeColor = '#f43f5e';
-        gradFill = 'url(#apRssiGradWeak)';
+        strokeColor = "#f43f5e";
+        gradFill = "url(#apRssiGradWeak)";
       } else if (rssi < -62) {
-        strokeColor = '#fbbf24';
-        gradFill = 'url(#apRssiGradMed)';
+        strokeColor = "#fbbf24";
+        gradFill = "url(#apRssiGradMed)";
       }
 
       // Draw Ray to Guest Position if available
@@ -3321,44 +4449,76 @@ const MapEngine = {
   renderApDebugHud(telemetry = null) {
     if (!this.isApDebugActive) return;
 
-    let hud = document.getElementById('apDebugHud');
-    const viewport = document.getElementById('mapViewport');
+    let hud = document.getElementById("apDebugHud");
+    const viewport = document.getElementById("mapViewport");
     if (!viewport) return;
 
     if (!hud) {
-      hud = document.createElement('div');
-      hud.id = 'apDebugHud';
-      hud.className = 'ap-debug-hud';
+      hud = document.createElement("div");
+      hud.id = "apDebugHud";
+      hud.className = "ap-debug-hud";
       viewport.appendChild(hud);
     }
 
     const data = telemetry || this.lastApTelemetry || {};
-    const mac = data.mac || this.guestMac || 'A4:C3:F0:77:88:99';
-    const x = data.x != null ? data.x : (this.lastGuestPosition ? Math.round((this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH) : '--');
-    const y = data.y != null ? data.y : (this.lastGuestPosition ? Math.round((this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT) : '--');
-    const pctX = data.pctX != null ? data.pctX : (this.lastGuestPosition ? this.lastGuestPosition.pctX : '--');
-    const pctY = data.pctY != null ? data.pctY : (this.lastGuestPosition ? this.lastGuestPosition.pctY : '--');
-    const accuracy = data.accuracyMeters || data.accuracyRadiusMeters || (this.lastGuestPosition ? this.lastGuestPosition.accuracyMeters : 2.5);
-    const method = data.method || 'WLS + Gauss-Newton 2D';
+    const mac = data.mac || this.guestMac || "A4:C3:F0:77:88:99";
+    const x =
+      data.x != null
+        ? data.x
+        : this.lastGuestPosition
+          ? Math.round((this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH)
+          : "--";
+    const y =
+      data.y != null
+        ? data.y
+        : this.lastGuestPosition
+          ? Math.round((this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT)
+          : "--";
+    const pctX =
+      data.pctX != null
+        ? data.pctX
+        : this.lastGuestPosition
+          ? this.lastGuestPosition.pctX
+          : "--";
+    const pctY =
+      data.pctY != null
+        ? data.pctY
+        : this.lastGuestPosition
+          ? this.lastGuestPosition.pctY
+          : "--";
+    const accuracy =
+      data.accuracyMeters ||
+      data.accuracyRadiusMeters ||
+      (this.lastGuestPosition ? this.lastGuestPosition.accuracyMeters : 2.5);
+    const method = data.method || "WLS + Gauss-Newton 2D";
     const activeAps = data.activeAps || [];
 
-    const rowsHtml = (this.cachedAccessPoints && this.cachedAccessPoints.length > 0)
-      ? this.cachedAccessPoints.map(ap => {
-          const meas = activeAps.find(m => 
-            (m.id && m.id.toUpperCase() === ap.id.toUpperCase()) || 
-            (m.bssid && m.bssid.toLowerCase() === ap.bssid.toLowerCase())
-          );
-          const hasSignal = !!meas;
-          const rssi = hasSignal ? meas.rssi : '--';
-          const dist = hasSignal ? `${meas.distM || meas.distanceMeters}m` : '--';
-          const radPx = hasSignal ? `${Math.round((meas.distM || meas.distanceMeters) * 2.381)}px` : '--';
-          const badgeClass = hasSignal ? 'text-emerald-400 font-bold' : 'text-slate-500';
+    const rowsHtml =
+      this.cachedAccessPoints && this.cachedAccessPoints.length > 0
+        ? this.cachedAccessPoints
+            .map((ap) => {
+              const meas = activeAps.find(
+                (m) =>
+                  (m.id && m.id.toUpperCase() === ap.id.toUpperCase()) ||
+                  (m.bssid && m.bssid.toLowerCase() === ap.bssid.toLowerCase()),
+              );
+              const hasSignal = !!meas;
+              const rssi = hasSignal ? meas.rssi : "--";
+              const dist = hasSignal
+                ? `${meas.distM || meas.distanceMeters}m`
+                : "--";
+              const radPx = hasSignal
+                ? `${Math.round((meas.distM || meas.distanceMeters) * 2.381)}px`
+                : "--";
+              const badgeClass = hasSignal
+                ? "text-emerald-400 font-bold"
+                : "text-slate-500";
 
-          return `
+              return `
             <tr class="border-b border-slate-800 hover:bg-white/5 transition text-[11px] font-mono">
               <td class="py-1 px-1.5 font-bold ${badgeClass}">
                 <button onclick="MapEngine.showApInspector('${ap.id}')" class="hover:underline text-left">
-                  ${hasSignal ? '🟢' : '⚪'} ${ap.id}
+                  ${hasSignal ? "🟢" : "⚪"} ${ap.id}
                 </button>
               </td>
               <td class="py-1 px-1 text-center font-bold ${badgeClass}">${rssi}</td>
@@ -3366,8 +4526,9 @@ const MapEngine = {
               <td class="py-1 px-1 text-center text-cyan-400">${radPx}</td>
             </tr>
           `;
-        }).join('')
-      : `<tr><td colspan="4" class="text-center py-2 text-slate-500 text-xs">جاري تحميل نقاط الوصول...</td></tr>`;
+            })
+            .join("")
+        : `<tr><td colspan="4" class="text-center py-2 text-slate-500 text-xs">جاري تحميل نقاط الوصول...</td></tr>`;
 
     hud.innerHTML = `
       <!-- Header -->
@@ -3379,7 +4540,7 @@ const MapEngine = {
         </div>
         <div class="flex items-center gap-1.5">
           <button onclick="MapEngine.toggleRadiusCirclesVisibility()" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-300 transition" title="تبديل إظهار دوائر المدى">
-            ${this.showRadiusCircles ? '⭕ دوائر: تشغيل' : '⭕ دوائر: إيقاف'}
+            ${this.showRadiusCircles ? "⭕ دوائر: تشغيل" : "⭕ دوائر: إيقاف"}
           </button>
           <button onclick="MapEngine.toggleApDebugHudCollapse()" class="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-slate-300 flex items-center justify-center transition">
             _
@@ -3412,8 +4573,8 @@ const MapEngine = {
           </div>
           <div class="flex items-center justify-between border-t border-white/10 pt-1.5">
             <span class="text-slate-400 font-sans font-bold text-[10px]">مطابقة المسار (Map-Match):</span>
-            <span class="text-[10px] font-bold ${this.lastGuestPosition?.isSnapped ? 'text-emerald-400' : this.lastGuestPosition?.zone ? 'text-cyan-400' : 'text-slate-400'}">
-              ${this.lastGuestPosition?.isSnapped ? '🟢 Snapped to Walkway' : this.lastGuestPosition?.zone ? '🔷 Free Roam (' + this.lastGuestPosition.zone + ')' : '⚪ Unmatched'}
+            <span class="text-[10px] font-bold ${this.lastGuestPosition?.isSnapped ? "text-emerald-400" : this.lastGuestPosition?.zone ? "text-cyan-400" : "text-slate-400"}">
+              ${this.lastGuestPosition?.isSnapped ? "🟢 Snapped to Walkway" : this.lastGuestPosition?.zone ? "🔷 Free Roam (" + this.lastGuestPosition.zone + ")" : "⚪ Unmatched"}
             </span>
           </div>
 
@@ -3500,60 +4661,78 @@ const MapEngine = {
   toggleRadiusCirclesVisibility() {
     this.showRadiusCircles = !this.showRadiusCircles;
     if (this.lastApTelemetry && this.lastGuestPosition) {
-      this.updateApRadiusCircles(this.lastApTelemetry.activeAps || [], this.lastGuestPosition);
+      this.updateApRadiusCircles(
+        this.lastApTelemetry.activeAps || [],
+        this.lastGuestPosition,
+      );
     } else {
-      const svgLayer = document.getElementById('apRadiusSvgLayer');
-      if (svgLayer) svgLayer.innerHTML = '';
+      const svgLayer = document.getElementById("apRadiusSvgLayer");
+      if (svgLayer) svgLayer.innerHTML = "";
     }
     this.renderApDebugHud(this.lastApTelemetry);
   },
 
   toggleApDebugHudCollapse() {
-    const hud = document.getElementById('apDebugHud');
-    if (hud) hud.classList.toggle('collapsed');
+    const hud = document.getElementById("apDebugHud");
+    if (hud) hud.classList.toggle("collapsed");
   },
 
-  simulateTestPing(x, y, label = '') {
-    const testMac = this.guestMac || 'A4:C3:F0:77:88:99';
-    fetch('/api/simulate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mac: testMac, x, y })
+  simulateTestPing(x, y, label = "") {
+    const testMac = this.guestMac || "A4:C3:F0:77:88:99";
+    fetch("/api/simulate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mac: testMac, x, y }),
     })
-    .then(r => r.json())
-    .then(data => {
-      if (data && data.success && data.result) {
-        const loc = data.result;
-        this.lastApTelemetry = loc;
-        this.updateGuestLiveLocation(loc.pctX, loc.pctY, loc.accuracyRadiusMeters || 2.2);
-        this.updateApRadiusCircles(loc.activeAps || [], { pctX: loc.pctX, pctY: loc.pctY });
-        this.renderApDebugHud(loc);
-        if (typeof App !== 'undefined' && App.showToast) {
-          App.showToast(`📡 تم إرسال نبضة RSSI تجريبية عند [${label || 'الموقع'}]!`);
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && data.success && data.result) {
+          const loc = data.result;
+          this.lastApTelemetry = loc;
+          this.updateGuestLiveLocation(
+            loc.pctX,
+            loc.pctY,
+            loc.accuracyRadiusMeters || 2.2,
+          );
+          this.updateApRadiusCircles(loc.activeAps || [], {
+            pctX: loc.pctX,
+            pctY: loc.pctY,
+          });
+          this.renderApDebugHud(loc);
+          if (typeof App !== "undefined" && App.showToast) {
+            App.showToast(
+              `📡 تم إرسال نبضة RSSI تجريبية عند [${label || "الموقع"}]!`,
+            );
+          }
         }
-      }
-    })
-    .catch(err => {
-      console.error('[MapEngine] Test ping failed:', err);
-    });
+      })
+      .catch((err) => {
+        console.error("[MapEngine] Test ping failed:", err);
+      });
   },
 
   showApInspector(apId) {
-    const ap = (this.cachedAccessPoints || []).find(a => a.id.toUpperCase() === String(apId).toUpperCase());
+    const ap = (this.cachedAccessPoints || []).find(
+      (a) => a.id.toUpperCase() === String(apId).toUpperCase(),
+    );
     if (!ap) return;
 
-    const meas = (this.lastApTelemetry && this.lastApTelemetry.activeAps) 
-      ? this.lastApTelemetry.activeAps.find(m => m.id && m.id.toUpperCase() === ap.id.toUpperCase())
-      : null;
+    const meas =
+      this.lastApTelemetry && this.lastApTelemetry.activeAps
+        ? this.lastApTelemetry.activeAps.find(
+            (m) => m.id && m.id.toUpperCase() === ap.id.toUpperCase(),
+          )
+        : null;
 
-    const rssi = meas ? `${meas.rssi} dBm` : 'لا توجد إشارة من الجهاز حالياً';
-    const dist = meas ? `${meas.distM || meas.distanceMeters} متر` : '--';
+    const rssi = meas ? `${meas.rssi} dBm` : "لا توجد إشارة من الجهاز حالياً";
+    const dist = meas ? `${meas.distM || meas.distanceMeters} متر` : "--";
 
-    let inspector = document.getElementById('apInspectorModal');
+    let inspector = document.getElementById("apInspectorModal");
     if (!inspector) {
-      inspector = document.createElement('div');
-      inspector.id = 'apInspectorModal';
-      inspector.className = 'fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4';
+      inspector = document.createElement("div");
+      inspector.id = "apInspectorModal";
+      inspector.className =
+        "fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4";
       document.body.appendChild(inspector);
     }
 
@@ -3578,7 +4757,7 @@ const MapEngine = {
           </div>
           <div class="flex justify-between border-b border-white/10 pb-1">
             <span class="text-slate-400 font-sans">التردد / الدور:</span>
-            <span class="text-cyan-300 font-bold">${ap.band || '5GHz'} • الدور ${ap.floor || 0}</span>
+            <span class="text-cyan-300 font-bold">${ap.band || "5GHz"} • الدور ${ap.floor || 0}</span>
           </div>
           <div class="flex justify-between border-b border-white/10 pb-1">
             <span class="text-slate-400 font-sans">إحداثيات الخريطة:</span>
@@ -3608,27 +4787,36 @@ const MapEngine = {
         </button>
       </div>
     `;
-    inspector.style.display = 'flex';
+    inspector.style.display = "flex";
   },
 
   async recordFingerprintAtCurrentPosition() {
     if (!this.lastGuestPosition) {
-      if (typeof App !== 'undefined' && App.showToast) {
-        App.showToast('⚠️ لا يوجد موقع مباشر متاح حالياً لتسجيل البصمة.');
+      if (typeof App !== "undefined" && App.showToast) {
+        App.showToast("⚠️ لا يوجد موقع مباشر متاح حالياً لتسجيل البصمة.");
       }
       return;
     }
 
-    const curX = Math.round((this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH);
-    const curY = Math.round((this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT);
-    const label = prompt('أدخل اسم نقطة المعايرة (مثلاً: تراس مطعم سيرينا، مسبح لوتس):', `نقطة معايرة (${curX}, ${curY})`);
+    const curX = Math.round(
+      (this.lastGuestPosition.pctX / 100) * this.CANVAS_WIDTH,
+    );
+    const curY = Math.round(
+      (this.lastGuestPosition.pctY / 100) * this.CANVAS_HEIGHT,
+    );
+    const label = prompt(
+      "أدخل اسم نقطة المعايرة (مثلاً: تراس مطعم سيرينا، مسبح لوتس):",
+      `نقطة معايرة (${curX}, ${curY})`,
+    );
     if (!label) return;
 
     // Collect current incoming RSSI vector from active APs
     const expectedRssi = {};
     if (this.lastApTelemetry && Array.isArray(this.lastApTelemetry.activeAps)) {
       for (const ap of this.lastApTelemetry.activeAps) {
-        const bssid = ap.bssid || (this.cachedAccessPoints.find(a => a.id === ap.id) || {}).bssid;
+        const bssid =
+          ap.bssid ||
+          (this.cachedAccessPoints.find((a) => a.id === ap.id) || {}).bssid;
         if (bssid && ap.rssi) {
           expectedRssi[bssid.toLowerCase()] = ap.rssi;
         }
@@ -3636,32 +4824,34 @@ const MapEngine = {
     }
 
     try {
-      const res = await fetch('/api/admin/fingerprints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/fingerprints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           x: curX,
           y: curY,
           label,
           labelEn: label,
-          expectedRssi
-        })
+          expectedRssi,
+        }),
       });
       const data = await res.json();
       if (data.success) {
-        if (typeof App !== 'undefined' && App.showToast) {
-          App.showToast(`🎯 تم حفظ البصمة الراديوية بنجاح: ${label} (${Object.keys(expectedRssi).length} APs)`);
+        if (typeof App !== "undefined" && App.showToast) {
+          App.showToast(
+            `🎯 تم حفظ البصمة الراديوية بنجاح: ${label} (${Object.keys(expectedRssi).length} APs)`,
+          );
         }
       } else {
-        alert('فشل حفظ البصمة: ' + (data.error || 'خطأ غير معروف'));
+        alert("فشل حفظ البصمة: " + (data.error || "خطأ غير معروف"));
       }
     } catch (err) {
-      alert('خطأ في الاتصال بالخادم: ' + err.message);
+      alert("خطأ في الاتصال بالخادم: " + err.message);
     }
-  }
+  },
 };
 
 // Global Window Attachment
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.MapEngine = MapEngine;
 }

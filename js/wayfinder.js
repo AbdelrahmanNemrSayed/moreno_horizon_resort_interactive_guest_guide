@@ -6,30 +6,31 @@
 const Wayfinder = {
   lookupRoom() {
     App.playBeep(800);
-    const input = document.getElementById('roomSearchInput');
-    const rawVal = input ? input.value.trim() : '';
+    const input = document.getElementById("roomSearchInput");
+    const rawVal = input ? input.value.trim() : "";
     if (!rawVal) return;
 
     // Normalize Eastern Arabic numerals (٢٠١٥ -> 2015)
-    const normalized = rawVal.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+    const normalized = rawVal.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
     const roomNum = parseInt(normalized);
     if (isNaN(roomNum)) return;
 
-    // Save room number to localStorage
-    localStorage.setItem('moreno_guest_room', roomNum);
-    const srvInput = document.getElementById('srvRoomNumberInput');
-    if (srvInput) srvInput.value = roomNum;
-    const bkTblInput = document.getElementById('bookRoomNum');
-    if (bkTblInput) bkTblInput.value = roomNum;
+    // Populate inputs if currently active, without persisting as guest room
+    const srvInput = document.getElementById("srvRoomNumberInput");
+    if (srvInput && !srvInput.value) srvInput.value = roomNum;
+    const bkTblInput = document.getElementById("bookRoomNum");
+    if (bkTblInput && !bkTblInput.value) bkTblInput.value = roomNum;
 
     // Match against official building ranges
-    const buildings = resortPois.filter(p => p.isBuilding);
+    const buildings = resortPois.filter((p) => p.isBuilding);
     let matchedBuilding = null;
     let matchedFloor = "";
 
     for (const b of buildings) {
       for (const r of b.rooms) {
-        const isMatch = r.exact ? r.exact.includes(roomNum) : (roomNum >= r.min && roomNum <= r.max);
+        const isMatch = r.exact
+          ? r.exact.includes(roomNum)
+          : roomNum >= r.min && roomNum <= r.max;
         if (isMatch) {
           matchedBuilding = b;
           matchedFloor = r.floor;
@@ -39,15 +40,21 @@ const Wayfinder = {
       if (matchedBuilding) break;
     }
 
-    const banner = document.getElementById('routeResultBanner');
-    banner.classList.remove('hidden');
+    const banner = document.getElementById("routeResultBanner");
+    banner.classList.remove("hidden");
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
 
     if (matchedBuilding) {
-      const locBuilding = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(matchedBuilding, lang) : { name: matchedBuilding.nameAr };
-      const locFloor = (typeof getLocalizedFloor === 'function') ? getLocalizedFloor(matchedFloor, lang) : matchedFloor;
+      const locBuilding =
+        typeof getLocalizedPoi === "function"
+          ? getLocalizedPoi(matchedBuilding, lang)
+          : { name: matchedBuilding.nameAr };
+      const locFloor =
+        typeof getLocalizedFloor === "function"
+          ? getLocalizedFloor(matchedFloor, lang)
+          : matchedFloor;
 
       MapEngine.closePopover();
 
@@ -56,19 +63,42 @@ const Wayfinder = {
       MapEngine.closePopover(); // keep popover closed so room beacon & map remain completely clear
 
       // Draw animated SVG route from Main Lobby (M) to Matched Building
-      const currentPoi = resortPois.find(p => p.id === MapEngine.guestLocationPoiId);
-      const originPoi = currentPoi || resortPois.find(p => p.id === 'M') || { coords: { x: 31.55, y: 68.36 } };
-      const locOrigin = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(originPoi, lang) : { name: originPoi.nameAr || 'Main Lobby' };
-      const routeInfo = MapEngine.drawRoute(originPoi.coords, matchedBuilding.coords, locOrigin.name, locBuilding.name);
+      const currentPoi = resortPois.find(
+        (p) => p.id === MapEngine.guestLocationPoiId,
+      );
+      const originPoi = currentPoi ||
+        resortPois.find((p) => p.id === "M") || {
+          coords: { x: 31.55, y: 68.36 },
+        };
+      const locOrigin =
+        typeof getLocalizedPoi === "function"
+          ? getLocalizedPoi(originPoi, lang)
+          : { name: originPoi.nameAr || "Main Lobby" };
+      const routeInfo = MapEngine.drawRoute(
+        originPoi.coords,
+        matchedBuilding.coords,
+        locOrigin.name,
+        locBuilding.name,
+      );
 
       // 1. Drop prominent bouncing golden room beacon right on the matched building coordinate
-      MapEngine.dropRoomBeacon(matchedBuilding.coords, roomNum, locBuilding.name, locFloor);
+      MapEngine.dropRoomBeacon(
+        matchedBuilding.coords,
+        roomNum,
+        locBuilding.name,
+        locFloor,
+      );
 
       // 2. Start turn-by-turn navigation HUD outside the map, but DON'T recenter camera on lobby
       MapEngine.startTurnByTurn(originPoi, matchedBuilding, false, false);
 
       // 3. Laser-focus camera directly onto the guest's room building with clear zoom (1.85x)
-      MapEngine.focusCoordinate(matchedBuilding.coords.x, matchedBuilding.coords.y, 1.85, true);
+      MapEngine.focusCoordinate(
+        matchedBuilding.coords.x,
+        matchedBuilding.coords.y,
+        1.85,
+        true,
+      );
 
       // 4. Accurately scroll to map viewport framed directly below the sticky header
       MapEngine.scrollToMap();
@@ -80,17 +110,17 @@ const Wayfinder = {
               ${matchedBuilding.num}
             </span>
             <div>
-              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">${t.wf_room_found || '✓ تم تحديد موقع الغرفة'} (${roomNum})</span>
+              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">${t.wf_room_found || "✓ تم تحديد موقع الغرفة"} (${roomNum})</span>
               <h4 class="font-black text-sm sm:text-base text-slate-900 dark:text-white">${locBuilding.name} - ${locFloor}</h4>
-              <p class="text-xs text-slate-500 mt-0.5">${t.wf_approx_distance || '⏱️ المسافة التقريبية:'} ${routeInfo.meters} ${t.wf_meters || 'متراً'} • ${routeInfo.minutes} ${t.wf_minutes_walk || 'دقيقة سيراً عبر الممشى المظلل'}</p>
+              <p class="text-xs text-slate-500 mt-0.5">${t.wf_approx_distance || "⏱️ المسافة التقريبية:"} ${routeInfo.meters} ${t.wf_meters || "متراً"} • ${routeInfo.minutes} ${t.wf_minutes_walk || "دقيقة سيراً عبر الممشى المظلل"}</p>
             </div>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <button onclick="MapEngine.scrollToMap(); MapEngine.startLiveWalkSimulation();" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black text-xs whitespace-nowrap shadow-sm tap-effect">
-              ${t.wf_live_walk_btn || 'بدء محاكاة السير 🚶‍♂️'}
+              ${t.wf_live_walk_btn || "بدء محاكاة السير 🚶‍♂️"}
             </button>
             <button onclick="MapEngine.scrollToMap()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold text-xs whitespace-nowrap">
-              ${t.wf_preview_map || 'الخريطة 🗺️'}
+              ${t.wf_preview_map || "الخريطة 🗺️"}
             </button>
           </div>
         </div>
@@ -99,80 +129,100 @@ const Wayfinder = {
       MapEngine.clearRoute();
       banner.innerHTML = `
         <div class="text-xs text-rose-600 dark:text-rose-400 font-bold flex items-center gap-2">
-          <span>⚠️</span> ${t.wf_room_not_found || 'رقم الغرفة غير مسجل في نطاقات الغرف الحالية. يرجى مراجعة موظف الاستقبال على تحويلة (0).'} (${roomNum})
+          <span>⚠️</span> ${t.wf_room_not_found || "رقم الغرفة غير مسجل في نطاقات الغرف الحالية. يرجى مراجعة موظف الاستقبال على تحويلة (0)."} (${roomNum})
         </div>
       `;
     }
   },
 
   quickSelectRoom(num) {
-    document.getElementById('roomSearchInput').value = num;
-    const box = document.getElementById('roomSuggestionsBox');
-    if (box) box.classList.add('hidden');
+    document.getElementById("roomSearchInput").value = num;
+    const box = document.getElementById("roomSuggestionsBox");
+    if (box) box.classList.add("hidden");
     this.lookupRoom();
   },
 
   onRoomInput(val) {
-    const box = document.getElementById('roomSuggestionsBox');
+    const box = document.getElementById("roomSuggestionsBox");
     if (!box) return;
-    const clean = (val || '').trim().replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+    const clean = (val || "")
+      .trim()
+      .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
     if (!clean || clean.length < 2) {
-      box.classList.add('hidden');
+      box.classList.add("hidden");
       return;
     }
 
-    const buildings = resortPois.filter(p => p.isBuilding);
+    const buildings = resortPois.filter((p) => p.isBuilding);
     const matches = [];
 
     for (const b of buildings) {
       for (const r of b.rooms) {
         if (r.exact) {
-          const hits = r.exact.filter(num => String(num).startsWith(clean));
-          hits.forEach(h => matches.push({ room: h, building: b, floor: r.floor }));
+          const hits = r.exact.filter((num) => String(num).startsWith(clean));
+          hits.forEach((h) =>
+            matches.push({ room: h, building: b, floor: r.floor }),
+          );
         } else if (r.min && r.max) {
           const minS = String(r.min);
           const maxS = String(r.max);
-          if (minS.startsWith(clean) || maxS.startsWith(clean) || (parseInt(clean) >= Math.floor(r.min / 10) && parseInt(clean) <= Math.floor(r.max / 10))) {
-            matches.push({ sample: `${r.min} - ${r.max}`, building: b, floor: r.floor, range: true });
+          if (
+            minS.startsWith(clean) ||
+            maxS.startsWith(clean) ||
+            (parseInt(clean) >= Math.floor(r.min / 10) &&
+              parseInt(clean) <= Math.floor(r.max / 10))
+          ) {
+            matches.push({
+              sample: `${r.min} - ${r.max}`,
+              building: b,
+              floor: r.floor,
+              range: true,
+            });
           }
         }
       }
     }
 
     if (matches.length === 0) {
-      box.classList.add('hidden');
+      box.classList.add("hidden");
       return;
     }
 
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    box.innerHTML = matches.slice(0, 4).map(m => {
-      const locB = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(m.building, lang) : { name: m.building.nameAr };
-      if (m.range) {
-        const firstNum = m.sample.split(' - ')[0];
-        return `
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    box.innerHTML = matches
+      .slice(0, 4)
+      .map((m) => {
+        const locB =
+          typeof getLocalizedPoi === "function"
+            ? getLocalizedPoi(m.building, lang)
+            : { name: m.building.nameAr };
+        if (m.range) {
+          const firstNum = m.sample.split(" - ")[0];
+          return `
           <button type="button" onclick="document.getElementById('roomSearchInput').value='${firstNum}'; Wayfinder.lookupRoom(); document.getElementById('roomSuggestionsBox').classList.add('hidden');" class="w-full text-start p-2 rounded-xl hover:bg-amber-500/10 dark:hover:bg-slate-800 transition flex items-center justify-between text-xs tap-effect">
             <span class="font-bold text-slate-800 dark:text-slate-200">غرف ${m.sample}</span>
             <span class="text-[11px] font-semibold text-amber-600 dark:text-amber-400">${locB.name}</span>
           </button>
         `;
-      } else {
-        return `
+        } else {
+          return `
           <button type="button" onclick="document.getElementById('roomSearchInput').value='${m.room}'; Wayfinder.lookupRoom(); document.getElementById('roomSuggestionsBox').classList.add('hidden');" class="w-full text-start p-2 rounded-xl hover:bg-amber-500/10 dark:hover:bg-slate-800 transition flex items-center justify-between text-xs tap-effect">
             <span class="font-bold text-slate-800 dark:text-slate-200">غرفة #${m.room}</span>
             <span class="text-[11px] font-semibold text-amber-600 dark:text-amber-400">${locB.name}</span>
           </button>
         `;
-      }
-    }).join('');
-    box.classList.remove('hidden');
+        }
+      })
+      .join("");
+    box.classList.remove("hidden");
   },
 
   reset() {
-    document.getElementById('roomSearchInput').value = '';
-    const box = document.getElementById('roomSuggestionsBox');
-    if (box) box.classList.add('hidden');
-    document.getElementById('selectDestination').value = '';
-    document.getElementById('routeResultBanner').classList.add('hidden');
+    document.getElementById("roomSearchInput").value = "";
+    const box = document.getElementById("roomSuggestionsBox");
+    if (box) box.classList.add("hidden");
+    document.getElementById("selectDestination").value = "";
+    document.getElementById("routeResultBanner").classList.add("hidden");
     MapEngine.clearRoute();
     MapEngine.resetTransform();
     MapEngine.endTurnByTurn();
@@ -180,56 +230,80 @@ const Wayfinder = {
 
   calculateRoute() {
     App.playBeep(800);
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
 
-    const originSelect = document.getElementById('selectOrigin');
-    const originId = originSelect ? originSelect.value : 'M';
-    const destinationSelect = document.getElementById('selectDestination');
-    const destination = destinationSelect ? destinationSelect.value : '';
-    const banner = document.getElementById('routeResultBanner');
+    const originSelect = document.getElementById("selectOrigin");
+    const originId = originSelect ? originSelect.value : "M";
+    const destinationSelect = document.getElementById("selectDestination");
+    const destination = destinationSelect ? destinationSelect.value : "";
+    const banner = document.getElementById("routeResultBanner");
 
     if (!destination) {
-      App.showToast(t.wf_select_dest_prompt || 'يرجى اختيار الوجهة المطلوبة أولاً 🎯');
+      App.showToast(
+        t.wf_select_dest_prompt || "يرجى اختيار الوجهة المطلوبة أولاً 🎯",
+      );
       return;
     }
 
     let originPoi;
     let originText;
 
-    if (originId === 'LIVE_GUEST_LOCATION' && MapEngine.lastGuestPosition) {
+    if (originId === "LIVE_GUEST_LOCATION" && MapEngine.lastGuestPosition) {
       originPoi = {
-        id: 'LIVE_GUEST_LOCATION',
-        nameAr: (lang === 'ar') ? 'موقعي الحالي' : 'My Live Location',
-        nameEn: 'My Live Location',
-        nameRu: 'Мое местоположение',
-        nameDe: 'Mein Standort',
-        coords: { x: MapEngine.lastGuestPosition.pctX, y: MapEngine.lastGuestPosition.pctY },
-        isLiveLocation: true
+        id: "LIVE_GUEST_LOCATION",
+        nameAr: lang === "ar" ? "موقعي الحالي" : "My Live Location",
+        nameEn: "My Live Location",
+        nameRu: "Мое местоположение",
+        nameDe: "Mein Standort",
+        coords: {
+          x: MapEngine.lastGuestPosition.pctX,
+          y: MapEngine.lastGuestPosition.pctY,
+        },
+        isLiveLocation: true,
       };
-      originText = (lang === 'ar') ? '📍 موقعي الحالي' : '📍 My Live Location';
-      MapEngine.activeLiveNavDestination = resortPois.find(p => p.id === destination);
+      originText = lang === "ar" ? "📍 موقعي الحالي" : "📍 My Live Location";
+      MapEngine.activeLiveNavDestination = resortPois.find(
+        (p) => p.id === destination,
+      );
     } else {
-      originPoi = resortPois.find(p => p.id === originId) || resortPois.find(p => p.id === 'M');
-      const originOpt = originSelect && originSelect.options && originSelect.selectedIndex >= 0 ? originSelect.options[originSelect.selectedIndex] : null;
-      originText = originOpt ? originOpt.text.replace(/^[📍\s]+/, '') : (t.wf_your_location || 'موقعك');
+      originPoi =
+        resortPois.find((p) => p.id === originId) ||
+        resortPois.find((p) => p.id === "M");
+      const originOpt =
+        originSelect && originSelect.options && originSelect.selectedIndex >= 0
+          ? originSelect.options[originSelect.selectedIndex]
+          : null;
+      originText = originOpt
+        ? originOpt.text.replace(/^[📍\s]+/, "")
+        : t.wf_your_location || "موقعك";
       MapEngine.activeLiveNavDestination = null;
     }
 
-    const targetPoi = resortPois.find(p => p.id === destination);
+    const targetPoi = resortPois.find((p) => p.id === destination);
     if (!targetPoi) return;
 
-    const locTarget = (typeof getLocalizedPoi === 'function') ? getLocalizedPoi(targetPoi, lang) : { name: targetPoi.nameAr };
+    const locTarget =
+      typeof getLocalizedPoi === "function"
+        ? getLocalizedPoi(targetPoi, lang)
+        : { name: targetPoi.nameAr };
 
     MapEngine.selectPoi(destination);
     MapEngine.closePopover();
     MapEngine.focusCoordinate(targetPoi.coords.x, targetPoi.coords.y, 1.45);
 
     // Draw animated route & auto start live turn-by-turn navigation
-    const routeInfo = MapEngine.drawRoute(originPoi.coords, targetPoi.coords, originText, locTarget.name, false, true);
+    const routeInfo = MapEngine.drawRoute(
+      originPoi.coords,
+      targetPoi.coords,
+      originText,
+      locTarget.name,
+      false,
+      true,
+    );
     MapEngine.startTurnByTurn(originPoi, targetPoi, false, true);
 
-    banner.classList.remove('hidden');
+    banner.classList.remove("hidden");
     banner.innerHTML = `
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -237,17 +311,17 @@ const Wayfinder = {
             ${targetPoi.num}
           </span>
           <div>
-            <span class="text-[11px] font-bold text-slate-500">${t.wf_direct_route || 'مسار سير مباشر متصل بالخريطة:'}</span>
-            <h4 class="font-extrabold text-sm text-slate-900 dark:text-white">${t.wf_from_to || 'من'} [${originText}] ${t.wf_to || 'إلى'} ➔ ${locTarget.name}</h4>
-            <p class="text-xs text-emerald-600 font-semibold mt-0.5">⏱️ ${t.wf_approx_distance || 'المسافة:'} ${routeInfo.meters} ${t.wf_meters || 'متراً'} • ${routeInfo.minutes} ${t.walkingTime || 'دقيقة سيراً'}</p>
+            <span class="text-[11px] font-bold text-slate-500">${t.wf_direct_route || "مسار سير مباشر متصل بالخريطة:"}</span>
+            <h4 class="font-extrabold text-sm text-slate-900 dark:text-white">${t.wf_from_to || "من"} [${originText}] ${t.wf_to || "إلى"} ➔ ${locTarget.name}</h4>
+            <p class="text-xs text-emerald-600 font-semibold mt-0.5">⏱️ ${t.wf_approx_distance || "المسافة:"} ${routeInfo.meters} ${t.wf_meters || "متراً"} • ${routeInfo.minutes} ${t.walkingTime || "دقيقة سيراً"}</p>
           </div>
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <button onclick="MapEngine.scrollToMap(); MapEngine.startLiveWalkSimulation();" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black text-xs whitespace-nowrap shadow-sm tap-effect">
-            ${t.wf_live_walk_btn || 'بدء محاكاة السير 🚶‍♂️'}
+            ${t.wf_live_walk_btn || "بدء محاكاة السير 🚶‍♂️"}
           </button>
           <button onclick="MapEngine.scrollToMap()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold text-xs whitespace-nowrap">
-            ${t.wf_show_route || 'الخريطة 🗺️'}
+            ${t.wf_show_route || "الخريطة 🗺️"}
           </button>
         </div>
       </div>
@@ -257,23 +331,40 @@ const Wayfinder = {
   // 1-Tap "Take Me to My Room"
   takeMeToMyRoom() {
     App.playBeep(900);
-    const savedRoom = localStorage.getItem('moreno_guest_room');
-    const lang = (typeof App !== 'undefined' && App.currentLang) || 'ar';
-    const t = (typeof i18n !== 'undefined' && i18n[lang]) ? i18n[lang] : i18n.ar;
+    const savedRoom = localStorage.getItem("moreno_guest_room");
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
 
     if (!savedRoom) {
       App.openSaveRoomModal();
       return;
     }
 
-    const input = document.getElementById('roomSearchInput');
+    const input = document.getElementById("roomSearchInput");
     if (input) input.value = savedRoom;
 
     this.lookupRoom();
-    App.showToast(`🏠 ${t.nav_turn_title || 'الملاحة الحية إلى غرفتك'} (${savedRoom})`);
-  }
+    App.showToast(
+      `🏠 ${t.nav_turn_title || "الملاحة الحية إلى غرفتك"} (${savedRoom})`,
+    );
+  },
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.Wayfinder = Wayfinder;
+  window.calculateCustomRoute = function () {
+    Wayfinder.calculateRoute();
+  };
+  window.resetWayfinder = function () {
+    Wayfinder.reset();
+  };
+  window.takeMeToMyRoom = function () {
+    Wayfinder.takeMeToMyRoom();
+  };
+  window.lookupRoom = function () {
+    Wayfinder.lookupRoom();
+  };
+  window.quickSelectRoom = function (num) {
+    Wayfinder.quickSelectRoom(num);
+  };
 }

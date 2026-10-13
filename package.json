@@ -1,0 +1,45 @@
+{
+  "name": "moreno-horizon-guest-guide",
+  "version": "2.0.0",
+  "description": "Moreno Horizon Spa & Resort Interactive Guest Guide & Real-Time Indoor Wayfinding Engine",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "bridge": "node server/bridgeServer.js",
+    "bridge:dev": "node --watch server/bridgeServer.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "validate": "node scripts/validate-configs.js",
+    "lint": "eslint config/ server/ shared/ tests/ scripts/ js/core/",
+    "lint:fix": "eslint config/ server/ shared/ tests/ scripts/ js/core/ --fix",
+    "format": "prettier --write \"**/*.{js,json,css,html,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,css,html,md}\"",
+    "build:locales": "node scripts/build-locales.js",
+    "build:data": "node scripts/build-data.js",
+    "build": "npm run build:locales && npm run build:data",
+    "trim:i18n": "node scripts/trim-data-i18n.js"
+  },
+  "keywords": [
+    "resort-guide",
+    "indoor-location",
+    "wayfinder",
+    "trilateration",
+    "mikrotik",
+    "smart-resort"
+  ],
+  "author": "Moreno Horizon Resort",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.3.0",
+    "vitest": "^2.0.0"
+  }
+}

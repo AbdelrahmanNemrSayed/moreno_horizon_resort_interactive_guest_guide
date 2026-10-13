@@ -22,5 +22,35 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "البحث عن الغرفة والملاحة",
+      "short_name": "مكتشف الغرف",
+      "description": "تحديد موقع غرفتك ومسار المشي إليها خطوة بخطوة",
+      "url": "./index.html#room-finder",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "طوارئ وخدمة النزلاء 24/7",
+      "short_name": "طوارئ",
+      "description": "اتصال فوري بالطوارئ والعيادة والاستقبال",
+      "url": "./index.html#emergency",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "خريطة المنتجع التفاعلية",
+      "short_name": "الخريطة",
+      "description": "استكشاف مرافق المنتجع والشاطئ والمسابح",
+      "url": "./index.html#map",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "قوائم الطعام وحجز المطاعم",
+      "short_name": "المطاعم",
+      "description": "استعراض بوفيه سيرينا ومطاعم المأكولات البحرية والبارات",
+      "url": "./index.html#dining",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
