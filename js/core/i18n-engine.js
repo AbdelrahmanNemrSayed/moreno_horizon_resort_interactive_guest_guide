@@ -53,7 +53,7 @@
       if (!this.pluralRulesCache.has(lang)) {
         try {
           this.pluralRulesCache.set(lang, new Intl.PluralRules(lang));
-        } catch (e) {
+        } catch {
           this.pluralRulesCache.set(lang, new Intl.PluralRules("en"));
         }
       }
@@ -131,7 +131,6 @@
      * Create backward-compatible Proxy for window.i18n
      */
     createLegacyProxy() {
-      const self = this;
       return new Proxy(this.locales, {
         get(target, lang) {
           if (lang in target) {

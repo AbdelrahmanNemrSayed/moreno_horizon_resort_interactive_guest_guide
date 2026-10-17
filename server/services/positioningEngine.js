@@ -96,7 +96,7 @@ class PositioningEngine {
   pruneApStats() {
     const now = Date.now();
     const ttl = 60000; // 1 minute
-    for (const [apId, stats] of this.apStats.entries()) {
+    for (const stats of this.apStats.values()) {
       // In a real implementation we'd need timestamps per device in the Set
       // For now, let's just clear if we haven't seen updates for a while
       if (now - this.lastSuccessfulUpdate > ttl) {
@@ -140,16 +140,16 @@ class PositioningEngine {
         const enrichedAp = {
           ...ap,
           pixelX:
-            ap.pixelX != null
+            ap.pixelX !== null && ap.pixelX !== undefined
               ? ap.pixelX
               : Math.round((ap.xPct / 100) * this.canvasWidth),
           pixelY:
-            ap.pixelY != null
+            ap.pixelY !== null && ap.pixelY !== undefined
               ? ap.pixelY
               : Math.round((ap.yPct / 100) * this.canvasHeight),
-          txPower: ap.txPower != null ? ap.txPower : this.defaultTxPower,
+          txPower: ap.txPower !== null && ap.txPower !== undefined ? ap.txPower : this.defaultTxPower,
           pathLossExponent:
-            ap.pathLossExponent != null
+            ap.pathLossExponent !== null && ap.pathLossExponent !== undefined
               ? ap.pathLossExponent
               : this.defaultPathLossExponent,
         };
@@ -177,9 +177,9 @@ class PositioningEngine {
    * @returns {number} distance in meters
    */
   rssiToDistance(rssi, txPower = null, pathLossExponent = null) {
-    const p0 = txPower != null ? Number(txPower) : this.defaultTxPower;
+    const p0 = txPower !== null && txPower !== undefined ? Number(txPower) : this.defaultTxPower;
     const n =
-      pathLossExponent != null
+      pathLossExponent !== null && pathLossExponent !== undefined
         ? Number(pathLossExponent)
         : this.defaultPathLossExponent;
     return PositioningCore.rssiToDistance(rssi, p0, n);
@@ -260,7 +260,7 @@ class PositioningEngine {
       d: ap.distanceInPixels,
       dMeters: ap.distanceInMeters,
       weight:
-        ap.weight != null
+        ap.weight !== null && ap.weight !== undefined
           ? ap.weight
           : 1.0 / Math.max(0.5, ap.distanceInMeters),
     }));
@@ -498,7 +498,7 @@ class PositioningEngine {
 
       // Extract RSSI integer
       const rssiStr = String(
-        r.rssi != null ? r.rssi : r["signal-strength"] || "-90",
+        r.rssi !== null && r.rssi !== undefined ? r.rssi : r["signal-strength"] || "-90",
       );
       const match = rssiStr.match(/(-?\d+)/);
       if (!match) continue;

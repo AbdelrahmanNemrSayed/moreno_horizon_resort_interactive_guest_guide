@@ -15,12 +15,6 @@ import { themeManager } from './theme-manager.js';
 import { pwaManager } from './pwa-manager.js';
 import { weatherManager } from './weather-manager.js';
 
-// Data modules
-import { resortPois } from '../data/pois.js';
-import { resortActivities } from '../data/activities.js';
-import { resortSpaTreatments, diningSchedules } from '../data/menu.js';
-import { compendiumData } from '../data/compendium.js';
-
 // Safe references for engines in browser vs test environments
 const getMapEngine = () => (typeof window !== 'undefined' ? window.MapEngine : null);
 const getVoiceNavigator = () => (typeof window !== 'undefined' ? (window.VoiceConcierge || window.VoiceNavigator) : null);
@@ -77,7 +71,6 @@ export const App = {
 
         // 5. Setup UI state
         const savedRoom = localStorage.getItem('moreno_guest_room');
-        const savedName = localStorage.getItem('moreno_guest_name');
         if (savedRoom) {
             // Update room search inputs
             this.prefillRoomSearch(savedRoom);
@@ -122,22 +115,89 @@ export const App = {
         root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
 
         // Update all elements with data-i18n attribute
+        // Sync dropdown selector
+        const langSelect = document.getElementById('langSelect');
+        if (langSelect && langSelect.value !== lang) {
+            langSelect.value = lang;
+        }
+
+        // Localize page title
+        if (typeof I18nEngine !== 'undefined') {
+            const pageTitle = I18nEngine.t('page_title');
+            if (pageTitle) document.title = pageTitle;
+        }
+
         this.updateI18nElements();
+
+        if (typeof window !== 'undefined' && window.Wayfinder && typeof window.Wayfinder.populateDropdowns === 'function') {
+            window.Wayfinder.populateDropdowns(lang);
+        }
+
+        if (typeof window !== 'undefined' && window.MapEngine && typeof window.MapEngine.updateLandmarkPresetLabels === 'function') {
+            window.MapEngine.updateLandmarkPresetLabels(lang);
+        }
+
+        if (typeof window !== 'undefined' && window.MapEngine && typeof window.MapEngine.renderPins === 'function') {
+            window.MapEngine.renderPins();
+        }
 
         // Dispatch event for other components
         window.dispatchEvent(new CustomEvent('languagechange', { detail: { lang } }));
     },
 
     /**
-     * Update all elements with data-i18n attribute
+     * Update all elements with i18n attributes
      */
     updateI18nElements() {
-        const elements = document.querySelectorAll('[data-i18n]');
-        elements.forEach(el => {
+        const getTrans = (key) => {
+            if (typeof I18nEngine !== 'undefined' && typeof I18nEngine.t === 'function') {
+                return I18nEngine.t(key, null, this.currentLang);
+            }
+            if (typeof window !== 'undefined' && window.i18n && window.i18n[this.currentLang]) {
+                return window.i18n[this.currentLang][key];
+            }
+            return key;
+        };
+
+        // Text
+        document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if (key && I18nEngine) {
-                const text = I18nEngine.t(key);
-                if (text) el.textContent = text;
+            if (key) {
+                const text = getTrans(key);
+                if (text) {
+                    if (el.tagName === 'INPUT' && (el.type === 'button' || el.type === 'submit')) {
+                        el.value = text;
+                    } else {
+                        el.textContent = text;
+                    }
+                }
+            }
+        });
+
+        // Placeholders
+        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+            const key = el.getAttribute('data-i18n-ph');
+            if (key) {
+                const text = getTrans(key);
+                if (text) el.setAttribute('placeholder', text);
+            }
+        });
+
+        // Titles
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const key = el.getAttribute('data-i18n-title');
+            if (key) {
+                const text = getTrans(key);
+                if (text) el.setAttribute('title', text);
+            }
+        });
+
+        // Aria labels
+        document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+            const key = el.getAttribute('data-i18n-aria');
+            if (key) {
+                const text = getTrans(key);
+                if (text) el.setAttribute('aria-label', text);
             }
         });
     },
@@ -271,7 +331,7 @@ export const App = {
                 const url = `https://wa.me/?text=📍%20%20${encodeURIComponent(`أبحث عن غرفتي في موقع: ${latitude}, ${longitude}`)}`;
                 window.open(url, '_blank');
             },
-            (error) => {
+            () => {
                 uiManager.showToast('تعذر الوصول إلى موقعك الحالي', '⚠️');
             }
         );

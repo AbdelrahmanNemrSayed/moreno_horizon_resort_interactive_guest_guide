@@ -3,7 +3,7 @@
  * Network-First Strategy with Offline Cache Fallback
  */
 
-const CACHE_NAME = "moreno-guide-v56";
+const CACHE_NAME = "moreno-guide-v58";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -16,21 +16,23 @@ const ASSETS_TO_CACHE = [
   "./assets/icons/icon-512.png",
   "./assets/icons/favicon-32x32.png",
   "./assets/icons/favicon-16x16.png",
+  "./css/tailwind-compiled.css",
+  "./css/tailwind-compiled.css?v=58.0",
   "./css/style.css",
-  "./css/style.css?v=48.0",
-  "./shared/positioning-core.js?v=48.0",
-  "./js/core/i18n-engine.js?v=48.0",
-  "./js/locales-bundle.js?v=48.0",
-  "./js/data.js?v=48.0",
-  "./js/virtual-resort-map.js?v=48.0",
-  "./js/geofence-service.js?v=48.0",
-  "./js/map-matcher.js?v=48.0",
-  "./js/map-engine.js?v=48.0",
-  "./js/voice-concierge.js?v=48.0",
-  "./js/wayfinder.js?v=48.0",
-  "./js/room-finder.js?v=48.0",
-  "./js/templates/view-templates.js?v=48.0",
-  "./js/app.js?v=48.0",
+  "./css/style.css?v=58.0",
+  "./shared/positioning-core.js?v=58.0",
+  "./js/core/i18n-engine.js?v=58.0",
+  "./js/locales-bundle.js?v=58.0",
+  "./js/data.js?v=58.0",
+  "./js/virtual-resort-map.js?v=58.0",
+  "./js/geofence-service.js?v=58.0",
+  "./js/map-matcher.js?v=58.0",
+  "./js/map-engine.js?v=58.0",
+  "./js/voice-concierge.js?v=58.0",
+  "./js/wayfinder.js?v=58.0",
+  "./js/room-finder.js?v=58.0",
+  "./js/templates/view-templates.js?v=58.0",
+  "./js/app.js?v=58.0",
   "./moreno_resort_map_new.png",
   "./assets/images/moreno_logo.jpg",
   "./assets/images/hero_resort.jpg",
@@ -78,6 +80,19 @@ self.addEventListener("fetch", (event) => {
   // Ignore non-http schemes (e.g. chrome-extension)
   if (!url.protocol.startsWith("http")) return;
 
+  // Never cache API routes — always fetch live from network
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return new Response(
+          JSON.stringify({ success: false, error: "Offline — network unavailable" }),
+          { status: 503, headers: { "Content-Type": "application/json" } },
+        );
+      }),
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       // Revalidate in background to keep cache fresh
@@ -109,3 +124,4 @@ self.addEventListener("fetch", (event) => {
     }),
   );
 });
+

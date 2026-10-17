@@ -118,12 +118,12 @@ class IndoorLocationService {
    */
   rssiToDistance(rssi, refRssi1m = null, pathLossN = null) {
     const A =
-      refRssi1m != null
+      refRssi1m !== null && refRssi1m !== undefined
         ? refRssi1m
         : this.config.defaultModel?.refRssi1m ||
           PositioningCore.DEFAULT_REF_RSSI_1M;
     const n =
-      pathLossN != null
+      pathLossN !== null && pathLossN !== undefined
         ? pathLossN
         : this.config.defaultModel?.pathLossN ||
           PositioningCore.DEFAULT_PATH_LOSS_N;
@@ -135,12 +135,12 @@ class IndoorLocationService {
    */
   distanceToRssi(distMeters, refRssi1m = null, pathLossN = null) {
     const A =
-      refRssi1m != null
+      refRssi1m !== null && refRssi1m !== undefined
         ? refRssi1m
         : this.config.defaultModel?.refRssi1m ||
           PositioningCore.DEFAULT_REF_RSSI_1M;
     const n =
-      pathLossN != null
+      pathLossN !== null && pathLossN !== undefined
         ? pathLossN
         : this.config.defaultModel?.pathLossN ||
           PositioningCore.DEFAULT_PATH_LOSS_N;
@@ -473,7 +473,7 @@ class IndoorLocationService {
     const measMap = new Map();
     for (const m of measurements) {
       const norm = this.normalizeMac(m.bssid);
-      if (norm && m.rssi != null) {
+      if (norm && m.rssi !== null && m.rssi !== undefined) {
         measMap.set(norm, Number(m.rssi));
       }
     }

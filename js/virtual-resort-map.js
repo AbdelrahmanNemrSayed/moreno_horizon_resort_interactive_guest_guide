@@ -486,6 +486,7 @@ const VirtualResortMap = {
         "p_west_service_road",
         "p_mls_walk",
         "p_mls_west_bypass",
+        "poi_mls_mall",
       ],
     },
     p_avenue_mid: {
@@ -638,6 +639,10 @@ const VirtualResortMap = {
   renderCanvasWorld() {
     const container = document.getElementById("mapCanvasWrapper");
     if (!container) return;
+    // Safeguard: Never overwrite if MapEngine's pins overlay or master map already exists
+    if (document.getElementById("pinsOverlay") || document.getElementById("routeSvgLayer")) {
+      return;
+    }
 
     container.style.width = `${this.WIDTH}px`;
     container.style.height = `${this.HEIGHT}px`;
@@ -1622,3 +1627,6 @@ if (typeof globalThis !== "undefined") {
 if (typeof window !== "undefined") {
   window.VirtualResortMap = VirtualResortMap;
 }
+
+// Automatically ensure graph bidirectionality on load
+VirtualResortMap.ensureBidirectionalGraph();

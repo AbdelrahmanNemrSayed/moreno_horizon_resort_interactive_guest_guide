@@ -26,6 +26,14 @@ export class ThemeManager {
         }
     }
 
+    updateIcons(theme) {
+        if (typeof document === 'undefined') return;
+        const sun = document.getElementById('sunIcon');
+        const moon = document.getElementById('moonIcon');
+        if (sun) sun.style.display = theme === 'dark' ? 'block' : 'none';
+        if (moon) moon.style.display = theme === 'dark' ? 'none' : 'block';
+    }
+
     // Set theme (dark or light)
     setTheme(theme) {
         this.currentTheme = theme;
@@ -36,6 +44,7 @@ export class ThemeManager {
         } else {
             root.classList.remove('dark');
         }
+        this.updateIcons(theme);
 
         // Save to localStorage
         localStorage.setItem('moreno_theme', theme);

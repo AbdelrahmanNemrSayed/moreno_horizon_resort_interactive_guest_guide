@@ -771,12 +771,8 @@ const MapEngine = {
     const distMeters = Math.round(distPx * 0.42);
     const walkMin = Math.max(1, Math.round(distMeters / 65));
 
-    // ── Build smooth Bezier path (Catmull-Rom spline) ──
-    const bezierD = this.buildBezierPath(routePoints, 0.22);
-    // Fallback linear path for shadow (works on all browsers)
-    const linearD = routePoints
-      .map((pt, i) => `${i === 0 ? "M" : "L"} ${pt.x} ${pt.y}`)
-      .join(" ");
+    // ── Build smooth filleted path (strictly adheres to paved walkways) ──
+    const routeD = this.buildFilletedPath(routePoints, 14);
 
     const lineClass = isAccessible
       ? "animated-route-line accessible-route-line"
@@ -809,7 +805,7 @@ const MapEngine = {
         <!-- Gradient flows from cyan (origin) to gold (destination) -->
         <linearGradient id="routeGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%"   stop-color="#00f0ff" stop-opacity="0.98" />
-          <stop offset="40%"  stop-color="#38bdf8" stop-opacity="1"    />
+          <stop offset="45%"  stop-color="#38bdf8" stop-opacity="1"    />
           <stop offset="100%" stop-color="#fbbf24" stop-opacity="1"    />
         </linearGradient>
 
@@ -821,7 +817,7 @@ const MapEngine = {
 
         <!-- Glow filter: blurred halo behind the route line -->
         <filter id="routeGlow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
@@ -838,42 +834,48 @@ const MapEngine = {
         </filter>
       </defs>
 
-      <!-- 1. Deep shadow for visual depth (uses linear fallback for reliability) -->
-      <path d="${linearD}" fill="none"
-            stroke="#000000" stroke-width="10"
-            stroke-opacity="0.45" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- 1. Deep casing/shadow: exact match with route line (no detached shadow!) -->
+      <path d="${routeD}" fill="none"
+            stroke="#000000" stroke-width="9"
+            stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
 
       <!-- 2. Wide soft glow halo beneath the line -->
-      <path d="${bezierD}" fill="none"
+      <path d="${routeD}" fill="none"
             stroke="${isAccessible ? "url(#accessibleGrad)" : "#00d4ff"}"
-            stroke-width="11" stroke-opacity="0.22"
+            stroke-width="11" stroke-opacity="0.25"
             stroke-linecap="round" stroke-linejoin="round"/>
 
-      <!-- 3. Main Bezier route line — smooth spline, no harsh corners -->
-      <path id="liveRouteSvgPath" d="${bezierD}" fill="none"
+      <!-- 3. Vibrant solid core route line -->
+      <path d="${routeD}" fill="none"
             stroke="${strokeUrl}" stroke-width="5"
             stroke-linecap="round" stroke-linejoin="round"
-            class="${lineClass}" filter="url(#routeGlow)"/>
+            filter="url(#routeGlow)"/>
 
-      <!-- 4. Leader particle: golden orb traveling the Bezier path -->
-      <circle r="8" fill="#fbbf24" stroke="#ffffff" stroke-width="1.8" class="route-particle-glow">
-        <animateMotion dur="${particleDur}s" repeatCount="indefinite" path="${bezierD}"
+      <!-- 4. Animated directional dash flow (shows walking direction clearly) -->
+      <path id="liveRouteSvgPath" d="${routeD}" fill="none"
+            stroke="#ffffff" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"
+            class="${lineClass}" opacity="0.9"/>
+
+      <!-- 5. Leader particle: golden orb traveling the route -->
+      <circle r="7.5" fill="#fbbf24" stroke="#ffffff" stroke-width="1.8" class="route-particle-glow">
+        <animateMotion dur="${particleDur}s" repeatCount="indefinite" path="${routeD}"
                        calcMode="paced"/>
       </circle>
 
-      <!-- 5. Follower particle 1: cyan orb with slight delay -->
-      <circle r="5.5" fill="#00f0ff" stroke="#ffffff" stroke-width="1" class="route-particle-cyan" opacity="0.92">
+      <!-- 6. Follower particle 1: cyan orb with slight delay -->
+      <circle r="5" fill="#00f0ff" stroke="#ffffff" stroke-width="1" class="route-particle-cyan" opacity="0.92">
         <animateMotion dur="${particleDur}s" begin="${(+particleDur * 0.28).toFixed(2)}s"
-                       repeatCount="indefinite" path="${bezierD}" calcMode="paced"/>
+                       repeatCount="indefinite" path="${routeD}" calcMode="paced"/>
       </circle>
 
-      <!-- 6. Follower particle 2: white sparkle -->
-      <circle r="3.5" fill="#ffffff" opacity="0.80">
+      <!-- 7. Follower particle 2: white sparkle -->
+      <circle r="3.2" fill="#ffffff" opacity="0.85">
         <animateMotion dur="${particle2Dur}s" begin="${(+particleDur * 0.56).toFixed(2)}s"
-                       repeatCount="indefinite" path="${bezierD}" calcMode="paced"/>
+                       repeatCount="indefinite" path="${routeD}" calcMode="paced"/>
       </circle>
 
-      <!-- 7. Origin pulse ring + directional heading arrow -->
+      <!-- 8. Origin pulse ring + directional heading arrow -->
       <g transform="translate(${startPoint.x}, ${startPoint.y})">
         <!-- Expanding pulse -->
         <circle r="14" fill="#00f0ff" fill-opacity="0.28">
@@ -884,12 +886,12 @@ const MapEngine = {
         <circle r="6" fill="#00f0ff" stroke="#ffffff" stroke-width="2.5"/>
         <!-- Direction heading arrow -->
         <line x1="0" y1="0" x2="${(arrowX - startPoint.x).toFixed(1)}" y2="${(arrowY - startPoint.y).toFixed(1)}"
-              stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+              stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
         <circle cx="${(arrowX - startPoint.x).toFixed(1)}" cy="${(arrowY - startPoint.y).toFixed(1)}"
-                r="2.5" fill="#ffffff" opacity="0.85"/>
+                r="2.5" fill="#ffffff" opacity="0.9"/>
       </g>
 
-      <!-- 8. Destination beacon: gold pulsing rings with star icon -->
+      <!-- 9. Destination beacon: gold pulsing rings with star icon -->
       <g transform="translate(${endPoint.x}, ${endPoint.y})" filter="url(#destGlow)">
         <!-- Outer fast ring -->
         <circle r="22" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-opacity="0.5">
@@ -951,9 +953,9 @@ const MapEngine = {
       },
       {
         name: "Wing S",
-        x1: 500,
-        y1: 550,
-        x2: 600,
+        x1: 490,
+        y1: 470,
+        x2: 640,
         y2: 670,
         entranceKey: "poi_s_wing",
       },
@@ -989,8 +991,8 @@ const MapEngine = {
 
   /**
    * Computes the walkway route as an array of pixel {x,y} points.
-   * Uses edge-projection to cleanly enter/exit the graph, snaps building interiors
-   * to outdoor entrances, and runs A* for the collision-free walkway path.
+   * Uses graph A* for collision-free walkway routing, snaps building interiors
+   * to outdoor entrances, and ensures smooth direct entry/exit without doubling-back hooks.
    */
   getWalkwayRoutePoints(originCoords, destCoords) {
     const toPixels = (coords) => ({
@@ -1009,68 +1011,31 @@ const MapEngine = {
       return [origin, destination];
     }
 
-    // ── Edge-aware entry/exit: find nearest graph edge for start & end ──
-    const startEdge =
-      typeof network.getNearestEdgePoint === "function"
-        ? network.getNearestEdgePoint(origin.x, origin.y)
-        : null;
-    const endEdge =
-      typeof network.getNearestEdgePoint === "function"
-        ? network.getNearestEdgePoint(destination.x, destination.y)
-        : null;
-
-    // Determine A* start/end keys from edge endpoints (pick the one closer to center)
-    const startKey = startEdge
-      ? Math.hypot(
-          network.nodes[startEdge.fromKey].x - origin.x,
-          network.nodes[startEdge.fromKey].y - origin.y,
-        ) <
-        Math.hypot(
-          network.nodes[startEdge.toKey].x - origin.x,
-          network.nodes[startEdge.toKey].y - origin.y,
-        )
-        ? startEdge.fromKey
-        : startEdge.toKey
-      : network.getNearestNodeKey(origin.x, origin.y);
-
-    const destinationKey = endEdge
-      ? Math.hypot(
-          network.nodes[endEdge.fromKey].x - destination.x,
-          network.nodes[endEdge.fromKey].y - destination.y,
-        ) <
-        Math.hypot(
-          network.nodes[endEdge.toKey].x - destination.x,
-          network.nodes[endEdge.toKey].y - destination.y,
-        )
-        ? endEdge.fromKey
-        : endEdge.toKey
-      : network.getNearestNodeKey(destination.x, destination.y);
+    const startKey = network.getNearestNodeKey(origin.x, origin.y);
+    const destinationKey = network.getNearestNodeKey(
+      destination.x,
+      destination.y,
+    );
 
     if (!startKey || !destinationKey) {
       return [origin, destination];
     }
 
-    const graphPath = network.findPath(startKey, destinationKey) || [];
+    if (startKey === destinationKey) {
+      return [origin, destination];
+    }
 
-    // Build waypoints: real origin → (edge entry proj) → graph nodes → (edge exit proj) → real dest
+    const graphPath = network.findPath(startKey, destinationKey) || [];
+    if (!graphPath || graphPath.length === 0) {
+      return [origin, destination];
+    }
+
+    // Build waypoints:
+    // If origin is noticeably distant (>10px) from the starting entrance node, include origin
     const waypoints = [];
     const firstNode = graphPath[0];
-    if (
-      !firstNode ||
-      Math.hypot(origin.x - firstNode.x, origin.y - firstNode.y) > 8
-    ) {
+    if (Math.hypot(origin.x - firstNode.x, origin.y - firstNode.y) > 10) {
       waypoints.push(origin);
-      if (startEdge && startEdge.dist > 15) {
-        const entryProj = { x: startEdge.projX, y: startEdge.projY };
-        if (
-          Math.hypot(entryProj.x - origin.x, entryProj.y - origin.y) > 8 &&
-          (!firstNode ||
-            Math.hypot(entryProj.x - firstNode.x, entryProj.y - firstNode.y) >
-              8)
-        ) {
-          waypoints.push(entryProj);
-        }
-      }
     }
 
     for (const node of graphPath) {
@@ -1079,30 +1044,19 @@ const MapEngine = {
       }
     }
 
+    // If destination is noticeably distant (>10px) from the final exit node, append destination
     const lastNode = graphPath[graphPath.length - 1];
     if (
-      !lastNode ||
-      Math.hypot(destination.x - lastNode.x, destination.y - lastNode.y) > 8
+      Math.hypot(destination.x - lastNode.x, destination.y - lastNode.y) > 10
     ) {
-      if (endEdge && endEdge.dist > 15) {
-        const exitProj = { x: endEdge.projX, y: endEdge.projY };
-        if (
-          Math.hypot(exitProj.x - destination.x, exitProj.y - destination.y) >
-            8 &&
-          (!lastNode ||
-            Math.hypot(exitProj.x - lastNode.x, exitProj.y - lastNode.y) > 8)
-        ) {
-          waypoints.push(exitProj);
-        }
-      }
       waypoints.push(destination);
     }
 
-    // Filter out points within 3px of each other to avoid micro-jitter
+    // Filter out duplicate or near-coincident points (< 4px) to avoid micro-jitter
     const filtered = waypoints.filter((pt, i) => {
       if (i === 0) return true;
       return (
-        Math.hypot(pt.x - waypoints[i - 1].x, pt.y - waypoints[i - 1].y) > 3
+        Math.hypot(pt.x - waypoints[i - 1].x, pt.y - waypoints[i - 1].y) > 4
       );
     });
 
@@ -1110,13 +1064,68 @@ const MapEngine = {
   },
 
   /**
-   * Converts an array of {x,y} polyline points into a smooth SVG path
-   * string using Catmull-Rom → Cubic Bezier conversion.
-   * Tension 0.22 ensures smooth filleted turns without bulging off-path.
+   * Generates a clean CAD-standard filleted SVG path string.
+   * Replaces sharp polyline corners with smooth circular quadratic fillets.
+   * Unlike Catmull-Rom Bezier splines, filleted paths NEVER bulge outward off
+   * the paved walkway corridors, and perfectly match both shadow and glow strokes.
    *
-   * @param {Array<{x,y}>} points - Waypoint array (≥2 points)
-   * @param {number} tension - Catmull-Rom tension 0–1 (default 0.22)
+   * @param {Array<{x: number, y: number}>} pts - Waypoint array
+   * @param {number} [maxRadius=14] - Maximum corner fillet radius in pixels
    * @returns {string} SVG path 'd' attribute string
+   */
+  buildFilletedPath(pts, maxRadius = 14) {
+    if (!pts || pts.length < 2) return "";
+    if (pts.length === 2) {
+      return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)} L ${pts[1].x.toFixed(1)} ${pts[1].y.toFixed(1)}`;
+    }
+
+    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+
+    for (let i = 1; i < pts.length - 1; i++) {
+      const prev = pts[i - 1];
+      const curr = pts[i];
+      const next = pts[i + 1];
+
+      const d1x = prev.x - curr.x;
+      const d1y = prev.y - curr.y;
+      const len1 = Math.hypot(d1x, d1y);
+
+      const d2x = next.x - curr.x;
+      const d2y = next.y - curr.y;
+      const len2 = Math.hypot(d2x, d2y);
+
+      // If segments are too short, just draw straight to curr
+      if (len1 < 2 || len2 < 2) {
+        d += ` L ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
+        continue;
+      }
+
+      // Check if angle is virtually straight (collinear, dot product ≈ -1)
+      const dot = (d1x * d2x + d1y * d2y) / (len1 * len2);
+      if (dot < -0.985) {
+        // Nearly straight line (170° - 180°), no fillet needed
+        d += ` L ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
+        continue;
+      }
+
+      // Radius proportional to segment lengths, capped at maxRadius
+      const r = Math.min(maxRadius, len1 * 0.45, len2 * 0.45);
+      const startX = curr.x + (d1x / len1) * r;
+      const startY = curr.y + (d1y / len1) * r;
+      const endX = curr.x + (d2x / len2) * r;
+      const endY = curr.y + (d2y / len2) * r;
+
+      d += ` L ${startX.toFixed(1)} ${startY.toFixed(1)} Q ${curr.x.toFixed(1)} ${curr.y.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}`;
+    }
+
+    const last = pts[pts.length - 1];
+    d += ` L ${last.x.toFixed(1)} ${last.y.toFixed(1)}`;
+    return d;
+  },
+
+  /**
+   * Converts an array of {x,y} polyline points into a smooth SVG path
+   * string using Catmull-Rom → Cubic Bezier conversion (kept for legacy support).
    */
   buildBezierPath(points, tension = 0.22) {
     if (!points || points.length < 2) return "";
@@ -2147,6 +2156,54 @@ const MapEngine = {
     }
 
     this.selectPoi(strId, true);
+  },
+
+  updateLandmarkPresetLabels(lang) {
+    lang = lang || (typeof App !== "undefined" && App.currentLang) || "ar";
+    const chips = document.querySelectorAll(
+      "#mapQuickLandmarksBar .landmark-preset-btn[data-preset-id]",
+    );
+    chips.forEach((btn) => {
+      const id = btn.getAttribute("data-preset-id");
+      const labelSpan = btn.querySelector("[data-preset-label]");
+      if (!id || !labelSpan) return;
+
+      const i18nKey = labelSpan.getAttribute("data-i18n");
+      if (i18nKey && typeof App !== "undefined" && typeof App.t === "function") {
+        const trans = App.t(i18nKey);
+        if (trans && trans !== i18nKey) {
+          labelSpan.textContent = trans;
+          return;
+        }
+      }
+
+      const poisList =
+        (typeof window !== "undefined" && window.resortPois) ||
+        (typeof resortPois !== "undefined" && resortPois) ||
+        [];
+      const poi = poisList.find((p) => p.id === id);
+      if (poi) {
+        const locFn =
+          (typeof window !== "undefined" && window.getLocalizedPoi) ||
+          (typeof getLocalizedPoi === "function" ? getLocalizedPoi : null);
+        let name = "";
+        if (locFn) {
+          try {
+            const loc = locFn(poi, lang);
+            if (loc && loc.name) name = loc.name;
+          } catch (e) {}
+        }
+        if (!name) {
+          if (lang === "ru") name = poi.nameRu;
+          else if (lang === "en") name = poi.nameEn;
+          else if (lang === "de") name = poi.nameDe;
+          else name = poi.nameAr;
+        }
+        if (name) {
+          labelSpan.textContent = `${name} (${poi.num})`;
+        }
+      }
+    });
   },
 
   resetTransform() {
@@ -3912,9 +3969,7 @@ const MapEngine = {
     }
 
     if (remainingPoints.length >= 2) {
-      const newD = remainingPoints
-        .map((pt, idx) => `${idx === 0 ? "M" : "L"} ${pt.x} ${pt.y}`)
-        .join(" ");
+      const newD = this.buildFilletedPath(remainingPoints, 14);
       svgPath.setAttribute("d", newD);
     }
   },

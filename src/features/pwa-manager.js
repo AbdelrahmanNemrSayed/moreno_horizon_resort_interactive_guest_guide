@@ -138,10 +138,30 @@ export class PWAManager {
         });
     }
 
-    // Notify user about update
+    // Notify user about update with a real visible banner
     notifyUpdateAvailable() {
-        // Implementation for showing update notification
-        console.log('[PWA] New version available. Please refresh.');
+        console.log('[PWA] New version available.');
+        if (typeof document === 'undefined') return;
+
+        // Reuse existing toast container or create one
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'pwaUpdateBanner';
+            container.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;';
+            document.body.appendChild(container);
+        }
+
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:rgba(13,23,39,0.95);border:1px solid rgba(6,182,212,0.5);border-radius:16px;padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.5);color:#f1f5f9;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;';
+        banner.innerHTML = `
+            <span style="font-size:18px">🔄</span>
+            <span>تحديث جديد متاح للتطبيق</span>
+            <button onclick="window.location.reload()" style="margin-inline-start:auto;padding:6px 14px;border-radius:10px;background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#020617;font-weight:900;font-size:12px;border:none;cursor:pointer;">
+                تحديث الآن
+            </button>
+        `;
+        container.appendChild(banner);
     }
 }
 

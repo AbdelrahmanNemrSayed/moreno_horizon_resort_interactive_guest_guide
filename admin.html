@@ -23,35 +23,8 @@
       rel="stylesheet"
     />
 
-    <!-- Tailwind CSS Framework CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                navy: "#0B2545",
-                deep: "#134074",
-                teal: "#1D976C",
-                sea: "#00B4D8",
-                gold: "#DDA15E",
-                goldDark: "#BC6C25",
-                darkBg: "#050A14",
-                cardDark: "#0D1726",
-                borderDark: "#1E293B",
-              },
-            },
-            fontFamily: {
-              cairo: ["Cairo", "sans-serif"],
-              sans: ['"Plus Jakarta Sans"', "Cairo", "sans-serif"],
-              mono: ['"JetBrains Mono"', "monospace"],
-            },
-          },
-        },
-      };
-    </script>
+    <!-- Local Standalone Tailwind CSS (100% Offline, Zero-CDN Dependency) -->
+    <link rel="stylesheet" href="css/tailwind-compiled.css?v=58.0" />
 
     <style>
       /* Ultra-Premium Glassmorphic Theme */
@@ -569,6 +542,20 @@
               <span>📟</span>
               <span>سجل الحزم</span>
             </button>
+
+            <button
+              id="tabBtnAnnouncements"
+              onclick="switchAdminTab('announcements')"
+              class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition shrink-0"
+            >
+              <span>📢</span>
+              <span>تنبيهات النزلاء</span>
+              <span
+                id="badgeActiveAnnouncement"
+                class="hidden text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500 text-slate-950 font-black"
+                >نشط</span
+              >
+            </button>
           </div>
 
           <!-- Tab 1: Live Devices Table Panel -->
@@ -602,6 +589,14 @@
                     >0</span
                   ></span
                 >
+                <button
+                  onclick="exportDevicesCsv()"
+                  class="px-2.5 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition flex items-center gap-1 tap-effect"
+                  title="تصدير بيانات الأجهزة إلى ملف CSV"
+                >
+                  <span>📥</span>
+                  <span class="hidden sm:inline">تصدير CSV</span>
+                </button>
                 <button
                   onclick="purgeActiveDevices()"
                   class="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1 tap-effect"
@@ -881,6 +876,44 @@
                     الواتساب
                   </p>
                 </div>
+              </div>
+              <button
+                onclick="toggleEditContactsMode()"
+                id="btnToggleEditContacts"
+                class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 font-bold text-xs flex items-center gap-1.5 transition tap-effect shadow"
+              >
+                <span>✏️</span>
+                <span id="lblEditContacts">تعديل الأرقام</span>
+              </button>
+            </div>
+
+            <!-- Editable Contacts Form (Toggled by admin) -->
+            <div id="editContactsForm" class="hidden p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 space-y-3">
+              <h4 class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <span>⚙️</span>
+                <span>تحديث أرقام الاتصال والواتساب ومزامنتها لحظياً لجميع النزلاء:</span>
+              </h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs" id="editContactsInputsGrid">
+                <!-- Dynamically populated via renderEditContactsInputs -->
+              </div>
+              <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                  <span class="text-xs text-emerald-400 font-bold whitespace-nowrap">رقم واتساب الاستقبال:</span>
+                  <input
+                    type="text"
+                    id="editEmergencyWhatsapp"
+                    placeholder="201099887701"
+                    class="px-2.5 py-1 rounded-lg bg-slate-950 border border-white/15 text-xs text-emerald-300 font-mono w-full"
+                  />
+                </div>
+                <button
+                  onclick="saveAdminContacts()"
+                  id="btnSaveContacts"
+                  class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs tap-effect shadow flex items-center gap-1.5 transition"
+                >
+                  <span>💾</span>
+                  <span>حفظ ومزامنة فورية</span>
+                </button>
               </div>
             </div>
 
@@ -1170,12 +1203,22 @@
                   >Live Packet Ingestion Stream (/api/mikrotik/feed)</span
                 >
               </div>
-              <button
-                onclick="clearFeedLogs()"
-                class="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded glass-pill transition"
-              >
-                مسح السجل
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  onclick="exportLogsCsv()"
+                  class="text-xs text-cyan-300 hover:text-white px-2 py-0.5 rounded glass-pill transition flex items-center gap-1"
+                  title="تصدير السجل إلى ملف CSV"
+                >
+                  <span>📥</span>
+                  <span>تصدير CSV</span>
+                </button>
+                <button
+                  onclick="clearFeedLogs()"
+                  class="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded glass-pill transition"
+                >
+                  مسح السجل
+                </button>
+              </div>
             </div>
 
             <div
@@ -1185,6 +1228,114 @@
               <div class="text-slate-500">
                 [System] Terminal ready. Waiting for incoming registration-table
                 feeds...
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 9: Live Guest Announcements & Alerts Broadcast -->
+          <div
+            id="tabContentAnnouncements"
+            class="hidden glass-card rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4"
+          >
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">📢</span>
+                <div>
+                  <h3 class="text-sm font-bold text-white">
+                    نظام بث الإعلانات والتنبيهات الحية للنزلاء (Live Announcements Broadcast)
+                  </h3>
+                  <p class="text-[11px] text-slate-400">
+                    بث إشعار فوري يظهر كشريط علوي أنيق في شاشات جميع النزلاء المتصلين بالمرشد فوراً عبر البث الحي SSE
+                  </p>
+                </div>
+              </div>
+              <span id="announcementLiveBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-white/10 font-bold">
+                لا يوجد إعلان نشط
+              </span>
+            </div>
+
+            <!-- Current Active Announcement Preview Card -->
+            <div id="activeAnnouncementPreviewCard" class="hidden p-3.5 rounded-2xl border transition shadow-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span id="announcementPreviewTypeTag" class="text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  ℹ️ تنبيه عادي
+                </span>
+                <span id="announcementPreviewTime" class="text-[10px] text-slate-400 font-mono">
+                  منذ قليل
+                </span>
+              </div>
+              <p id="announcementPreviewTextAr" class="text-sm font-bold text-white"></p>
+              <p id="announcementPreviewTextEn" class="text-xs text-slate-300 font-sans mt-0.5"></p>
+            </div>
+
+            <!-- Form: Create / Edit Announcement -->
+            <div class="space-y-3 pt-1">
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">
+                  نص الإعلان أو التنبيه (بالعربية) <span class="text-rose-400">*</span>:
+                </label>
+                <input
+                  type="text"
+                  id="announcementInputAr"
+                  placeholder="مثال: حفل الشواء والموسيقى الحية الليلة على شاطئ لوتس الساعة 8:00 مساءً 🎶"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/15 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">
+                  Announcement Text (English) <span class="text-slate-400 text-[10px]">(اختياري للنزلاء الأجانب)</span>:
+                </label>
+                <input
+                  type="text"
+                  id="announcementInputEn"
+                  placeholder="e.g. Live BBQ & Beach Party tonight at Lotus Beach starting 8:00 PM 🎶"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/15 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-sans"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                <label class="cursor-pointer">
+                  <input type="radio" name="announcementType" value="info" checked class="peer sr-only" />
+                  <div class="p-2.5 rounded-xl border border-white/10 peer-checked:border-cyan-400 peer-checked:bg-cyan-500/20 text-center transition">
+                    <span class="block text-sm">ℹ️</span>
+                    <span class="text-xs font-bold text-slate-200">معلومات عامة</span>
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="announcementType" value="warning" class="peer sr-only" />
+                  <div class="p-2.5 rounded-xl border border-white/10 peer-checked:border-amber-400 peer-checked:bg-amber-500/20 text-center transition">
+                    <span class="block text-sm">⚠️</span>
+                    <span class="text-xs font-bold text-slate-200">تنبيه / طقس / أمان</span>
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="announcementType" value="event" class="peer sr-only" />
+                  <div class="p-2.5 rounded-xl border border-white/10 peer-checked:border-purple-400 peer-checked:bg-purple-500/20 text-center transition">
+                    <span class="block text-sm">🎉</span>
+                    <span class="text-xs font-bold text-slate-200">فعالية / حفل / عرض</span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onclick="publishAdminAnnouncement()"
+                  id="btnPublishAnnouncement"
+                  class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 shadow-lg tap-effect"
+                >
+                  <span>📢</span>
+                  <span>بث الإعلان لجميع النزلاء فوراً</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="clearAdminAnnouncement()"
+                  id="btnClearAnnouncement"
+                  class="py-2.5 px-4 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-xs transition tap-effect"
+                >
+                  إلغاء الإعلان ✕
+                </button>
               </div>
             </div>
           </div>
@@ -1214,6 +1365,15 @@
                 >
                   <span>🎯</span>
                   <span id="lblRecordFp">تسجيل بصمة</span>
+                </button>
+                <button
+                  id="btnToggleZoneRadar"
+                  onclick="toggleZoneRadar()"
+                  class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold transition flex items-center gap-1 tap-effect"
+                  title="تفعيل رادار كثافة ومرافق المنتجع (Live Zone Radar & Heatmap)"
+                >
+                  <span>📡</span>
+                  <span>رادار المناطق</span>
                 </button>
                 <button
                   id="btnToggleHeatmap"
@@ -1288,6 +1448,14 @@
                   id="miniMapSpotlightLayer"
                   class="absolute inset-0 pointer-events-none z-15"
                 ></div>
+
+                <!-- Live Zone Density & Heatmap Badges Layer -->
+                <div
+                  id="miniMapZoneBadgesLayer"
+                  class="absolute inset-0 pointer-events-auto z-25"
+                >
+                  <!-- Dynamically populated luxury zone badges with live capacity gauges -->
+                </div>
 
                 <!-- Access Points Overlay Layer -->
                 <div
@@ -1368,6 +1536,20 @@
                 >
                   ✋ اسحب للتحريك • 🔍 عجلة الماوس للتكبير
                 </span>
+              </div>
+            </div>
+
+            <!-- Live Zone Occupancy Radar Dashboard -->
+            <div id="liveZoneRadarContainer" class="mt-3 p-3.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 shadow-xl backdrop-blur-md">
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span class="text-xs font-bold text-white">رادار الكثافة والإشغال اللحظي لمرافق المنتجع (Live Venue Radar)</span>
+                </div>
+                <span id="zoneRadarTotalDevices" class="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">-- أجهزة نشطة</span>
+              </div>
+              <div id="zoneOccupancyCardsGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
+                <!-- Dynamically rendered zone occupancy mini-cards -->
               </div>
             </div>
 
@@ -1601,8 +1783,8 @@
     </div>
 
     <!-- Shared Data and Room-Finder Core Dependencies -->
-    <script src="js/data.js?v=41.0"></script>
-    <script src="js/room-finder.js?v=41.0"></script>
+    <script src="js/data.js?v=58.0"></script>
+    <script src="js/room-finder.js?v=58.0"></script>
 
     <!-- Dashboard JavaScript Controller -->
     <script>
@@ -1993,8 +2175,18 @@
           locationSseSource.onmessage = (event) => {
             if (!event.data || event.data.startsWith(": keepalive")) return;
             try {
-              const loc = JSON.parse(event.data);
-              handleLiveDeviceLocationUpdate(loc);
+              const msg = JSON.parse(event.data);
+              if (msg.type === "announcement") {
+                initAnnouncementSettings(msg.announcement);
+              } else if (msg.type === "contacts") {
+                initEmergencyContacts(msg.emergencyContacts, msg.emergencyWhatsapp);
+              } else if (msg.type === "beach_flag") {
+                highlightBeachFlagBtn(msg.beachFlag);
+              } else if (msg.type === "occupancy_update") {
+                updateLiveZoneRadarUI(msg);
+              } else if (msg.mac) {
+                handleLiveDeviceLocationUpdate(msg);
+              }
             } catch (e) {
               console.warn("[SSE] Parse error:", e);
             }
@@ -2215,19 +2407,22 @@
         initEmergencyContacts();
         initFacilitiesGrid();
         initWeatherControls();
+        fetchInitialZoneOccupancy();
       });
 
       function initWebhookUrl() {
         const origin = window.location.origin;
-        const feedKey =
-          sessionStorage.getItem("moreno_mikrotik_feed_key") ||
-          "mhr-mikrotik-secure-2026";
-        const webhookUrl = `${origin}/api/mikrotik/feed?key=${encodeURIComponent(feedKey)}`;
+        // Always use the key received from the server after login.
+        // Show a placeholder if not yet authenticated.
+        const feedKey = sessionStorage.getItem("moreno_mikrotik_feed_key");
+        const webhookUrl = feedKey
+          ? `${origin}/api/mikrotik/feed?key=${encodeURIComponent(feedKey)}`
+          : `${origin}/api/mikrotik/feed?key=<سجّل-الدخول-أولاً>`;
         const el = document.getElementById("webhookUrlDisplay");
         if (el) el.textContent = webhookUrl;
 
         const scriptCode = document.getElementById("mikrotikScriptCode");
-        if (scriptCode) {
+        if (scriptCode && feedKey) {
           scriptCode.textContent = scriptCode.textContent.replace(
             /http[^\s"]+\/api\/mikrotik\/feed[^\s"]*/g,
             webhookUrl,
@@ -2237,9 +2432,7 @@
 
       function updateCustomTunnelUrl(val) {
         val = (val || "").trim();
-        const feedKey =
-          sessionStorage.getItem("moreno_mikrotik_feed_key") ||
-          "mhr-mikrotik-secure-2026";
+        const feedKey = sessionStorage.getItem("moreno_mikrotik_feed_key") || "";
         if (!val) {
           initWebhookUrl();
           return;
@@ -2248,12 +2441,14 @@
           val = "https://" + val;
         }
         val = val.replace(/\/+$/, "");
-        const webhookUrl = `${val}/api/mikrotik/feed?key=${encodeURIComponent(feedKey)}`;
+        const webhookUrl = feedKey
+          ? `${val}/api/mikrotik/feed?key=${encodeURIComponent(feedKey)}`
+          : `${val}/api/mikrotik/feed?key=<سجّل-الدخول-أولاً>`;
         const el = document.getElementById("webhookUrlDisplay");
         if (el) el.textContent = webhookUrl;
 
         const scriptCode = document.getElementById("mikrotikScriptCode");
-        if (scriptCode) {
+        if (scriptCode && feedKey) {
           scriptCode.textContent = scriptCode.textContent.replace(
             /https?:\/\/[^\s"\']+\/api\/mikrotik\/feed[^\s"\']*/g,
             webhookUrl,
@@ -2582,6 +2777,104 @@
         }
       }
 
+      // ==========================================
+      // Live Zone Radar & Heatmap Engine
+      // ==========================================
+      let isZoneRadarActive = true;
+
+      function toggleZoneRadar() {
+        isZoneRadarActive = !isZoneRadarActive;
+        const btn = document.getElementById("btnToggleZoneRadar");
+        const layer = document.getElementById("miniMapZoneBadgesLayer");
+        if (isZoneRadarActive) {
+          if (btn) btn.className = "px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-[11px] shadow transition flex items-center gap-1";
+          if (layer) layer.style.display = "block";
+        } else {
+          if (btn) btn.className = "px-2.5 py-1 rounded-lg glass-pill text-slate-400 hover:text-white text-[11px] font-bold transition flex items-center gap-1";
+          if (layer) layer.style.display = "none";
+        }
+      }
+
+      function updateLiveZoneRadarUI(data) {
+        if (!data || !Array.isArray(data.zones)) return;
+        renderZoneOccupancyBadges(data.zones);
+        renderZoneOccupancyCards(data.zones, data.totalDevices || 0);
+      }
+
+      function renderZoneOccupancyBadges(zones) {
+        const layer = document.getElementById("miniMapZoneBadgesLayer");
+        if (!layer) return;
+
+        layer.innerHTML = zones.map((z) => {
+          const statusColors = {
+            calm: { bg: "bg-emerald-500/20", border: "border-emerald-500/50", text: "text-emerald-300", dot: "bg-emerald-400" },
+            moderate: { bg: "bg-amber-500/25", border: "border-amber-500/50", text: "text-amber-300", dot: "bg-amber-400" },
+            busy: { bg: "bg-rose-500/30", border: "border-rose-500/60", text: "text-rose-300", dot: "bg-rose-400 animate-ping" }
+          };
+          const style = statusColors[z.status] || statusColors.calm;
+
+          return `
+            <div 
+              style="left: ${z.x}px; top: ${z.y}px;"
+              class="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition hover:scale-110 z-25 group"
+              onclick="spotlightCoordinate(${z.x}, ${z.y}, '${z.nameAr}')"
+              title="${z.nameAr} - إشغال: ${z.occupancyRate}% (${z.count}/${z.capacity})"
+            >
+              <div class="px-2 py-0.5 rounded-xl backdrop-blur-md border ${style.bg} ${style.border} shadow-2xl flex items-center gap-1.5 whitespace-nowrap">
+                <span class="w-1.5 h-1.5 rounded-full ${style.dot}"></span>
+                <span class="text-[9px] font-black text-white font-sans">${z.nameAr.split(" ")[0]}</span>
+                <span class="text-[9px] font-mono font-bold ${style.text}">(${z.count})</span>
+                <span class="text-[8px] font-bold px-1 rounded-md bg-black/40 text-slate-300">${z.occupancyRate}%</span>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderZoneOccupancyCards(zones, totalDevices) {
+        const grid = document.getElementById("zoneOccupancyCardsGrid");
+        const totalEl = document.getElementById("zoneRadarTotalDevices");
+        if (totalEl) totalEl.textContent = `${totalDevices} جهازاً نشطاً متصلاً`;
+        if (!grid) return;
+
+        grid.innerHTML = zones.map((z) => {
+          const statusConfig = {
+            calm: { bar: "bg-emerald-500", text: "text-emerald-400" },
+            moderate: { bar: "bg-amber-500", text: "text-amber-400" },
+            busy: { bar: "bg-rose-500", text: "text-rose-400" }
+          };
+          const sc = statusConfig[z.status] || statusConfig.calm;
+
+          return `
+            <div 
+              onclick="spotlightCoordinate(${z.x}, ${z.y}, '${z.nameAr}')"
+              class="p-2.5 rounded-xl bg-slate-950/60 border border-white/10 hover:border-emerald-400/50 cursor-pointer transition shadow-md group"
+            >
+              <div class="text-[10px] font-bold text-slate-200 truncate mb-1 group-hover:text-emerald-300">${z.nameAr}</div>
+              <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                <span class="font-black text-white">${z.count} <span class="text-[9px] text-slate-400 font-sans">نزيل</span></span>
+                <span class="${sc.text} font-bold text-[10px]">${z.occupancyRate}%</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full ${sc.bar} rounded-full transition-all duration-500" style="width: ${z.occupancyRate}%;"></div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      async function fetchInitialZoneOccupancy() {
+        try {
+          const res = await fetch("/api/resort/occupancy");
+          const data = await res.json();
+          if (data && data.success) {
+            updateLiveZoneRadarUI(data);
+          }
+        } catch (e) {
+          // offline fallback
+        }
+      }
+
       function switchAdminTab(tab) {
         activeAdminTab = tab;
         const tabs = [
@@ -2593,6 +2886,7 @@
           "weather",
           "fingerprints",
           "logs",
+          "announcements",
         ];
 
         tabs.forEach((t) => {
@@ -2759,24 +3053,53 @@
       // ==========================================
       // Hotspot & Portal Settings
       // ==========================================
-      function initHotspotSettings() {
-        const saved =
-          localStorage.getItem("moreno_hotspot_url") ||
-          "http://192.1.1.1/login";
+      async function initHotspotSettings() {
+        let saved = localStorage.getItem("moreno_hotspot_url");
+        if (!saved) {
+          try {
+            const res = await fetch("/api/resort/state");
+            if (res.ok) {
+              const data = await res.json();
+              if (data.hotspotUrl) {
+                saved = data.hotspotUrl;
+                localStorage.setItem("moreno_hotspot_url", saved);
+              }
+            }
+          } catch (e) {
+            // fallback
+          }
+        }
+        saved = saved || "http://192.1.1.1/login";
         const input = document.getElementById("adminHotspotUrlInput");
         const btn = document.getElementById("adminTestPortalBtn");
         if (input) input.value = saved;
         if (btn) btn.href = saved;
       }
 
-      function saveAdminHotspotUrl() {
+      async function saveAdminHotspotUrl() {
         const input = document.getElementById("adminHotspotUrlInput");
         if (!input) return;
         const url = input.value.trim() || "http://192.1.1.1/login";
         localStorage.setItem("moreno_hotspot_url", url);
         const btn = document.getElementById("adminTestPortalBtn");
         if (btn) btn.href = url;
-        alert(`✅ تم حفظ رابط البوابة بنجاح:\n${url}`);
+
+        // Sync with server so all connected guests get the new portal URL
+        try {
+          const res = await fetch("/api/admin/resort/hotspot-url", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ url }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(`✅ تم حفظ رابط البوابة بنجاح ومزامنته مع الخادم:\n${url}`);
+          } else {
+            alert(`⚠️ تم الحفظ محلياً ولكن فشل الخادم: ${data.error || "خطأ غير معروف"}`);
+          }
+        } catch (err) {
+          alert(`✅ تم حفظ الرابط محلياً:\n${url}`);
+        }
       }
 
       function renderAdminApsTable() {
@@ -2806,74 +3129,177 @@
       // ==========================================
       // Emergency Contacts Management
       // ==========================================
-      function initEmergencyContacts() {
+      let currentEmergencyContacts = [];
+      let currentEmergencyWhatsapp = "201099887701";
+
+      function initEmergencyContacts(serverContacts, serverWhatsapp) {
+        if (serverContacts && Array.isArray(serverContacts)) {
+          currentEmergencyContacts = serverContacts;
+        } else if (currentEmergencyContacts.length === 0) {
+          currentEmergencyContacts =
+            typeof resortContactConfig !== "undefined" && resortContactConfig.contacts
+              ? resortContactConfig.contacts
+              : [
+                  {
+                    id: "reception",
+                    nameAr: "مكتب الاستقبال الرئيسي (Front Desk)",
+                    phone: "+201099887701",
+                    extension: "0 / 100",
+                    icon: "🛎️",
+                    badgeColor: "bg-amber-500",
+                  },
+                  {
+                    id: "clinic",
+                    nameAr: "عيادة المنتجع والطوارئ (Clinic)",
+                    phone: "+201099887703",
+                    extension: "150",
+                    icon: "🩺",
+                    badgeColor: "bg-rose-600",
+                  },
+                  {
+                    id: "security",
+                    nameAr: "الأمن والسلامة وحرس الشاطئ (Security)",
+                    phone: "+201099887702",
+                    extension: "200",
+                    icon: "🛡️",
+                    badgeColor: "bg-blue-600",
+                  },
+                  {
+                    id: "room_service",
+                    nameAr: "خدمة الغرف وعلاقات النزلاء (Room Service)",
+                    phone: "+201099887704",
+                    extension: "300",
+                    icon: "🛎️",
+                    badgeColor: "bg-emerald-600",
+                  },
+                ];
+        }
+        if (serverWhatsapp) {
+          currentEmergencyWhatsapp = serverWhatsapp;
+        }
+
         const container = document.getElementById("adminContactsGrid");
-        if (!container) return;
+        if (container) {
+          container.innerHTML = currentEmergencyContacts
+            .map(
+              (c) => `
+          <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2.5 glass-card-hover">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">${c.icon}</span>
+                <div>
+                  <h4 class="text-xs font-black text-white">${c.nameAr}</h4>
+                  <span class="text-[10px] text-slate-400">تحويلة داخلية: <strong class="text-amber-400">${c.extension}</strong></span>
+                </div>
+              </div>
+              <span class="w-3 h-3 rounded-full ${c.badgeColor} shadow-md"></span>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-white/10">
+              <span class="font-mono text-cyan-300 font-bold text-xs">${c.phone}</span>
+              <a href="tel:${c.phone}" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs tap-effect shadow flex items-center gap-1">
+                <span>📞</span>
+                <span>اتصال تجريبي</span>
+              </a>
+            </div>
+          </div>
+        `,
+            )
+            .join("");
+        }
+        renderEditContactsInputs();
+      }
 
-        const contacts =
-          typeof resortContactConfig !== "undefined" &&
-          resortContactConfig.contacts
-            ? resortContactConfig.contacts
-            : [
-                {
-                  id: "reception",
-                  nameAr: "مكتب الاستقبال الرئيسي (Front Desk)",
-                  phone: "+201099887701",
-                  extension: "0 / 100",
-                  icon: "🛎️",
-                  badgeColor: "bg-amber-500",
-                },
-                {
-                  id: "clinic",
-                  nameAr: "عيادة المنتجع والطوارئ (Clinic)",
-                  phone: "+201099887703",
-                  extension: "150",
-                  icon: "🩺",
-                  badgeColor: "bg-rose-600",
-                },
-                {
-                  id: "security",
-                  nameAr: "الأمن والسلامة وحرس الشاطئ (Security)",
-                  phone: "+201099887702",
-                  extension: "200",
-                  icon: "🛡️",
-                  badgeColor: "bg-blue-600",
-                },
-                {
-                  id: "room_service",
-                  nameAr: "خدمة الغرف وعلاقات النزلاء (Room Service)",
-                  phone: "+201099887704",
-                  extension: "300",
-                  icon: "🛎️",
-                  badgeColor: "bg-emerald-600",
-                },
-              ];
+      function toggleEditContactsMode() {
+        const form = document.getElementById("editContactsForm");
+        const btn = document.getElementById("btnToggleEditContacts");
+        const lbl = document.getElementById("lblEditContacts");
+        if (!form) return;
+        const isHidden = form.classList.contains("hidden");
+        if (isHidden) {
+          form.classList.remove("hidden");
+          if (lbl) lbl.textContent = "إخفاء التعديل";
+          if (btn)
+            btn.className =
+              "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 border border-white/20 font-bold text-xs flex items-center gap-1.5 transition tap-effect shadow";
+        } else {
+          form.classList.add("hidden");
+          if (lbl) lbl.textContent = "تعديل الأرقام";
+          if (btn)
+            btn.className =
+              "px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 font-bold text-xs flex items-center gap-1.5 transition tap-effect shadow";
+        }
+      }
 
-        container.innerHTML = contacts
+      function renderEditContactsInputs() {
+        const grid = document.getElementById("editContactsInputsGrid");
+        const waInput = document.getElementById("editEmergencyWhatsapp");
+        if (waInput) waInput.value = currentEmergencyWhatsapp;
+        if (!grid) return;
+
+        grid.innerHTML = currentEmergencyContacts
           .map(
             (c) => `
-        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2.5 glass-card-hover">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl">${c.icon}</span>
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-white/10 space-y-1.5">
+            <div class="flex items-center gap-1.5 text-slate-300 font-bold text-[11px]">
+              <span>${c.icon}</span>
+              <span>${c.nameAr.split("(")[0]}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <h4 class="text-xs font-black text-white">${c.nameAr}</h4>
-                <span class="text-[10px] text-slate-400">تحويلة داخلية: <strong class="text-amber-400">${c.extension}</strong></span>
+                <label class="text-[10px] text-slate-400 block mb-0.5">الهاتف:</label>
+                <input
+                  type="text"
+                  id="contactInputPhone_${c.id}"
+                  value="${c.phone}"
+                  class="w-full px-2 py-1 rounded bg-slate-900 border border-white/10 text-[11px] font-mono text-cyan-300 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-400 block mb-0.5">التحويلة:</label>
+                <input
+                  type="text"
+                  id="contactInputExt_${c.id}"
+                  value="${c.extension}"
+                  class="w-full px-2 py-1 rounded bg-slate-900 border border-white/10 text-[11px] font-mono text-amber-300 focus:outline-none focus:border-amber-400"
+                />
               </div>
             </div>
-            <span class="w-3 h-3 rounded-full ${c.badgeColor} shadow-md"></span>
           </div>
-          <div class="flex items-center justify-between pt-2 border-t border-white/10">
-            <span class="font-mono text-cyan-300 font-bold text-xs">${c.phone}</span>
-            <a href="tel:${c.phone}" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs tap-effect shadow flex items-center gap-1">
-              <span>📞</span>
-              <span>اتصال تجريبي</span>
-            </a>
-          </div>
-        </div>
-      `,
+        `,
           )
           .join("");
+      }
+
+      async function saveAdminContacts() {
+        const updated = currentEmergencyContacts.map((c) => {
+          const phoneIn = document.getElementById(`contactInputPhone_${c.id}`);
+          const extIn = document.getElementById(`contactInputExt_${c.id}`);
+          return {
+            ...c,
+            phone: phoneIn ? phoneIn.value.trim() : c.phone,
+            extension: extIn ? extIn.value.trim() : c.extension,
+          };
+        });
+        const waIn = document.getElementById("editEmergencyWhatsapp");
+        const whatsapp = waIn ? waIn.value.trim() : currentEmergencyWhatsapp;
+
+        try {
+          const res = await fetch("/api/admin/resort/contacts", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ contacts: updated, whatsapp }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert("✅ تم حفظ أرقام الطوارئ ومزامنتها بنجاح مع السيرفر وجميع النزلاء!");
+            initEmergencyContacts(data.emergencyContacts, data.emergencyWhatsapp);
+            toggleEditContactsMode();
+          } else {
+            alert("فشل الحفظ: " + (data.error || "خطأ غير معروف"));
+          }
+        } catch (err) {
+          alert("فشل الاتصال بالخادم: " + err.message);
+        }
       }
 
       // ==========================================
@@ -2934,27 +3360,86 @@
           .join("");
       }
 
-      function togglePoiOpenStatus(id) {
+      async function togglePoiOpenStatus(id) {
         const current = localStorage.getItem(`poi_status_${id}`) || "open";
         const next = current === "open" ? "closed" : "open";
+        // Persist locally for instant UI response
         localStorage.setItem(`poi_status_${id}`, next);
         filterAdminPois(activePoiCategory);
+        // Sync to server so guests see the change in real time
+        try {
+          await fetch("/api/admin/resort/poi-status", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ id, status: next }),
+          });
+        } catch (err) {
+          console.warn("[Admin] POI status sync failed:", err);
+        }
       }
 
       // ==========================================
       // Beach Flag & Weather Controls
       // ==========================================
-      function initWeatherControls() {
+      async function initWeatherControls() {
+        // Load beach flag from server first; fall back to localStorage
+        try {
+          const res = await fetch("/api/resort/state");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success) {
+              const serverFlag = data.beachFlag || "safe";
+              localStorage.setItem("moreno_beach_flag", serverFlag);
+              highlightBeachFlagBtn(serverFlag);
+              // Sync any POI statuses from server into localStorage & re-render
+              if (data.poiStatuses) {
+                Object.entries(data.poiStatuses).forEach(([id, status]) => {
+                  localStorage.setItem(`poi_status_${id}`, status);
+                });
+                filterAdminPois(activePoiCategory);
+              }
+              if (data.hotspotUrl) {
+                localStorage.setItem("moreno_hotspot_url", data.hotspotUrl);
+              }
+              if (data.announcement) {
+                initAnnouncementSettings(data.announcement);
+              }
+              if (data.emergencyContacts) {
+                initEmergencyContacts(data.emergencyContacts, data.emergencyWhatsapp);
+              }
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn("[Admin] Could not load resort state from server:", err);
+        }
+        // Fallback: use localStorage value
         const flag = localStorage.getItem("moreno_beach_flag") || "safe";
         highlightBeachFlagBtn(flag);
       }
 
-      function setAdminBeachFlag(flag) {
+      async function setAdminBeachFlag(flag) {
+        // Optimistic UI update
         localStorage.setItem("moreno_beach_flag", flag);
         highlightBeachFlagBtn(flag);
-        alert(
-          `✅ تم تحديث راية الشاطئ إلى: [${flag.toUpperCase()}] بنجاح! تم حفظ الحالة لتظهر فوراً لجميع النزلاء.`,
-        );
+        // Sync to server so all guests see the change immediately
+        try {
+          const res = await fetch("/api/admin/resort/beach-flag", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ flag }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(
+              `✅ تم تحديث راية الشاطئ إلى: [${flag.toUpperCase()}] بنجاح!\nتمت مزامنة الحالة مع الخادم وستظهر فوراً لجميع النزلاء.`,
+            );
+          } else {
+            alert(`⚠️ تحديث محلي تم، لكن فشل الخادم: ${data.error || "خطأ غير معروف"}`);
+          }
+        } catch (err) {
+          alert(`⚠️ تحديث محلي تم، لكن فشل الاتصال بالخادم: ${err.message}`);
+        }
       }
 
       function highlightBeachFlagBtn(flag) {
@@ -3355,6 +3840,184 @@
         document.documentElement.dir =
           currentAdminLang === "ar" ? "rtl" : "ltr";
         renderDevicesTable();
+      }
+
+      // ==========================================
+      // Live Guest Announcements Controller
+      // ==========================================
+      let currentAnnouncementData = null;
+
+      function initAnnouncementSettings(announcement) {
+        currentAnnouncementData = announcement;
+        const liveBadge = document.getElementById("announcementLiveBadge");
+        const navBadge = document.getElementById("badgeActiveAnnouncement");
+        const previewCard = document.getElementById("activeAnnouncementPreviewCard");
+        const inputAr = document.getElementById("announcementInputAr");
+        const inputEn = document.getElementById("announcementInputEn");
+        if (!liveBadge || !previewCard) return;
+
+        if (announcement && announcement.active) {
+          liveBadge.textContent = "إعلان مباشر نشط 🟢";
+          liveBadge.className =
+            "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold animate-pulse";
+          if (navBadge) navBadge.classList.remove("hidden");
+
+          previewCard.classList.remove("hidden");
+          const tag = document.getElementById("announcementPreviewTypeTag");
+          const time = document.getElementById("announcementPreviewTime");
+          const textAr = document.getElementById("announcementPreviewTextAr");
+          const textEn = document.getElementById("announcementPreviewTextEn");
+
+          if (textAr) textAr.textContent = announcement.textAr;
+          if (textEn) textEn.textContent = announcement.textEn || "";
+          if (time && announcement.updatedAt) {
+            time.textContent = new Date(announcement.updatedAt).toLocaleTimeString("ar-EG");
+          }
+
+          if (tag) {
+            if (announcement.type === "warning") {
+              tag.textContent = "⚠️ تنبيه وأمان";
+              tag.className =
+                "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-300 border border-amber-400/40";
+              previewCard.className =
+                "p-3.5 rounded-2xl border border-amber-500/40 bg-amber-500/10 shadow-lg space-y-1";
+            } else if (announcement.type === "event") {
+              tag.textContent = "🎉 فعالية واحتفال";
+              tag.className =
+                "text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-300 border border-purple-400/40";
+              previewCard.className =
+                "p-3.5 rounded-2xl border border-purple-500/40 bg-purple-500/10 shadow-lg space-y-1";
+            } else {
+              tag.textContent = "ℹ️ معلومات عامة";
+              tag.className =
+                "text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/30 text-cyan-300 border border-cyan-400/40";
+              previewCard.className =
+                "p-3.5 rounded-2xl border border-cyan-500/40 bg-cyan-500/10 shadow-lg space-y-1";
+            }
+          }
+
+          if (inputAr && !inputAr.value) inputAr.value = announcement.textAr;
+          if (inputEn && !inputEn.value) inputEn.value = announcement.textEn || "";
+        } else {
+          liveBadge.textContent = "لا يوجد إعلان نشط";
+          liveBadge.className =
+            "text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-white/10 font-bold";
+          if (navBadge) navBadge.classList.add("hidden");
+          previewCard.classList.add("hidden");
+        }
+      }
+
+      async function publishAdminAnnouncement() {
+        const textAr = (document.getElementById("announcementInputAr")?.value || "").trim();
+        const textEn = (document.getElementById("announcementInputEn")?.value || "").trim();
+        const typeEl = document.querySelector('input[name="announcementType"]:checked');
+        const type = typeEl ? typeEl.value : "info";
+
+        if (!textAr) {
+          alert("يرجى كتابة نص الإعلان بالعربية أولاً");
+          document.getElementById("announcementInputAr")?.focus();
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/admin/resort/announcement", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ active: true, textAr, textEn, type }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert("📢 تم بث الإعلان بنجاح لجميع النزلاء المتصلين الآن!");
+            initAnnouncementSettings(data.announcement);
+          } else {
+            alert("فشل بث الإعلان: " + (data.error || "خطأ غير معروف"));
+          }
+        } catch (err) {
+          alert("خطأ في الاتصال: " + err.message);
+        }
+      }
+
+      async function clearAdminAnnouncement() {
+        if (!confirm("هل تريد إلغاء وإخفاء الإعلان الحالي من شاشات جميع النزلاء؟")) return;
+        try {
+          const res = await fetch("/api/admin/resort/announcement", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ active: false }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert("✅ تم إلغاء الإعلان بنجاح.");
+            initAnnouncementSettings(data.announcement);
+            const inAr = document.getElementById("announcementInputAr");
+            const inEn = document.getElementById("announcementInputEn");
+            if (inAr) inAr.value = "";
+            if (inEn) inEn.value = "";
+          }
+        } catch (err) {
+          alert("خطأ في الاتصال: " + err.message);
+        }
+      }
+
+      // ==========================================
+      // CSV Export Utilities
+      // ==========================================
+      function exportDevicesCsv() {
+        const devices = dashboardData.activeDevices || [];
+        if (devices.length === 0) {
+          alert("لا توجد أجهزة متصلة لتصديرها حالياً.");
+          return;
+        }
+        const headers = ["MAC Address", "X (px)", "Y (px)", "X (%)", "Y (%)", "Nearest Zone", "Accuracy (m)", "Strongest AP", "Export Time"];
+        const rows = devices.map((d) => {
+          const zone = resolveNearestZone(d.x, d.y);
+          const ap = d.activeAps && d.activeAps.length > 0 ? d.activeAps[0].id : "N/A";
+          return [
+            `"${d.mac}"`,
+            d.x,
+            d.y,
+            d.pctX,
+            d.pctY,
+            `"${zone.nameAr}"`,
+            (d.accuracyMeters || 2.2).toFixed(1),
+            `"${ap}"`,
+            `"${new Date().toISOString()}"`,
+          ].join(",");
+        });
+        const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+        downloadFile(csvContent, `moreno_devices_${Date.now()}.csv`, "text/csv;charset=utf-8;");
+      }
+
+      function exportLogsCsv() {
+        const logs = dashboardData.feedLogs || [];
+        if (logs.length === 0) {
+          alert("لا توجد سجلات حزم لتصديرها حالياً.");
+          return;
+        }
+        const headers = ["Timestamp", "Device MAC", "AP ID", "RSSI (dBm)", "Raw Message"];
+        const rows = logs.map((log) => {
+          return [
+            `"${log.timestamp || new Date().toISOString()}"`,
+            `"${log.mac || ""}"`,
+            `"${log.apId || ""}"`,
+            log.rssi || "",
+            `"${(log.message || "").replace(/"/g, '""')}"`,
+          ].join(",");
+        });
+        const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+        downloadFile(csvContent, `moreno_packets_${Date.now()}.csv`, "text/csv;charset=utf-8;");
+      }
+
+      function downloadFile(content, fileName, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
     </script>
   </body>

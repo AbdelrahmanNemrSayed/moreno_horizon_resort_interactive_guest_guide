@@ -81,7 +81,7 @@ export class UnifiedPositioningService {
         const raw = await fs.promises.readFile(this.fingerprintsPath, "utf8");
         this.fingerprints = JSON.parse(raw);
       }
-    } catch (err) {
+    } catch {
       this.fingerprints = [];
     }
   }

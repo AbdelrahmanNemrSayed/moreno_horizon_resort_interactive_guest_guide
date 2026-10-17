@@ -558,6 +558,9 @@ const RoomFinder = {
 };
 
 // Global Attachments
+if (typeof globalThis !== "undefined") {
+  globalThis.RoomFinder = RoomFinder;
+}
 if (typeof window !== "undefined") {
   window.RoomFinder = RoomFinder;
   if (typeof document !== "undefined") {

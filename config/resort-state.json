@@ -1,0 +1,48 @@
+{
+  "beachFlagState": "safe",
+  "poiStatusMap": {},
+  "hotspotUrlState": "http://192.1.1.1/login",
+  "announcementState": {
+    "active": false,
+    "textAr": "",
+    "textEn": "",
+    "type": "info",
+    "updatedAt": null
+  },
+  "emergencyContactsState": [
+    {
+      "id": "reception",
+      "nameAr": "مكتب الاستقبال الرئيسي (Front Desk)",
+      "phone": "+201099887701",
+      "extension": "0 / 100",
+      "icon": "🛎️",
+      "badgeColor": "bg-amber-500"
+    },
+    {
+      "id": "clinic",
+      "nameAr": "عيادة المنتجع والطوارئ (Clinic)",
+      "phone": "+201099887703",
+      "extension": "150",
+      "icon": "🩺",
+      "badgeColor": "bg-rose-600"
+    },
+    {
+      "id": "security",
+      "nameAr": "الأمن والسلامة وحرس الشاطئ (Security)",
+      "phone": "+201099887702",
+      "extension": "200",
+      "icon": "🛡️",
+      "badgeColor": "bg-blue-600"
+    },
+    {
+      "id": "room_service",
+      "nameAr": "خدمة الغرف وعلاقات النزلاء (Room Service)",
+      "phone": "+201099887704",
+      "extension": "300",
+      "icon": "🛎️",
+      "badgeColor": "bg-emerald-600"
+    }
+  ],
+  "emergencyWhatsappState": "201099887701",
+  "updatedAt": "2026-10-15T10:30:00.000Z"
+}

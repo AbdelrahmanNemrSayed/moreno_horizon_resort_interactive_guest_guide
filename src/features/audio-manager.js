@@ -92,8 +92,8 @@ export class AudioManager {
 
     // Preload sound effects
     preloadSound(name, url) {
-        // Implementation for preloading audio files
-        // This would use fetch and decodeAudioData
+        if (!name || !url) return;
+        this.sounds.set(name, url);
     }
 
     // Play sound from preloaded buffer

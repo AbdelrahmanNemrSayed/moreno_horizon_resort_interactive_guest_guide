@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="ar" dir="rtl" class="scroll-smooth">
+<html lang="ar" dir="rtl" class="scroll-smooth dark">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Moreno Horizon Spa & Resort | الدليل التفاعلي الذكي الشامل</title>
+    <title data-i18n="page_title">Moreno Horizon Spa & Resort | الدليل التفاعلي الذكي الشامل</title>
 
     <!-- PWA & Mobile Web Meta -->
     <meta name="theme-color" content="#0B2545" />
@@ -71,61 +71,75 @@
       rel="stylesheet"
     />
 
-    <!-- Tailwind CSS Framework CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                navy: "#051329", // Deep Royal Navy Abyss
-                deep: "#0A2540", // Rich Midnight Sapphire
-                ocean: "#0E365E", // Lustrous Marine Ocean
-                sea: "#00D4FF", // Luminous Red Sea Azure Cyan
-                lagoon: "#06D6A0", // Glowing Tropical Emerald Lagoon
-                sand: "#FDF8F0", // Warm Champagne Sand
-                gold: "#F59E0B", // Radiant Royal Gold (5-Star Primary)
-                goldLight: "#FDE68A", // Brilliant Champagne Highlight
-                goldDark: "#D97706", // Burnished Luxury Amber
-                goldDeep: "#B45309", // Deep Antique Bronze
-                darkBg: "#030712", // Pure Luxury Dark Abyss (OLED Deep)
-                cardDark: "#071326", // Frosted Deep Sapphire Card Surface
-                cardGlass: "rgba(7, 19, 38, 0.78)",
-                accentAqua: "#00F0FF", // Neon Lagoon Glow
-              },
-            },
-            fontFamily: {
-              cairo: ["Cairo", "sans-serif"],
-              sans: ['"Plus Jakarta Sans"', "Cairo", "sans-serif"],
-            },
-            boxShadow: {
-              "gold-glow": "0 0 25px -4px rgba(245, 158, 11, 0.45)",
-              "gold-glow-lg": "0 0 35px 0 rgba(245, 158, 11, 0.6)",
-              "sea-glow": "0 0 25px -4px rgba(0, 212, 255, 0.45)",
-              "card-glass":
-                "0 15px 35px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12)",
-            },
-          },
-        },
-      };
-    </script>
+    <!-- Local Standalone Tailwind CSS (100% Offline, Zero-CDN Dependency) -->
+    <link rel="stylesheet" href="css/tailwind-compiled.css?v=58.0" />
 
-    <!-- Pre-render Theme Guard (Instant mode activation without flash) -->
+    <!-- Pre-render Theme & Language Guard + Immediate Resilient Dispatchers -->
     <script>
       (function () {
         const savedTheme = localStorage.getItem("moreno_theme");
-        if (savedTheme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else if (savedTheme === "light") {
+        if (savedTheme === "light") {
           document.documentElement.classList.remove("dark");
+        } else {
+          document.documentElement.classList.add("dark");
         }
+
+        const savedLang = localStorage.getItem("moreno_language");
+        if (savedLang) {
+          document.documentElement.setAttribute("lang", savedLang);
+          document.documentElement.setAttribute("dir", savedLang === "ar" ? "rtl" : "ltr");
+        }
+
+        // Global Early Dispatchers to guarantee zero ReferenceError on immediate user clicks
+        window.__updateThemeIcons = function (theme) {
+          const sun = document.getElementById("sunIcon");
+          const moon = document.getElementById("moonIcon");
+          if (sun) sun.style.display = theme === "dark" ? "block" : "none";
+          if (moon) moon.style.display = theme === "dark" ? "none" : "block";
+        };
+
+        window.toggleDarkMode = function () {
+          if (window.App && typeof window.App.toggleTheme === "function") {
+            return window.App.toggleTheme();
+          }
+          const isDark = document.documentElement.classList.toggle("dark");
+          const current = isDark ? "dark" : "light";
+          localStorage.setItem("moreno_theme", current);
+          window.__updateThemeIcons(current);
+          return current;
+        };
+
+        window.changeLanguage = function (lang) {
+          if (window.App && typeof window.App.changeLanguage === "function") {
+            window.App.changeLanguage(lang);
+          } else {
+            localStorage.setItem("moreno_language", lang);
+            document.documentElement.setAttribute("lang", lang);
+            document.documentElement.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+            window.__pendingLang = lang;
+          }
+        };
+
+        window.handleRoomLookup = function () {
+          if (window.Wayfinder && typeof window.Wayfinder.lookupRoom === "function") {
+            window.Wayfinder.lookupRoom();
+          } else if (window.App && typeof window.App.handleRoomLookup === "function") {
+            window.App.handleRoomLookup();
+          }
+        };
+        window.lookupRoom = window.handleRoomLookup;
+        window.findRoom = window.handleRoomLookup;
+
+        window.toggleAudio = function () {
+          if (window.App && typeof window.App.toggleSound === "function") {
+            return window.App.toggleSound();
+          }
+        };
       })();
     </script>
 
     <!-- Resource Hints & Critical Asset Preloads -->
-    <link rel="preload" href="css/style.css?v=48.0" as="style" />
+    <link rel="preload" href="css/style.css?v=58.0" as="style" />
     <link
       rel="preload"
       href="assets/images/hero_resort.jpg"
@@ -134,7 +148,7 @@
     />
 
     <!-- Modular Stylesheet -->
-    <link rel="stylesheet" href="css/style.css?v=48.0" />
+    <link rel="stylesheet" href="css/style.css?v=58.0" />
   </head>
 
   <body
@@ -184,7 +198,9 @@
           <button
             onclick="App.openSpotlightSearch()"
             title="بحث سريع في مرافق وخدمات المنتجع"
-            aria-label="بحث سريع في مرافق وخدمات المنتجع"
+              aria-label="بحث سريع في مرافق وخدمات المنتجع"
+              data-i18n-title="nav_quick_search_title"
+              data-i18n-aria="nav_quick_search_title"
             class="tap-effect flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl border border-amber-400/30 bg-white/90 dark:bg-slate-800/90 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-amber-400 hover:shadow-gold-glow"
           >
             <span>🔍</span>
@@ -288,6 +304,10 @@
             id="audioToggleBtn"
             title="كتم / تشغيل الصوت"
             aria-label="كتم / تشغيل الصوت"
+            data-i18n-title="nav_audio_btn_title"
+            data-i18n-aria="nav_audio_btn_title"
+            data-i18n-title="nav_audio_btn_title"
+            data-i18n-aria="nav_audio_btn_title"
             data-i18n-title="nav_audio_title"
             class="tap-effect hidden sm:flex p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300"
           >
@@ -305,7 +325,7 @@
           >
             <svg
               id="sunIcon"
-              class="w-4 h-4 hidden dark:block text-amber-400"
+              class="w-4 h-4 text-amber-400 theme-sun-icon"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -319,7 +339,7 @@
             </svg>
             <svg
               id="moonIcon"
-              class="w-4 h-4 block dark:hidden text-slate-600"
+              class="w-4 h-4 text-slate-600 dark:text-slate-200 theme-moon-icon"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -338,6 +358,34 @@
 
     <!-- Main Content Container -->
     <main class="max-w-6xl mx-auto px-3 sm:px-4 pt-3 pb-28" id="home">
+      <!-- Live Guest Announcement Banner (Admin Broadcast) -->
+      <section
+        id="liveGuestAnnouncement"
+        class="hidden mb-3 p-3.5 rounded-2xl border shadow-lg transition duration-300 relative overflow-hidden"
+      >
+        <div class="flex items-start justify-between gap-3 relative z-10">
+          <div class="flex items-start gap-3 min-w-0">
+            <span id="guestAnnouncementIcon" class="text-2xl shrink-0 mt-0.5">📢</span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span id="guestAnnouncementBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  إعلان المنتجع
+                </span>
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+              </div>
+              <p id="guestAnnouncementText" class="text-xs sm:text-sm font-black leading-snug"></p>
+            </div>
+          </div>
+          <button
+            onclick="App.dismissAnnouncement()"
+            class="text-slate-400 hover:text-white p-1 rounded-lg tap-effect text-xs shrink-0"
+            title="إخفاء التنبيه"
+          >
+            ✕
+          </button>
+        </div>
+      </section>
+
       <!-- Live Status Banner & Hurghada Clock -->
       <section
         class="mb-3 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white to-sky-500/10 dark:from-brand-deep/80 dark:via-brand-ocean/50 dark:to-amber-500/20 border border-amber-400/35 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md"
@@ -972,6 +1020,8 @@
               id="selectOrigin"
               title="نقطة الانطلاق (من)"
               aria-label="نقطة الانطلاق"
+              data-i18n-title="wf_origin_prompt"
+              data-i18n-aria="wf_origin_prompt"
               class="w-full px-3 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="M">📍 الاستقبال واللوبي الرئيسي (M)</option>
@@ -992,6 +1042,8 @@
               id="selectDestination"
               title="وجهة الوصول (إلى)"
               aria-label="وجهة الوصول"
+              data-i18n-title="wf_dest_prompt"
+              data-i18n-aria="wf_dest_prompt"
               class="w-full px-3 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="">🎯 الوجهة: اختر مرفقاً أو مبنى...</option>
@@ -1240,6 +1292,7 @@
                 oninput="MapEngine.searchPois(this.value)"
                 placeholder="ابحث في الخريطة: مطعم، مسبح، شاطئ، سبا، رقم المعلم..."
                 data-i18n-ph="map_search_placeholder"
+                data-i18n-ph="map_search_placeholder"
                 class="w-full ps-10 pe-16 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs transition"
               />
               <div
@@ -1285,7 +1338,7 @@
               </span>
               <input
                 type="text"
-                id="roomSearchInput"
+                id="mapRoomSearchInput"
                 placeholder="أدخل رقم الغرفة (مثال: 2015) / Enter Room Number"
                 data-i18n-ph="room_search_placeholder"
                 class="w-full ps-10 pe-20 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs transition"
@@ -1299,7 +1352,7 @@
                   type="button"
                   onclick="
                     RoomFinder.navigateToRoom(
-                      document.getElementById('roomSearchInput').value,
+                      document.getElementById('mapRoomSearchInput').value,
                     )
                   "
                   class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-brand-gold hover:brightness-110 text-slate-950 font-black text-xs transition tap-effect flex items-center gap-1 shadow-sm"
@@ -1336,70 +1389,70 @@
               onclick="MapEngine.focusPreset('M')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🏛️ <span data-preset-label="M">الاستقبال (M)</span>
+              🏛️ <span data-preset-label="M" data-i18n="chip_reception_m">الاستقبال (M)</span>
             </button>
             <button
               data-preset-id="12"
               onclick="MapEngine.focusPreset('12')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🍽️ <span data-preset-label="12">المطعم الرئيسي (12)</span>
+              🍽️ <span data-preset-label="12" data-i18n="chip_sirena_12">المطعم الرئيسي (12)</span>
             </button>
             <button
               data-preset-id="8"
               onclick="MapEngine.focusPreset('8')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🍕 <span data-preset-label="8">مطعم لا ماما (8)</span>
+              🍕 <span data-preset-label="8" data-i18n="chip_lamama_8">مطعم لا ماما (8)</span>
             </button>
             <button
               data-preset-id="11"
               onclick="MapEngine.focusPreset('11')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🏊 <span data-preset-label="11">مسبح لوتس (11)</span>
+              🏊 <span data-preset-label="11" data-i18n="chip_lotus_11">مسبح لوتس (11)</span>
             </button>
             <button
               data-preset-id="1"
               onclick="MapEngine.focusPreset('1')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🌊 <span data-preset-label="1">الشاطئ والمارينا (1)</span>
+              🌊 <span data-preset-label="1" data-i18n="chip_beach_1">الشاطئ والمارينا (1)</span>
             </button>
             <button
               data-preset-id="3"
               onclick="MapEngine.focusPreset('3')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🛝 <span data-preset-label="3">الأكوا بارك (3)</span>
+              🛝 <span data-preset-label="3" data-i18n="chip_aquapark_3">الأكوا بارك (3)</span>
             </button>
             <button
               data-preset-id="5"
               onclick="MapEngine.focusPreset('5')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🍹 <span data-preset-label="5">بار الشاطئ (5)</span>
+              🍹 <span data-preset-label="5" data-i18n="chip_beachbar_5">بار الشاطئ (5)</span>
             </button>
             <button
               data-preset-id="9"
               onclick="MapEngine.focusPreset('9')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              💆 <span data-preset-label="9">السبا والجيم (9)</span>
+              💆 <span data-preset-label="9" data-i18n="chip_spa_9">السبا والجيم (9)</span>
             </button>
             <button
               data-preset-id="2"
               onclick="MapEngine.focusPreset('2')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🤿 <span data-preset-label="2">مركز الغوص (2)</span>
+              🤿 <span data-preset-label="2" data-i18n="chip_diving_2">مركز الغوص (2)</span>
             </button>
             <button
               data-preset-id="MLS"
               onclick="MapEngine.focusPreset('MLS')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🛍️ <span data-preset-label="MLS">المبنى التجاري (MLS)</span>
+              🛍️ <span data-preset-label="MLS" data-i18n="chip_mall_mls">المبنى التجاري (MLS)</span>
             </button>
           </div>
         </div>
@@ -1633,7 +1686,7 @@
             data-i18n="map_touch_hint"
           >
             <span>🌍</span>
-            <span>اسحب للتنقل • تحكم بالإمالة 3D والبوصلة</span>
+            <span data-i18n="map_touch_hint">اسحب للتنقل • تحكم بالإمالة 3D والبوصلة</span>
           </div>
         </div>
       </section>
@@ -3129,6 +3182,7 @@
         <div class="p-4 sm:p-5 overflow-y-auto space-y-2.5">
           <!-- Reception Desk -->
           <a
+            id="contactLink_reception"
             href="tel:+201099887701"
             class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-amber-500 transition group"
           >
@@ -3144,6 +3198,7 @@
                 >
                   مكتب الاستقبال الرئيسي (Front Desk)
                   <span
+                    id="contactExt_reception"
                     class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold"
                     >داخلي: 0 / 100</span
                   >
@@ -3163,6 +3218,7 @@
 
           <!-- Clinic & Medical Emergency -->
           <a
+            id="contactLink_clinic"
             href="tel:+201099887703"
             class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-rose-500/5 dark:bg-rose-950/20 border border-rose-500/20 hover:border-rose-500 transition group"
           >
@@ -3178,6 +3234,7 @@
                 >
                   عيادة المنتجع والإسعاف (Clinic)
                   <span
+                    id="contactExt_clinic"
                     class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold"
                     >داخلي: 150</span
                   >
@@ -3197,6 +3254,7 @@
 
           <!-- Security & Lost & Found -->
           <a
+            id="contactLink_security"
             href="tel:+201099887702"
             class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-blue-500 transition group"
           >
@@ -3212,6 +3270,7 @@
                 >
                   الأمن والسلامة وحرس الشاطئ (Security)
                   <span
+                    id="contactExt_security"
                     class="text-[10px] px-1.5 py-0.5 rounded-md bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold"
                     >داخلي: 200</span
                   >
@@ -3231,6 +3290,7 @@
 
           <!-- Room Service & Butler -->
           <a
+            id="contactLink_room_service"
             href="tel:+201099887704"
             class="tap-effect flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 hover:border-teal-500 transition group"
           >
@@ -3246,6 +3306,7 @@
                 >
                   خدمة الغرف وعلاقات النزلاء (Room Service)
                   <span
+                    id="contactExt_room_service"
                     class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold"
                     >داخلي: 300</span
                   >
@@ -3290,7 +3351,7 @@
         title="الرئيسية"
       >
         <span class="nav-icon">🏰</span>
-        <span class="font-bold">الرئيسية</span>
+        <span data-i18n="mob_nav_home" class="font-bold">الرئيسية</span>
       </button>
       <button
         onclick="
@@ -3302,7 +3363,7 @@
         title="الخريطة"
       >
         <span class="nav-icon">🗺️</span>
-        <span class="font-bold">الخريطة</span>
+        <span data-i18n="mob_nav_map" class="font-bold">الخريطة</span>
       </button>
       <button
         onclick="
@@ -3314,7 +3375,7 @@
         title="الملاحة"
       >
         <span class="nav-icon">🧭</span>
-        <span class="font-bold">الملاحة</span>
+        <span data-i18n="mob_nav_nav" class="font-bold">الملاحة</span>
       </button>
       <button
         onclick="
@@ -3326,7 +3387,7 @@
         title="غرفتي"
       >
         <span class="nav-icon">👑</span>
-        <span class="font-bold">غرفتي</span>
+        <span data-i18n="mob_nav_room" class="font-bold">غرفتي</span>
       </button>
       <button
         onclick="openEmergencyDrawer()"
@@ -3334,7 +3395,7 @@
         title="الطوارئ"
       >
         <span class="nav-icon">🆘</span>
-        <span class="font-bold">طوارئ</span>
+        <span data-i18n="mob_nav_emergency" class="font-bold">طوارئ</span>
       </button>
     </nav>
 
@@ -3353,19 +3414,19 @@
       >
     </button>
 
-    <!-- Modular Scripts Architecture (Deferred execution for non-blocking rendering) -->
-    <script defer src="shared/positioning-core.js?v=48.0"></script>
-    <script defer src="js/core/i18n-engine.js?v=48.0"></script>
-    <script defer src="js/locales-bundle.js?v=48.0"></script>
-    <script defer src="js/data.js?v=48.0"></script>
-    <script defer src="js/virtual-resort-map.js?v=48.0"></script>
-    <script defer src="js/geofence-service.js?v=48.0"></script>
-    <script defer src="js/map-matcher.js?v=48.0"></script>
-    <script defer src="js/map-engine.js?v=48.0"></script>
-    <script defer src="js/voice-concierge.js?v=48.0"></script>
-    <script defer src="js/wayfinder.js?v=48.0"></script>
-    <script defer src="js/room-finder.js?v=48.0"></script>
-    <script defer src="js/templates/view-templates.js?v=48.0"></script>
-    <script defer src="js/app.js?v=48.0"></script>
+    <!-- Modular Scripts Architecture (Immediate synchronous execution in DOM order) -->
+    <script type="module" src="shared/positioning-core.js?v=58.0"></script>
+    <script src="js/core/i18n-engine.js?v=58.0"></script>
+    <script src="js/locales-bundle.js?v=58.0"></script>
+    <script src="js/data.js?v=58.0"></script>
+    <script src="js/virtual-resort-map.js?v=58.0"></script>
+    <script src="js/geofence-service.js?v=58.0"></script>
+    <script src="js/map-matcher.js?v=58.0"></script>
+    <script src="js/map-engine.js?v=58.0"></script>
+    <script src="js/voice-concierge.js?v=58.0"></script>
+    <script src="js/wayfinder.js?v=58.0"></script>
+    <script src="js/room-finder.js?v=58.0"></script>
+    <script src="js/templates/view-templates.js?v=58.0"></script>
+    <script src="js/app.js?v=58.0"></script>
   </body>
 </html>

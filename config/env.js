@@ -17,7 +17,7 @@ function loadEnvironmentFile() {
       try {
         process.loadEnvFile(envPath);
         return;
-      } catch (e) {
+      } catch {
         // Fallback to manual parsing if process.loadEnvFile throws
       }
     }
@@ -87,7 +87,9 @@ const config = Object.freeze({
     adminPassword: ADMIN_PASSWORD,
     jwtSecret: JWT_SECRET,
     mikrotikFeedKey: MIKROTIK_FEED_KEY,
-    devAdminPassword: !isProduction ? "admin123" : null,
+    devAdminPassword: !isProduction
+      ? (process.env.DEV_ADMIN_PASSWORD || "admin123")
+      : null,
   },
 
   mikrotik: {

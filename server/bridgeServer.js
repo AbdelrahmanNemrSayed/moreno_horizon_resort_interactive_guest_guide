@@ -12,17 +12,12 @@
 import http from "http";
 import net from "net";
 import crypto from "crypto";
-import url from "url";
-import path from "path";
-import { fileURLToPath } from "url";
 import { createRequire } from "module";
 
 import { positioningEngine } from "./services/positioningEngine.js";
 import envConfig from "../config/env.js";
 
 const require = createRequire(import.meta.url);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Configuration from environment or defaults
 const PORT = process.env.BRIDGE_PORT || 3001;
@@ -43,7 +38,7 @@ const connectedClients = new Set(); // Set of { socket, targetMac, send(json) }
 let WsServer = null;
 try {
   WsServer = require("ws").Server;
-} catch (e) {
+} catch {
   // Graceful fallback to native RFC6455
 }
 
@@ -207,8 +202,8 @@ const server = http.createServer(async (req, res) => {
       const testMac = positioningEngine.normalizeMac(
         body.mac || "A4:C3:F0:12:34:56",
       );
-      const targetX = Number(body.x != null ? body.x : 344); // default: Lotus Pool
-      const targetY = Number(body.y != null ? body.y : 665);
+      const targetX = Number(body.x !== null && body.x !== undefined ? body.x : 344); // default: Lotus Pool
+      const targetY = Number(body.y !== null && body.y !== undefined ? body.y : 665);
 
       const syntheticRows = positioningEngine.getAccessPoints().map((ap) => {
         const distM = Math.max(
@@ -267,7 +262,7 @@ function broadcastPosition(pos) {
           type: "location_update",
           data: pos,
         });
-      } catch (err) {
+      } catch {
         // Disconnected client
       }
     }
@@ -315,7 +310,7 @@ if (WsServer) {
               });
             }
           }
-        } catch (e) { }
+        } catch { }
       });
 
       ws.on("close", () => connectedClients.delete(client));
@@ -375,7 +370,7 @@ if (WsServer) {
             header.writeBigUInt64BE(BigInt(len), 2);
           }
           socket.write(Buffer.concat([header, payload]));
-        } catch (e) {
+        } catch {
           connectedClients.delete(client);
         }
       },
@@ -394,7 +389,7 @@ if (WsServer) {
     const pingTimer = setInterval(() => {
       try {
         socket.write(Buffer.from([0x89, 0x00])); // Ping frame
-      } catch (e) {
+      } catch {
         clearInterval(pingTimer);
         connectedClients.delete(client);
       }
@@ -526,7 +521,7 @@ class NativeRouterOsClient {
   }
 
   async fetchRegistrationTable() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const rows = [];
       let currentRecord = {};
 
@@ -589,7 +584,7 @@ setInterval(async () => {
     }
     const rows = await routerClient.fetchRegistrationTable();
     processRegistrationRows(rows);
-  } catch (err) {
+  } catch {
     // Router offline or poll failed
     if (routerClient) routerClient.connected = false;
     // Notify clients of potential connection loss

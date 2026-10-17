@@ -348,7 +348,7 @@ export const resortPois = [
     nameRu: "Южный жилой корпус (Wing S)",
     nameDe: "Südflügel Unterkünfte (Wing S)",
     tagAr:
-      "الغرف: 2001-2016 (طابق 1) | 2101-2144 (طابق 2) | 2201-2244 (طابق 3) | 2301-2344 (طابق 4) | 2401-2444 (طابق 5)",
+      "الغرف: 2001-2021 (طابق 1) | 2101-2144 (طابق 2) | 2201-2244 (طابق 3) | 2301-2344 (طابق 4) | 2401-2441 (طابق 5)",
     hours: "متاح 24 ساعة للنزلاء",
     locAr: "الجهة الجنوبية الشرقية مطلاً على مسبح لوتس والحدائق",
     descriptionAr:
@@ -358,11 +358,11 @@ export const resortPois = [
     isBuilding: true,
     image: "assets/images/luxury_room.jpg",
     rooms: [
-      { min: 2001, max: 2016, floor: "الطابق الأول (Floor 1)" },
+      { min: 2001, max: 2021, floor: "الطابق الأول (Floor 1)" },
       { min: 2101, max: 2144, floor: "الطابق الثاني (Floor 2)" },
       { min: 2201, max: 2244, floor: "الطابق الثالث (Floor 3)" },
       { min: 2301, max: 2344, floor: "الطابق الرابع (Floor 4)" },
-      { min: 2401, max: 2444, floor: "الطابق الخامس (Floor 5)" },
+      { min: 2401, max: 2441, floor: "الطابق الخامس (Floor 5)" },
     ],
   },
   {

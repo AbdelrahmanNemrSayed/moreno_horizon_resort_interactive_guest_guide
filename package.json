@@ -13,13 +13,15 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "validate": "node scripts/validate-configs.js",
-    "lint": "eslint config/ server/ shared/ tests/ scripts/ js/core/",
-    "lint:fix": "eslint config/ server/ shared/ tests/ scripts/ js/core/ --fix",
+    "lint": "eslint config/ server/ services/ shared/ src/ tests/ scripts/ js/core/",
+    "lint:fix": "eslint config/ server/ services/ shared/ src/ tests/ scripts/ js/core/ --fix",
     "format": "prettier --write \"**/*.{js,json,css,html,md}\"",
     "format:check": "prettier --check \"**/*.{js,json,css,html,md}\"",
+    "sync:version": "node scripts/sync-version.js",
+    "build:css": "tailwindcss -i css/tailwind-input.css -o css/tailwind-compiled.css --minify",
     "build:locales": "node scripts/build-locales.js",
     "build:data": "node scripts/build-data.js",
-    "build": "npm run build:locales && npm run build:data",
+    "build": "npm run build:css && npm run sync:version && npm run build:locales && npm run build:data",
     "trim:i18n": "node scripts/trim-data-i18n.js"
   },
   "keywords": [
@@ -40,6 +42,7 @@
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
     "prettier": "^3.3.0",
+    "tailwindcss": "^3.4.19",
     "vitest": "^2.0.0"
   }
 }

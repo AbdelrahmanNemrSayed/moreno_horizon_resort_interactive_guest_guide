@@ -43,6 +43,175 @@ const MIKROTIK_FEED_KEY = envConfig.security.mikrotikFeedKey;
 let lastMikrotikFeedTime = null;
 const feedLogs = [];
 
+// Shared Resort State (synced between admin & guest app)
+let beachFlagState = "safe"; // "safe" | "caution" | "danger"
+const poiStatusMap = {};     // { [poiId]: "open" | "closed" }
+let hotspotUrlState = "http://192.1.1.1/login"; // Hotspot portal URL configured by admin
+
+let announcementState = {
+  active: false,
+  textAr: "",
+  textEn: "",
+  type: "info", // "info" | "warning" | "event"
+  updatedAt: null,
+};
+
+let emergencyContactsState = [
+  {
+    id: "reception",
+    nameAr: "مكتب الاستقبال الرئيسي (Front Desk)",
+    phone: "+201099887701",
+    extension: "0 / 100",
+    icon: "🛎️",
+    badgeColor: "bg-amber-500",
+  },
+  {
+    id: "clinic",
+    nameAr: "عيادة المنتجع والطوارئ (Clinic)",
+    phone: "+201099887703",
+    extension: "150",
+    icon: "🩺",
+    badgeColor: "bg-rose-600",
+  },
+  {
+    id: "security",
+    nameAr: "الأمن والسلامة وحرس الشاطئ (Security)",
+    phone: "+201099887702",
+    extension: "200",
+    icon: "🛡️",
+    badgeColor: "bg-blue-600",
+  },
+  {
+    id: "room_service",
+    nameAr: "خدمة الغرف وعلاقات النزلاء (Room Service)",
+    phone: "+201099887704",
+    extension: "300",
+    icon: "🛎️",
+    badgeColor: "bg-emerald-600",
+  },
+];
+let emergencyWhatsappState = "201099887701";
+
+// Persistent Resort State Storage
+const RESORT_STATE_FILE = path.resolve(__dirname, "config/resort-state.json");
+
+function loadResortState() {
+  try {
+    if (fs.existsSync(RESORT_STATE_FILE)) {
+      const data = JSON.parse(fs.readFileSync(RESORT_STATE_FILE, "utf8"));
+      if (data.beachFlagState) beachFlagState = data.beachFlagState;
+      if (data.poiStatusMap && typeof data.poiStatusMap === "object") {
+        Object.assign(poiStatusMap, data.poiStatusMap);
+      }
+      if (data.hotspotUrlState) hotspotUrlState = data.hotspotUrlState;
+      if (data.announcementState && typeof data.announcementState === "object") {
+        announcementState = data.announcementState;
+      }
+      if (Array.isArray(data.emergencyContactsState)) {
+        emergencyContactsState = data.emergencyContactsState;
+      }
+      if (data.emergencyWhatsappState) {
+        emergencyWhatsappState = data.emergencyWhatsappState;
+      }
+      console.log("[Server] Loaded persisted resort state from config/resort-state.json");
+    }
+  } catch (err) {
+    console.warn("[Server] Could not load persisted resort state:", err.message);
+  }
+}
+
+function saveResortState() {
+  try {
+    const data = {
+      beachFlagState,
+      poiStatusMap,
+      hotspotUrlState,
+      announcementState,
+      emergencyContactsState,
+      emergencyWhatsappState,
+      updatedAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(RESORT_STATE_FILE, JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    console.error("[Server] Failed to save resort state:", err.message);
+  }
+}
+
+// Initialize resort state from disk
+loadResortState();
+
+// Active SSE Clients for real-time broadcast
+const sseClients = new Set();
+function broadcastToSseClients(payload) {
+  const dataStr = `data: ${JSON.stringify(payload)}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.write(dataStr);
+    } catch {
+      sseClients.delete(client);
+    }
+  }
+}
+
+// Live Radar Tracking Zones and Capacities (Intrinsic 896x1200 coordinates)
+const TRACKING_ZONES = [
+  { id: "1", nameAr: "منطقة الشاطئ والمارينا", nameEn: "Beach Area & Marina", x: 381, y: 281, radius: 180, capacity: 80 },
+  { id: "2", nameAr: "مركز الغوص والرياضات البحرية", nameEn: "Diving Center", x: 150, y: 342, radius: 100, capacity: 30 },
+  { id: "3", nameAr: "أكوا بارك مورينو", nameEn: "Moreno Aqua Park", x: 145, y: 418, radius: 120, capacity: 50 },
+  { id: "11", nameAr: "مسبح لوتس المركزي", nameEn: "Lotus Central Pool", x: 344, y: 665, radius: 140, capacity: 60 },
+  { id: "12", nameAr: "مطعم سيرينا الرئيسي", nameEn: "Sirena Buffet Restaurant", x: 310, y: 795, radius: 110, capacity: 90 },
+  { id: "M", nameAr: "بهو الاستقبال الرئيسي M", nameEn: "Main Lobby & Reception", x: 283, y: 820, radius: 110, capacity: 70 },
+  { id: "MLS", nameAr: "المبنى التجاري والمول", nameEn: "Resort Shopping Mall", x: 145, y: 948, radius: 110, capacity: 40 },
+];
+
+function computeZoneOccupancy() {
+  const devices = indoorLocationService.getAllDevices() || [];
+  const totalDevices = devices.length;
+
+  const zoneStats = TRACKING_ZONES.map((zone) => {
+    let count = 0;
+    for (const dev of devices) {
+      if (typeof dev.x === "number" && typeof dev.y === "number") {
+        const dx = dev.x - zone.x;
+        const dy = dev.y - zone.y;
+        if (Math.hypot(dx, dy) <= zone.radius) {
+          count++;
+        }
+      }
+    }
+    const occupancyRate = Math.min(100, Math.round((count / zone.capacity) * 100));
+    let status = "calm";
+    if (occupancyRate >= 75) status = "busy";
+    else if (occupancyRate >= 40) status = "moderate";
+
+    return {
+      id: zone.id,
+      nameAr: zone.nameAr,
+      nameEn: zone.nameEn,
+      x: zone.x,
+      y: zone.y,
+      count,
+      capacity: zone.capacity,
+      occupancyRate,
+      status,
+    };
+  });
+
+  return {
+    totalDevices,
+    zones: zoneStats,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+// Periodically broadcast zone occupancy metrics every 10 seconds to connected SSE clients
+setInterval(() => {
+  if (sseClients.size > 0) {
+    const occ = computeZoneOccupancy();
+    broadcastToSseClients({ type: "occupancy_update", ...occ });
+  }
+}, 10000);
+
 // Lightweight sliding-window Rate Limiter (in-memory)
 const rateLimitMap = new Map();
 function checkRateLimit(ip, limit = 120, windowMs = 60000) {
@@ -374,6 +543,7 @@ const server = http.createServer(async (req, res) => {
       Connection: "keep-alive",
     });
     res.write("retry: 2000\n\n");
+    sseClients.add(res);
 
     // Send immediate initial position if available
     if (targetMac) {
@@ -396,6 +566,7 @@ const server = http.createServer(async (req, res) => {
     }, 15000);
 
     req.on("close", () => {
+      sseClients.delete(res);
       clearInterval(heartbeatTimer);
       unsubscribe();
     });
@@ -497,8 +668,281 @@ const server = http.createServer(async (req, res) => {
     );
     return;
   }
+  // ==========================================
+  // API Routes: Shared Resort State (Beach Flag & POI Status)
+  // These sync admin decisions to all connected guests in real time.
+  // ==========================================
+
+  // GET  /api/resort/state  — Public: read beach flag + POI statuses
+  if (reqPath === "/api/resort/state" && req.method === "GET") {
+    res.writeHead(200, {
+      ...corsHeaders,
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-cache",
+    });
+    res.end(
+      JSON.stringify({
+        success: true,
+        beachFlag: beachFlagState,
+        poiStatuses: poiStatusMap,
+        hotspotUrl: hotspotUrlState,
+        announcement: announcementState,
+        emergencyContacts: emergencyContactsState,
+        emergencyWhatsapp: emergencyWhatsappState,
+        updatedAt: new Date().toISOString(),
+      }),
+    );
+    return;
+  }
+
+  // GET  /api/resort/occupancy — Public/Admin: live resort venue occupancy & device density
+  if (reqPath === "/api/resort/occupancy" && req.method === "GET") {
+    const data = computeZoneOccupancy();
+    res.writeHead(200, {
+      ...corsHeaders,
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-cache",
+    });
+    res.end(JSON.stringify({ success: true, ...data }));
+    return;
+  }
+
+  // POST /api/admin/resort/beach-flag  — Admin: update beach flag
+  if (reqPath === "/api/admin/resort/beach-flag" && req.method === "POST") {
+    const auth = verifyAdminAuth(req, urlObj);
+    if (!auth) {
+      res.writeHead(401, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(
+        JSON.stringify({ success: false, error: "Unauthorized: Valid admin token required" }),
+      );
+      return;
+    }
+    try {
+      const body = await parseBody(req);
+      const flag = (body.flag || "").toLowerCase();
+      if (!["safe", "caution", "danger"].includes(flag)) {
+        res.writeHead(400, {
+          ...corsHeaders,
+          "Content-Type": "application/json; charset=utf-8",
+        });
+        res.end(
+          JSON.stringify({ success: false, error: "Invalid flag value. Use: safe | caution | danger" }),
+        );
+        return;
+      }
+      beachFlagState = flag;
+      saveResortState();
+      broadcastToSseClients({ type: "beach_flag", beachFlag: beachFlagState });
+      res.writeHead(200, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: true, beachFlag: beachFlagState }));
+    } catch (err) {
+      res.writeHead(400, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // POST /api/admin/resort/poi-status  — Admin: update a single POI open/closed status
+  if (reqPath === "/api/admin/resort/poi-status" && req.method === "POST") {
+    const auth = verifyAdminAuth(req, urlObj);
+    if (!auth) {
+      res.writeHead(401, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(
+        JSON.stringify({ success: false, error: "Unauthorized: Valid admin token required" }),
+      );
+      return;
+    }
+    try {
+      const body = await parseBody(req);
+      const { id, status } = body;
+      if (!id || !["open", "closed"].includes(status)) {
+        res.writeHead(400, {
+          ...corsHeaders,
+          "Content-Type": "application/json; charset=utf-8",
+        });
+        res.end(
+          JSON.stringify({ success: false, error: "Required: id (string) and status (open|closed)" }),
+        );
+        return;
+      }
+      poiStatusMap[id] = status;
+      saveResortState();
+      broadcastToSseClients({ type: "poi_status", id, status });
+      res.writeHead(200, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: true, id, status }));
+    } catch (err) {
+      res.writeHead(400, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // POST /api/admin/resort/hotspot-url  — Admin: update Mikrotik hotspot portal URL
+  if (reqPath === "/api/admin/resort/hotspot-url" && req.method === "POST") {
+    const auth = verifyAdminAuth(req, urlObj);
+    if (!auth) {
+      res.writeHead(401, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(
+        JSON.stringify({ success: false, error: "Unauthorized: Valid admin token required" }),
+      );
+      return;
+    }
+    try {
+      const body = await parseBody(req);
+      const url = (body.url || "").trim();
+      if (!url || (!url.startsWith("http://") && !url.startsWith("https://"))) {
+        res.writeHead(400, {
+          ...corsHeaders,
+          "Content-Type": "application/json; charset=utf-8",
+        });
+        res.end(
+          JSON.stringify({ success: false, error: "Invalid URL. Must begin with http:// or https://" }),
+        );
+        return;
+      }
+      hotspotUrlState = url;
+      saveResortState();
+      res.writeHead(200, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: true, hotspotUrl: hotspotUrlState }));
+    } catch (err) {
+      res.writeHead(400, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // POST /api/admin/resort/announcement  — Admin: publish or clear live guest announcement
+  if (reqPath === "/api/admin/resort/announcement" && req.method === "POST") {
+    const auth = verifyAdminAuth(req, urlObj);
+    if (!auth) {
+      res.writeHead(401, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(
+        JSON.stringify({ success: false, error: "Unauthorized: Valid admin token required" }),
+      );
+      return;
+    }
+    try {
+      const body = await parseBody(req);
+      const active = Boolean(body.active);
+      const textAr = (body.textAr || "").trim();
+      const textEn = (body.textEn || "").trim();
+      const type = ["info", "warning", "event"].includes(body.type) ? body.type : "info";
+
+      announcementState = {
+        active,
+        textAr: active ? textAr : "",
+        textEn: active ? (textEn || textAr) : "",
+        type,
+        updatedAt: new Date().toISOString(),
+      };
+
+      saveResortState();
+
+      // Broadcast immediately to all connected SSE clients (guests & admin)
+      broadcastToSseClients({
+        type: "announcement",
+        announcement: announcementState,
+      });
+
+      res.writeHead(200, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: true, announcement: announcementState }));
+    } catch (err) {
+      res.writeHead(400, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // POST /api/admin/resort/contacts  — Admin: update emergency contacts & WhatsApp number
+  if (reqPath === "/api/admin/resort/contacts" && req.method === "POST") {
+    const auth = verifyAdminAuth(req, urlObj);
+    if (!auth) {
+      res.writeHead(401, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(
+        JSON.stringify({ success: false, error: "Unauthorized: Valid admin token required" }),
+      );
+      return;
+    }
+    try {
+      const body = await parseBody(req);
+      if (Array.isArray(body.contacts)) {
+        emergencyContactsState = body.contacts;
+      }
+      if (body.whatsapp) {
+        emergencyWhatsappState = String(body.whatsapp).replace(/[^0-9]/g, "");
+      }
+
+      saveResortState();
+
+      // Broadcast updated contacts to all connected SSE clients
+      broadcastToSseClients({
+        type: "contacts",
+        emergencyContacts: emergencyContactsState,
+        emergencyWhatsapp: emergencyWhatsappState,
+      });
+
+      res.writeHead(200, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(
+        JSON.stringify({
+          success: true,
+          emergencyContacts: emergencyContactsState,
+          emergencyWhatsapp: emergencyWhatsappState,
+        }),
+      );
+    } catch (err) {
+      res.writeHead(400, {
+        ...corsHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+      });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
 
   // 6.5 WiFi Radio Fingerprints Survey & Calibration APIs (Protected)
+
   if (reqPath === "/api/admin/fingerprints" && req.method === "GET") {
     const auth = verifyAdminAuth(req, urlObj);
     if (!auth) {

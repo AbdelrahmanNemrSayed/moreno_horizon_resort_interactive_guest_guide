@@ -6,14 +6,36 @@
 const Wayfinder = {
   lookupRoom() {
     App.playBeep(800);
-    const input = document.getElementById("roomSearchInput");
-    const rawVal = input ? input.value.trim() : "";
-    if (!rawVal) return;
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
+
+    let input = document.getElementById("roomSearchInput");
+    let rawVal = input ? input.value.trim() : "";
+    if (!rawVal) {
+      const altInput = document.getElementById("mapRoomSearchInput");
+      if (altInput && altInput.value.trim()) {
+        rawVal = altInput.value.trim();
+        if (input) input.value = rawVal;
+      }
+    }
+
+    if (!rawVal) {
+      if (typeof App !== "undefined" && typeof App.showToast === "function") {
+        App.showToast(t.wf_enter_room_prompt || "يرجى كتابة رقم الغرفة أولاً 🚪", "ℹ️");
+      }
+      if (input) input.focus();
+      return;
+    }
 
     // Normalize Eastern Arabic numerals (٢٠١٥ -> 2015)
     const normalized = rawVal.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
     const roomNum = parseInt(normalized);
-    if (isNaN(roomNum)) return;
+    if (isNaN(roomNum)) {
+      if (typeof App !== "undefined" && typeof App.showToast === "function") {
+        App.showToast(t.wf_room_not_found || "رقم الغرفة غير صحيح", "⚠️");
+      }
+      return;
+    }
 
     // Populate inputs if currently active, without persisting as guest room
     const srvInput = document.getElementById("srvRoomNumberInput");
@@ -41,10 +63,7 @@ const Wayfinder = {
     }
 
     const banner = document.getElementById("routeResultBanner");
-    banner.classList.remove("hidden");
-
-    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
-    const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
+    if (banner) banner.classList.remove("hidden");
 
     if (matchedBuilding) {
       const locBuilding =
@@ -275,7 +294,7 @@ const Wayfinder = {
           ? originSelect.options[originSelect.selectedIndex]
           : null;
       originText = originOpt
-        ? originOpt.text.replace(/^[📍\s]+/, "")
+        ? originOpt.text.replace(/^[📍🏨\s]+/, "")
         : t.wf_your_location || "موقعك";
       MapEngine.activeLiveNavDestination = null;
     }
@@ -348,23 +367,158 @@ const Wayfinder = {
       `🏠 ${t.nav_turn_title || "الملاحة الحية إلى غرفتك"} (${savedRoom})`,
     );
   },
+
+  /**
+   * Dynamically populate selectOrigin and selectDestination with fully localized POI and Building titles
+   */
+  populateDropdowns(lang = "ar") {
+    const originSelect = document.getElementById("selectOrigin");
+    const destSelect = document.getElementById("selectDestination");
+    if (!originSelect && !destSelect) return;
+
+    const t =
+      (typeof window !== "undefined" && window.i18n && window.i18n[lang])
+        ? window.i18n[lang]
+        : (typeof i18n !== "undefined" && i18n[lang]
+            ? i18n[lang]
+            : (typeof window !== "undefined" && window.i18n && window.i18n.ar
+                ? window.i18n.ar
+                : {}));
+
+    const currentOriginVal = originSelect ? originSelect.value : "M";
+    const currentDestVal = destSelect ? destSelect.value : "";
+
+    const poisList =
+      (typeof window !== "undefined" && Array.isArray(window.resortPois) && window.resortPois) ||
+      (typeof resortPois !== "undefined" && Array.isArray(resortPois) && resortPois) ||
+      [];
+
+    const getPoiName = (poi) => {
+      if (!poi) return "";
+      const locFn =
+        (typeof window !== "undefined" && typeof window.getLocalizedPoi === "function" && window.getLocalizedPoi) ||
+        (typeof getLocalizedPoi === "function" ? getLocalizedPoi : null);
+      if (locFn) {
+        try {
+          const loc = locFn(poi, lang);
+          if (loc && loc.name) return loc.name;
+        } catch (e) {}
+      }
+      if (lang === "en") return poi.nameEn || poi.nameAr;
+      if (lang === "ru") return poi.nameRu || poi.nameAr;
+      if (lang === "de") return poi.nameDe || poi.nameAr;
+      return poi.nameAr;
+    };
+
+    // 1. Populate Origin Select
+    if (originSelect) {
+      let originHtml = "";
+      const liveLabel =
+        lang === "ar"
+          ? "📍 موقعي الحالي (Live Blue Dot)"
+          : (lang === "ru"
+              ? "📍 Моё текущее положение (Live)"
+              : (lang === "de"
+                  ? "📍 Mein Standort (Live)"
+                  : "📍 My Live Location (Live Blue Dot)"));
+      originHtml += `<option value="LIVE_GUEST_LOCATION">${liveLabel}</option>`;
+
+      if (poisList.length > 0) {
+        const buildings = poisList.filter((p) => p.isBuilding);
+        const landmarks = poisList.filter((p) => !p.isBuilding);
+
+        buildings.forEach((poi) => {
+          const name = getPoiName(poi);
+          originHtml += `<option value="${poi.id}">🏨 ${name} (${poi.num})</option>`;
+        });
+        landmarks.forEach((poi) => {
+          const name = getPoiName(poi);
+          originHtml += `<option value="${poi.id}">📍 ${name} (${poi.num})</option>`;
+        });
+      }
+      originSelect.innerHTML = originHtml;
+      if (currentOriginVal) {
+        originSelect.value = currentOriginVal;
+      }
+      if (!originSelect.value && originSelect.options.length > 1) {
+        originSelect.value = "M";
+      }
+    }
+
+    // 2. Populate Destination Select
+    if (destSelect) {
+      const placeholderText =
+        t.wf_dest_placeholder_opt ||
+        (lang === "ru"
+          ? "🎯 Пункт назначения: выберите объект или корпус..."
+          : (lang === "de"
+              ? "🎯 Ziel: Einrichtung oder Gebäude wählen..."
+              : (lang === "en"
+                  ? "🎯 Destination: choose a facility or building..."
+                  : "🎯 الوجهة: اختر مرفقاً أو مبنى...")));
+
+      let destHtml = `<option value="">${placeholderText}</option>`;
+      if (poisList.length > 0) {
+        const buildings = poisList.filter((p) => p.isBuilding);
+        const landmarks = poisList.filter((p) => !p.isBuilding);
+
+        buildings.forEach((poi) => {
+          const name = getPoiName(poi);
+          destHtml += `<option value="${poi.id}">🏨 ${name} (${poi.num})</option>`;
+        });
+        landmarks.forEach((poi) => {
+          const name = getPoiName(poi);
+          destHtml += `<option value="${poi.id}">📍 ${name} (${poi.num})</option>`;
+        });
+      }
+      destSelect.innerHTML = destHtml;
+      if (currentDestVal) {
+        destSelect.value = currentDestVal;
+      }
+    }
+  },
 };
 
 if (typeof window !== "undefined") {
   window.Wayfinder = Wayfinder;
-  window.calculateCustomRoute = function () {
-    Wayfinder.calculateRoute();
-  };
-  window.resetWayfinder = function () {
-    Wayfinder.reset();
-  };
-  window.takeMeToMyRoom = function () {
-    Wayfinder.takeMeToMyRoom();
-  };
-  window.lookupRoom = function () {
+  window.handleRoomLookup = window.handleRoomLookup || function () {
     Wayfinder.lookupRoom();
   };
-  window.quickSelectRoom = function (num) {
+  window.lookupRoom = window.lookupRoom || function () {
+    Wayfinder.lookupRoom();
+  };
+  window.findRoom = window.findRoom || function () {
+    Wayfinder.lookupRoom();
+  };
+  window.calculateCustomRoute = window.calculateCustomRoute || function () {
+    Wayfinder.calculateRoute();
+  };
+  window.resetWayfinder = window.resetWayfinder || function () {
+    Wayfinder.reset();
+  };
+  window.takeMeToMyRoom = window.takeMeToMyRoom || function () {
+    Wayfinder.takeMeToMyRoom();
+  };
+  window.quickSelectRoom = window.quickSelectRoom || function (num) {
     Wayfinder.quickSelectRoom(num);
   };
+
+  // Populate dropdowns on initial DOM ready
+  const getInitialLang = () => {
+    return (
+      (typeof App !== "undefined" && App.currentLang) ||
+      (typeof localStorage !== "undefined" &&
+        localStorage.getItem("moreno_language")) ||
+      "ar"
+    );
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      Wayfinder.populateDropdowns(getInitialLang());
+    });
+  } else {
+    Wayfinder.populateDropdowns(getInitialLang());
+  }
 }
+

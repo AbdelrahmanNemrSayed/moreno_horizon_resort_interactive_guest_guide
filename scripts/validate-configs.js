@@ -97,4 +97,20 @@ assert.ok(pkg.scripts.start, "package.json must have start script");
 assert.ok(pkg.scripts.test, "package.json must have test script");
 console.log("✓ package.json scripts and metadata verified.");
 
+// 5. Validate Central Version Configuration
+const verPath = path.resolve(__dirname, "../config/version.json");
+assert.ok(fs.existsSync(verPath), "config/version.json must exist");
+const verConfig = JSON.parse(fs.readFileSync(verPath, "utf8"));
+assert.ok(verConfig.appVersion, "version.json must specify appVersion");
+assert.ok(verConfig.cacheVersion, "version.json must specify cacheVersion");
+console.log(`✓ Version configuration verified: ${verConfig.appVersion} (${verConfig.cacheVersion})`);
+
+// 6. Validate Resort State Configuration
+const statePath = path.resolve(__dirname, "../config/resort-state.json");
+assert.ok(fs.existsSync(statePath), "config/resort-state.json must exist");
+const stateConfig = JSON.parse(fs.readFileSync(statePath, "utf8"));
+assert.ok(stateConfig.beachFlagState, "resort-state.json must specify beachFlagState");
+assert.ok(Array.isArray(stateConfig.emergencyContactsState), "resort-state.json must contain emergencyContactsState");
+console.log("✓ Persistent resort-state configuration verified.");
+
 console.log("\n>>> ALL CONFIGURATION VALIDATIONS PASSED! <<<\n");
