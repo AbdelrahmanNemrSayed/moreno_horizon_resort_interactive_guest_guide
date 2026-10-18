@@ -114,6 +114,81 @@ export const resortPois = [
     image: "assets/images/sirena_buffet.jpg",
   },
   {
+    id: "7",
+    num: "7",
+    category: "relax",
+    categoryNameAr: "استكشاف واسترخاء (Explore & Relax)",
+    nameAr: "بيانو بار ولوبي لاوندج (Piano Bar)",
+    nameEn: "Piano Bar & Lounge",
+    nameRu: "Пиано-бар и лаундж",
+    nameDe: "Piano Bar & Lounge",
+    tagAr: "مشروبات راقية وأجواء هادئة خلف مطعم سيرينا",
+    hours: "10:00 - 00:00",
+    locAr: "خلف مطعم سيرينا (12) بالممشى الأوسط",
+    descriptionAr:
+      "بار كلاسيكي أنيق يقع خلف مطعم سيرينا، يقدم أرقى المشروبات والعصائر والكوكتيلات والقهوة مع أنغام البيانو الهادئة.",
+    descriptionEn:
+      "An elegant classic piano bar located behind Sirena Restaurant, serving fine beverages, specialty coffee, and evening cocktails with soothing melodies.",
+    descriptionRu:
+      "Элегантный классический пиано-бар за рестораном Sirena с изысканными напитками, кофе и коктейлями под звуки живого фортепиано.",
+    descriptionDe:
+      "Elegante Piano Bar hinter dem Restaurant Sirena mit feinen Getränken, Cocktails und Kaffee bei sanften Klaviermelodien.",
+    coords: { x: 47.88, y: 71.25 },
+    badgeColor: "bg-amber-700",
+    icon: "🎹",
+    image: "assets/images/resort_lobby.jpg",
+  },
+  {
+    id: "snack_beach",
+    num: "🥪",
+    category: "dine",
+    categoryNameAr: "مطاعم وتجارب طعام (Dine & Indulge)",
+    nameAr: "سناكس بيتش (Beach Snack Bar)",
+    nameEn: "Beach Snack Bar",
+    nameRu: "Снэк-бар на пляже",
+    nameDe: "Strand-Snackbar",
+    tagAr: "ساندوتشات شاطئ وسناكس طازجة طوال اليوم",
+    hours: "12:00 - 17:00",
+    locAr: "بجوار بار الشاطئ (5) على ممشى الكورنيش",
+    descriptionAr:
+      "يقدم تشكيلة شهية من السناكس السريعة وساندوتشات البرجر والبطاطس المقرمشة والمشروبات الباردة بجوار بار الشاطئ مباشرة.",
+    descriptionEn:
+      "Delicious beachside bites, fresh sandwiches, burgers, crispy fries, and refreshing cold drinks right next to Beach Bar 5.",
+    descriptionRu:
+      "Аппетитные пляжные закуски, сэндвичи, бургеры, картофель фри и прохладительные напитки рядом с пляжным баром.",
+    descriptionDe:
+      "Köstliche Strand-Snacks, frische Sandwiches, Burger, Pommes und kühle Getränke direkt neben der Strandbar.",
+    coords: { x: 40.18, y: 35.92 },
+    badgeColor: "bg-amber-600",
+    icon: "🥪",
+    image: "assets/images/beach_bar.jpg",
+  },
+  {
+    id: "snack_aqua",
+    num: "🌭",
+    category: "dine",
+    categoryNameAr: "مطاعم وتجارب طعام (Dine & Indulge)",
+    nameAr: "سناكس أكوا بارك (Aqua Snack Bar)",
+    nameEn: "Aqua Park Snack Bar",
+    nameRu: "Снэк-бар Аквапарк",
+    nameDe: "Aquapark Snackbar",
+    tagAr: "سناكس ومأكولات خفيفة للألعاب المائية",
+    hours: "12:00 - 17:00",
+    locAr: "بجوار مسبح وزلاجات الأكوا بارك (3)",
+    descriptionAr:
+      "محطة سناكس مميزة تقع بجوار الأكوا بارك، تقدم الهوت دوج والبيتزا سلايس والمشروبات المثلجة للأطفال والعائلات.",
+    descriptionEn:
+      "Fun snack station located right beside the Aqua Park slides, serving hot dogs, pizza slices, and ice-cold refreshments for families.",
+    descriptionRu:
+      "Закусочная у аквапарка: хот-доги, свежая пицца и холодные напитки для детей и всей семьи.",
+    descriptionDe:
+      "Snack-Station direkt am Aquapark mit Hot Dogs, Pizza-Schnitten und Erfrischungsgetränken für die ganze Familie.",
+    coords: { x: 19.53, y: 34.83 },
+    badgeColor: "bg-cyan-600",
+    icon: "🌭",
+    image: "assets/images/aquapark_pool.jpg",
+  },
+  {
     id: "8",
     num: "8",
     category: "dine",
@@ -172,7 +247,7 @@ export const resortPois = [
     num: "11",
     category: "relax",
     categoryNameAr: "استكشاف واسترخاء (Explore & Relax)",
-    nameAr: "مسبح لوتس والبحيرة (Lotus Pool)",
+    nameAr: "مسبح لوتس بول والبحيرة (Lotus Pool)",
     nameEn: "Lotus Central Pool & Swim-up Bar",
     nameRu: "Бассейн Lotus и водный бар",
     nameDe: "Lotus-Pool & Swim-up-Bar",
@@ -181,8 +256,15 @@ export const resortPois = [
     locAr: "الجهة الشرقية أمام المبنى الجنوبي S",
     descriptionAr:
       "أكبر بحيرات المسبح بالمنتجع، مياه متدرجة العمق، بار كوكتيل داخل الماء، كبائن استرخاء وأسرّة شمسية فاخرة.",
+    descriptionEn:
+      "The resort's largest lagoon pool featuring zero-entry depths, an integrated swim-up cocktail bar, and luxury sun cabanas.",
+    descriptionRu:
+      "Самый большой бассейн курорта с плавным заходом в воду, баром прямо в бассейне и шезлонгами.",
+    descriptionDe:
+      "Der größte Lagunenpool des Resorts mit flachem Einstieg, integrierter Swim-up-Bar und luxuriösen Sonnenliegen.",
     coords: { x: 69.2, y: 70.83 },
     badgeColor: "bg-blue-600",
+    icon: "🏊",
     image: "assets/images/lotus_pool.jpg",
   },
   {
@@ -244,17 +326,49 @@ export const resortPois = [
     num: "15",
     category: "services",
     categoryNameAr: "مرافق وخدمات (Facilities & Services)",
-    nameAr: "العيادة الطبية والصيدلية (Resort Clinic)",
-    nameEn: "Resort 24/7 Medical Clinic & Pharmacy",
-    nameRu: "Круглосуточная клиника и аптека",
-    nameDe: "24/7 Resort-Klinik & Apotheke",
+    nameAr: "العيادة الطبية (Resort Medical Clinic)",
+    nameEn: "Resort 24/7 Medical Clinic",
+    nameRu: "Круглосуточная медицинская клиника",
+    nameDe: "24/7 Resort-Klinik",
     tagAr: "طوارئ، إسعافات، وطبيب مقيم 24 ساعة",
     hours: "متاح 24 ساعة",
-    locAr: "الجهة الجنوبية الشرقية بجوار المسجد",
+    locAr: "داخل المبنى الرئيسي بجوار بهو الاستقبال واللوبي (Lobby M)",
     descriptionAr:
-      "عيادة طبية مجهزة للطوارئ والإسعافات الأولية وصيدلية تقدم الرعاية الصحية الفورية لجميع نزلاء المنتجع.",
-    coords: { x: 41.29, y: 83.33 },
+      "عيادة طبية مجهزة للطوارئ والإسعافات الأولية تقع داخل المبنى الرئيسي بجوار الريسيبشن مع طبيب مقيم 24 ساعة.",
+    descriptionEn:
+      "Fully equipped medical clinic inside the Main Building right next to Reception (Lobby M), staffed with a resident physician 24/7.",
+    descriptionRu:
+      "Оборудованная медицинская клиника внутри главного здания рядом с рецепцией (Lobby M), дежурный врач 24/7.",
+    descriptionDe:
+      "Voll ausgestattete 24/7-Klinik im Hauptgebäude neben der Rezeption (Lobby M) mit Notfallversorgung und Bereitschaftsarzt.",
+    coords: { x: 34.6, y: 69.58 },
     badgeColor: "bg-rose-600",
+    icon: "🩺",
+    image: "assets/images/resort_clinic.jpg",
+  },
+  {
+    id: "pharmacy",
+    num: "💊",
+    category: "services",
+    categoryNameAr: "مرافق وخدمات (Facilities & Services)",
+    nameAr: "صيدلية المنتجع (Resort Pharmacy)",
+    nameEn: "Resort Pharmacy",
+    nameRu: "Аптека курорта",
+    nameDe: "Resort-Apotheke",
+    tagAr: "أدوية ومستلزمات طبية وعناية بالبشرة",
+    hours: "09:00 - 23:00",
+    locAr: "بجوار مسجد المنتجع مباشرة (16)",
+    descriptionAr:
+      "صيدلية متكاملة تقع بجوار المسجد، توفر الأدوية والمستلزمات الطبية ومستحضرات الحماية من الشمس والإسعافات الأولية.",
+    descriptionEn:
+      "Fully stocked resort pharmacy located right next to the Mosque (16), offering prescription medicines, suncare, and first aid supplies.",
+    descriptionRu:
+      "Аптека курорта рядом с мечетью (16): медикаменты, солнцезащитные средства и средства первой помощи.",
+    descriptionDe:
+      "Voll ausgestattete Resort-Apotheke direkt neben der Moschee (16) mit Medikamenten, Sonnenschutz und Erste-Hilfe-Artikeln.",
+    coords: { x: 51.34, y: 86.67 },
+    badgeColor: "bg-emerald-600",
+    icon: "💊",
     image: "assets/images/resort_clinic.jpg",
   },
   {
@@ -353,7 +467,7 @@ export const resortPois = [
     locAr: "الجهة الجنوبية الشرقية مطلاً على مسبح لوتس والحدائق",
     descriptionAr:
       "جناح الإقامة الجنوبي الأنيق بإطلالات ساحرة على مسبح لوتس والممشى وملاعب التنس ومزود بمصاعد سريعة.",
-    coords: { x: 54.13, y: 51.25 },
+    coords: { x: 63.11, y: 54.2 },
     badgeColor: "bg-amber-600",
     isBuilding: true,
     image: "assets/images/luxury_room.jpg",

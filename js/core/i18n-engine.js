@@ -76,6 +76,15 @@
         msg = (this.locales.ar || {})[key];
       }
 
+      // Fallback to legacy window.i18n if registered
+      if (msg === undefined && typeof window !== "undefined" && window.i18n) {
+        if (window.i18n[lang] && window.i18n[lang][key]) {
+          msg = window.i18n[lang][key];
+        } else if (window.i18n.ar && window.i18n.ar[key]) {
+          msg = window.i18n.ar[key];
+        }
+      }
+
       if (msg === undefined) {
         return key;
       }

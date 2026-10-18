@@ -66,3 +66,15 @@ test("I18nEngine - setLanguage updates current language", () => {
   I18nEngine.setLanguage("ar");
   expect(I18nEngine.currentLang).toBe("ar");
 });
+
+test("I18nEngine - Wayfinder & Debug keys exist in English and Arabic", () => {
+  expect(I18nEngine.t("wf_tab_both", null, "en")).toBe("✨ Both");
+  expect(I18nEngine.t("wf_tab_both", null, "ar")).toBe("✨ كلاهما");
+  expect(I18nEngine.t("wf_card_room_title", null, "en")).toBe("Instant Room Locator");
+  expect(I18nEngine.t("wf_card_route_title", null, "en")).toBe("Walking Route Planner (From ➔ To)");
+  expect(I18nEngine.t("layer_ap_debug", null, "en")).toBe("Calibrate APs (Debug)");
+  expect(I18nEngine.t("sample_room_north_1520", null, "en")).toBe("1520 (North)");
+  expect(I18nEngine.t("omni_search_btn", null, "en")).toBe("Search");
+  expect(I18nEngine.t("omni_search_btn", null, "ar")).toBe("بحث");
+});
+

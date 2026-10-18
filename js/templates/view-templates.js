@@ -219,10 +219,84 @@
     `;
   }
 
+  /**
+   * 4. POI Details Luxury Modal
+   */
+  function renderPoiDetailsModal(data) {
+    const { poi, loc, lang, t } = data;
+    const safeName = escapeHtml(loc.name || poi.nameAr);
+    const safeDesc = escapeHtml(loc.desc || poi.descriptionAr || poi.descAr || "");
+    const safeLoc = escapeHtml(poi.locAr || "");
+    const safeHours = escapeHtml(poi.hours || "");
+    const safeTag = escapeHtml(poi.tagAr || "");
+    const icon = poi.icon || "📍";
+    const imgUrl = poi.image || "assets/images/hero_resort.jpg";
+    const safeId = escapeHtml(String(poi.id));
+
+    const navBtnText =
+      lang === "ar"
+        ? "توجيه وملاحة إلى هنا 🚶‍♂️"
+        : lang === "ru"
+          ? "Построить маршрут 🚶‍♂️"
+          : lang === "de"
+            ? "Route hierher 🚶‍♂️"
+            : "Navigate Here 🚶‍♂️";
+
+    const shareBtnText =
+      lang === "ar"
+        ? "مشاركة المرفق 📤"
+        : lang === "ru"
+          ? "Поделиться 📤"
+          : lang === "de"
+            ? "Teilen 📤"
+            : "Share 📤";
+
+    return `
+      <div>
+        <div class="relative -mx-5 -mt-5 sm:-mx-6 sm:-mt-6 mb-4 h-48 sm:h-56 rounded-t-3xl overflow-hidden bg-slate-900">
+          <img src="${imgUrl}" alt="${safeName}" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+          <button onclick="App.closeModal('detailModal')" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-black/60 backdrop-blur-md text-white hover:bg-black/90 flex items-center justify-center font-bold text-sm z-10 tap-effect">✕</button>
+          
+          <div class="absolute bottom-3 left-4 right-4 text-white">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded-full ${poi.badgeColor || "bg-amber-600"} text-white text-[11px] font-black shadow-md flex items-center gap-1">
+                <span>${icon}</span>
+                <span>${poi.num || ""}</span>
+              </span>
+              ${safeHours ? `<span class="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-amber-300 text-[10px] font-bold">🕒 ${safeHours}</span>` : ""}
+            </div>
+            <h3 class="text-lg sm:text-xl font-black drop-shadow-md text-white">${safeName}</h3>
+          </div>
+        </div>
+
+        <div class="space-y-3 mb-5">
+          ${safeTag ? `<div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center gap-2"><span>✨</span><span>${safeTag}</span></div>` : ""}
+
+          ${safeLoc ? `<div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span>📍</span><span class="font-bold">${safeLoc}</span></div>` : ""}
+
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+            ${safeDesc}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="App.navigateFromPoiModal('${safeId}')" class="py-3 px-3 rounded-2xl btn-royal-gold font-black text-xs shadow-lg flex items-center justify-center gap-1.5 tap-effect">
+            <span>${navBtnText}</span>
+          </button>
+          <button onclick="App.sharePoi('${safeId}')" class="py-3 px-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs shadow flex items-center justify-center gap-1.5 tap-effect">
+            <span>${shareBtnText}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   return {
     escapeHtml,
     renderRoomPassModal,
     renderExcursionModal,
     renderSpaServiceModal,
+    renderPoiDetailsModal,
   };
 });

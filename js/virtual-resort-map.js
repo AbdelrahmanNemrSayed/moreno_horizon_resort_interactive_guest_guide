@@ -95,13 +95,19 @@ const VirtualResortMap = {
       x: 145,
       y: 418,
       name: "أكوا بارك مورينو (3)",
-      neighbors: ["poi_2_diving", "p_aqua_promenade", "p_wing_n_outer_north"],
+      neighbors: ["poi_2_diving", "poi_snack_aqua", "p_aqua_promenade", "p_wing_n_outer_north"],
+    },
+    poi_snack_aqua: {
+      x: 175,
+      y: 418,
+      name: "سناكس أكوا (بجوار الأكوا بارك)",
+      neighbors: ["poi_3_aquapark", "p_aqua_promenade"],
     },
     p_aqua_promenade: {
       x: 200,
       y: 418,
       name: "ممشى الأكوا بارك الشرقي",
-      neighbors: ["poi_3_aquapark", "p_beach_w", "poi_4_kids"],
+      neighbors: ["poi_3_aquapark", "poi_snack_aqua", "p_beach_w", "poi_4_kids"],
     },
     poi_4_kids: {
       x: 266,
@@ -116,9 +122,16 @@ const VirtualResortMap = {
       neighbors: [
         "poi_4_kids",
         "p_garden_diag_3",
+        "poi_snack_beach",
         "p_promenade_5_6",
         "p_promenade_center",
       ],
+    },
+    poi_snack_beach: {
+      x: 360,
+      y: 431,
+      name: "سناكس بيتش (بجوار بار الشاطئ)",
+      neighbors: ["poi_5_beach_bar", "p_promenade_5_6"],
     },
     p_promenade_center: {
       x: 381,
@@ -359,7 +372,7 @@ const VirtualResortMap = {
       x: 475,
       y: 560,
       name: "ممشى المسبح (شرق)",
-      neighbors: ["p_pool_ne_2", "poi_s_wing", "p_pool_se"],
+      neighbors: ["p_pool_ne_2", "p_pool_se"],
     },
     p_pool_se: {
       x: 475,
@@ -367,7 +380,6 @@ const VirtualResortMap = {
       name: "ممشى المسبح (جنوب شرق)",
       neighbors: [
         "p_pool_east",
-        "poi_s_wing",
         "p_wing_s_south_bypass",
         "p_pool_s",
       ],
@@ -381,10 +393,10 @@ const VirtualResortMap = {
 
     // 6. Wing S, Spa (9), Tennis (10), Lotus Pool (11) (Paved walkways outside Wing S)
     poi_s_wing: {
-      x: 485,
-      y: 615,
+      x: 565,
+      y: 650,
       name: "مدخل المبنى الجنوبي (Wing S)",
-      neighbors: ["p_pool_east", "p_pool_se"],
+      neighbors: ["p_wing_s_south_bypass", "p_tennis_walk"],
     },
     p_wing_s_veranda_north: {
       x: 535,
@@ -408,7 +420,7 @@ const VirtualResortMap = {
       x: 535,
       y: 690,
       name: "ممشى جنوب الجناح S الخارجي",
-      neighbors: ["p_pool_se", "p_tennis_walk"],
+      neighbors: ["p_pool_se", "poi_s_wing", "p_tennis_walk"],
     },
     p_tennis_walk: {
       x: 615,
@@ -416,6 +428,7 @@ const VirtualResortMap = {
       name: "ممشى ملاعب التنس",
       neighbors: [
         "p_wing_s_south_bypass",
+        "poi_s_wing",
         "poi_9_spa",
         "poi_10_tennis",
         "p_lotus_walk_1",
@@ -451,7 +464,13 @@ const VirtualResortMap = {
       x: 429,
       y: 820,
       name: "مطعم سيرينا الرئيسي (12)",
-      neighbors: ["p_pool_s", "p_lobby_terrace", "p_avenue_mid"],
+      neighbors: ["p_pool_s", "p_lobby_terrace", "poi_7_piano", "p_avenue_mid"],
+    },
+    poi_7_piano: {
+      x: 429,
+      y: 855,
+      name: "بيانو بار (خلف مطعم سيرينا)",
+      neighbors: ["poi_12_sirena", "p_avenue_mid"],
     },
     p_lobby_terrace: {
       x: 355,
@@ -463,7 +482,13 @@ const VirtualResortMap = {
       x: 340,
       y: 835,
       name: "مدخل اللوبي الرئيسي (Lobby M)",
-      neighbors: ["p_lobby_terrace", "p_grand_plaza"],
+      neighbors: ["p_lobby_terrace", "poi_15_clinic", "p_grand_plaza"],
+    },
+    poi_15_clinic: {
+      x: 310,
+      y: 835,
+      name: "العيادة الطبية (داخل المبنى الرئيسي جنب الريسيبشن)",
+      neighbors: ["poi_m_lobby", "p_grand_plaza"],
     },
     p_grand_plaza: {
       x: 300,
@@ -529,14 +554,8 @@ const VirtualResortMap = {
     p_clinic_walk: {
       x: 370,
       y: 920,
-      name: "ممشى العيادة الشمالي",
-      neighbors: ["p_grand_plaza", "poi_15_clinic"],
-    },
-    poi_15_clinic: {
-      x: 370,
-      y: 1000,
-      name: "العيادة والصيدلية (15)",
-      neighbors: ["p_clinic_walk", "poi_16_mosque"],
+      name: "ممشى الحديقة الجنوبية",
+      neighbors: ["p_grand_plaza", "poi_16_mosque"],
     },
     p_mosque_walk: {
       x: 426,
@@ -548,13 +567,19 @@ const VirtualResortMap = {
       x: 426,
       y: 1040,
       name: "مسجد المنتجع (16)",
-      neighbors: ["p_mosque_walk", "poi_15_clinic", "p_mosque_walk_s"],
+      neighbors: ["p_mosque_walk", "p_clinic_walk", "poi_pharmacy", "p_mosque_walk_s"],
+    },
+    poi_pharmacy: {
+      x: 460,
+      y: 1040,
+      name: "صيدلية المنتجع (بجوار المسجد)",
+      neighbors: ["poi_16_mosque", "p_mosque_walk_s"],
     },
     p_mosque_walk_s: {
       x: 500,
       y: 1049,
       name: "ممشى المسجد الشرقي",
-      neighbors: ["poi_16_mosque", "poi_18_main_gate"],
+      neighbors: ["poi_16_mosque", "poi_pharmacy", "poi_18_main_gate"],
     },
     p_parking2_walk: {
       x: 580,
@@ -584,6 +609,9 @@ const VirtualResortMap = {
     4: "poi_4_kids",
     5: "poi_5_beach_bar",
     6: "poi_6_oriental",
+    7: "poi_7_piano",
+    snack_beach: "poi_snack_beach",
+    snack_aqua: "poi_snack_aqua",
     8: "poi_8_lamama",
     9: "poi_9_spa",
     10: "poi_10_tennis",
@@ -592,6 +620,7 @@ const VirtualResortMap = {
     13: "poi_13_parking1",
     14: "poi_14_side_gate",
     15: "poi_15_clinic",
+    pharmacy: "poi_pharmacy",
     16: "poi_16_mosque",
     17: "poi_17_parking2",
     18: "poi_18_main_gate",
@@ -785,18 +814,57 @@ const VirtualResortMap = {
             <text x="0" y="3" text-anchor="middle" font-size="9" font-weight="900" fill="#ffffff">MLS</text>
           </g>
 
-          <!-- 13. Mosque & Clinic & Gate -->
+          <!-- 13. Mosque & Pharmacy & Main Gate -->
           <g transform="translate(420, 1000)" filter="url(#dropShadow25D)">
             <rect x="-24" y="-18" width="48" height="36" rx="6" fill="#f8fafc" stroke="#047857" stroke-width="1.5" />
             <text x="0" y="4" text-anchor="middle" font-size="12">🕌</text>
           </g>
-          <g transform="translate(360, 1000)" filter="url(#dropShadow25D)">
-            <rect x="-24" y="-18" width="48" height="36" rx="6" fill="#f8fafc" stroke="#ef4444" stroke-width="1.5" />
-            <text x="0" y="4" text-anchor="middle" font-size="12">🏥</text>
+          <g transform="translate(465, 1000)" filter="url(#dropShadow25D)">
+            <rect x="-20" y="-18" width="40" height="36" rx="6" fill="#f8fafc" stroke="#059669" stroke-width="1.5" />
+            <text x="0" y="4" text-anchor="middle" font-size="12">💊</text>
           </g>
           <g transform="translate(610, 1020)" filter="url(#dropShadow25D)">
             <rect x="-30" y="-14" width="60" height="28" rx="6" fill="#0b2545" stroke="#dda15e" stroke-width="2" />
             <text x="0" y="4" text-anchor="middle" font-size="8" font-weight="900" fill="#ffffff">MAIN GATE</text>
+          </g>
+
+          <!-- 14. Beach Bar & Beach Snacks -->
+          <g transform="translate(335, 425)" filter="url(#dropShadow25D)">
+            <rect x="-24" y="-14" width="48" height="28" rx="6" fill="#f8fafc" stroke="#d97706" stroke-width="1.5" />
+            <text x="0" y="3" text-anchor="middle" font-size="11">🍹</text>
+            <text x="0" y="21" text-anchor="middle" font-size="7" font-weight="900" fill="#78350f">BEACH BAR</text>
+          </g>
+          <g transform="translate(370, 425)" filter="url(#dropShadow25D)">
+            <rect x="-16" y="-12" width="32" height="24" rx="5" fill="#fef3c7" stroke="#d97706" stroke-width="1.2" />
+            <text x="0" y="3" text-anchor="middle" font-size="10">🥪</text>
+            <text x="0" y="19" text-anchor="middle" font-size="6.5" font-weight="800" fill="#92400e">SNACKS</text>
+          </g>
+
+          <!-- 15. Aqua Park Snack Bar -->
+          <g transform="translate(180, 415)" filter="url(#dropShadow25D)">
+            <rect x="-18" y="-12" width="36" height="24" rx="5" fill="#ecfeff" stroke="#0891b2" stroke-width="1.2" />
+            <text x="0" y="3" text-anchor="middle" font-size="10">🌭</text>
+            <text x="0" y="19" text-anchor="middle" font-size="6.5" font-weight="800" fill="#0e7490">AQUA SNACK</text>
+          </g>
+
+          <!-- 16. Sirena Buffet & Piano Bar Lounge -->
+          <g transform="translate(429, 815)" filter="url(#dropShadow25D)">
+            <rect x="-35" y="-18" width="70" height="36" rx="7" fill="#f8fafc" stroke="#059669" stroke-width="1.8" />
+            <rect x="-35" y="-18" width="70" height="8" rx="2" fill="#059669" />
+            <text x="0" y="4" text-anchor="middle" font-size="11">🍽️</text>
+            <text x="0" y="14" text-anchor="middle" font-size="7.5" font-weight="900" fill="#065f46">SIRENA (12)</text>
+          </g>
+          <g transform="translate(429, 860)" filter="url(#dropShadow25D)">
+            <rect x="-30" y="-14" width="60" height="28" rx="6" fill="#451a03" stroke="#f59e0b" stroke-width="1.5" />
+            <text x="0" y="1" text-anchor="middle" font-size="10">🎹</text>
+            <text x="0" y="10" text-anchor="middle" font-size="6.5" font-weight="900" fill="#fbbf24">PIANO BAR (7)</text>
+          </g>
+
+          <!-- 17. Clinic inside Building M (west wing) -->
+          <g transform="translate(310, 825)" filter="url(#dropShadow25D)">
+            <rect x="-14" y="-12" width="28" height="24" rx="5" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5" />
+            <text x="0" y="3" text-anchor="middle" font-size="10">🩺</text>
+            <text x="0" y="18" text-anchor="middle" font-size="6" font-weight="900" fill="#9f1239">CLINIC (15)</text>
           </g>
         </g>
 
@@ -811,13 +879,13 @@ const VirtualResortMap = {
           <path id="activeRouteGlow" d="" fill="none" stroke="url(#pathGlowGrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="route-line-dynamic" />
         </g>
 
-        <!-- 4. DESTINATION TARGET MARKER (🎯 الوجهة) -->
+        <!-- 4. DESTINATION TARGET MARKER (علامة تحديد الموقع فقط) -->
         <g id="markerDestination" transform="translate(${this.nav.destPoint.x}, ${this.nav.destPoint.y})">
           <circle cx="0" cy="0" r="18" fill="#ef4444" fill-opacity="0.25" class="player-pulse-ring" />
           <circle cx="0" cy="0" r="8" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
-          <g transform="translate(0, -26)">
-            <rect x="-36" y="-11" width="72" height="18" rx="9" fill="#ef4444" stroke="#ffffff" stroke-width="1.5" filter="url(#dropShadow25D)" />
-            <text x="0" y="2" text-anchor="middle" font-size="8.5" font-weight="900" fill="#ffffff">🎯 الوجهة</text>
+          <g transform="translate(0, -22)" filter="url(#dropShadow25D)">
+            <circle cx="0" cy="0" r="13" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
+            <text x="0" y="4" text-anchor="middle" font-size="12">🎯</text>
           </g>
         </g>
 
@@ -1573,25 +1641,8 @@ const VirtualResortMap = {
   },
 
   playFootstepSound() {
-    if (!this.isSoundEnabled || !this.audioCtx) return;
-    try {
-      const osc = this.audioCtx.createOscillator();
-      const gain = this.audioCtx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(
-        140 + Math.random() * 20,
-        this.audioCtx.currentTime,
-      );
-      gain.gain.setValueAtTime(0.025, this.audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        this.audioCtx.currentTime + 0.08,
-      );
-      osc.connect(gain);
-      gain.connect(this.audioCtx.destination);
-      osc.start();
-      osc.stop(this.audioCtx.currentTime + 0.08);
-    } catch (e) {}
+    // Sound during walking simulation disabled per guest request
+    return;
   },
 
   playArrivalChime() {

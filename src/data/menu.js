@@ -64,13 +64,39 @@ export const diningSchedules = [
     meals: [{ name: "العشاء (Dinner)", time: "19:00 - 22:30" }],
   },
   {
-    restaurant: "بار الشاطئ وسناكس المسبح (Beach & Pool Bars)",
+    restaurant: "بار الشاطئ (Beach Bar)",
     meals: [
       {
         name: "مشروبات ومثلجات (Drinks & Ice Cream)",
-        time: "10:00 - غروب الشمس",
+        time: "10:00 - 18:00 (حتى الغروب)",
       },
-      { name: "سناكس بعد الظهر (Afternoon Snacks)", time: "15:00 - 17:00" },
+    ],
+  },
+  {
+    restaurant: "سناكس بيتش (Beach Snack Bar)",
+    meals: [
+      {
+        name: "ساندوتشات وسناكس سريعة وبطاطس مقرمشة",
+        time: "12:00 - 17:00",
+      },
+    ],
+  },
+  {
+    restaurant: "سناكس أكوا بارك (Aqua Snack Bar)",
+    meals: [
+      {
+        name: "هوت دوج وبيتزا سلايس وسناكس أطفال ومشروبات",
+        time: "12:00 - 17:00",
+      },
+    ],
+  },
+  {
+    restaurant: "بيانو بار ولوبي لاوندج (Piano Bar & Lounge)",
+    meals: [
+      {
+        name: "مشروبات ساخنة وباردة وعصائر وكوكتيلات مسائية",
+        time: "10:00 - 00:00",
+      },
     ],
   },
 ];

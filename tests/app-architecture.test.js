@@ -31,6 +31,11 @@ test("App Architecture - Unified App controller has all required APIs", () => {
   expect(typeof App.removeFromCart).toBe("function");
   expect(typeof App.updateCartBadge).toBe("function");
   expect(typeof App.saveGuestRoom).toBe("function");
+  expect(typeof App.saveGuestProfile).toBe("function");
+  expect(typeof App.updateGuestDashboardUI).toBe("function");
+  expect(typeof App.openGuestProfileModal).toBe("function");
+  expect(typeof App.closeGuestProfileModal).toBe("function");
+  expect(typeof App.updateMealScheduleTracker).toBe("function");
 });
 
 test("App Architecture - Modular Feature Managers instantiated correctly", () => {
@@ -61,6 +66,9 @@ test("App Architecture - Modular App Controller exports correctly", () => {
   expect(AppModular).toBeDefined();
   expect(typeof AppModular.init).toBe("function");
   expect(typeof AppModular.changeLanguage).toBe("function");
+  expect(typeof AppModular.saveGuestProfile).toBe("function");
+  expect(typeof AppModular.updateGuestDashboardUI).toBe("function");
+  expect(typeof AppModular.updateMealScheduleTracker).toBe("function");
 });
 
 test("Data Bundle - js/data.js exports complete dataset", () => {

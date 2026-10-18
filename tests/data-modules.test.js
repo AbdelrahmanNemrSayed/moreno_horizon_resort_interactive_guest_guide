@@ -62,8 +62,8 @@ test("Data Modules - Building wings and room lookup integrity", () => {
   const wingS = resortPois.find((p) => p.id === "S");
   expect(wingS).toBeDefined();
   expect(wingS.isBuilding).toBe(true);
-  expect(wingS.coords.x).toBeCloseTo(54.13, 1);
-  expect(wingS.coords.y).toBeCloseTo(51.25, 1);
+  expect(wingS.coords.x).toBeCloseTo(63.11, 1);
+  expect(wingS.coords.y).toBeCloseTo(54.2, 1);
   expect(wingS.nameAr).toContain("الجنوبي");
 
   // Wing N (North Building - المبنى الشمالي)

@@ -86,8 +86,8 @@ const RoomFinder = {
       nameEn: "South Building (Wing S)",
       nameRu: "Южный корпус (Wing S)",
       nameDe: "Südflügel (Wing S)",
-      coords: { x: 54.13, y: 51.25 },
-      canvasCoords: { x: 485, y: 615 },
+      coords: { x: 63.11, y: 54.2 },
+      canvasCoords: { x: 565, y: 650 },
       badgeColor: "bg-amber-500",
       icon: "🏨",
       floors: [
@@ -342,6 +342,12 @@ const RoomFinder = {
    * centers camera, and displays room guidance banner.
    */
   navigateToRoom(rawQuery) {
+    if (typeof Wayfinder !== "undefined" && typeof Wayfinder.lookupRoom === "function") {
+      const wfInput = document.getElementById("roomSearchInput");
+      if (wfInput && rawQuery) wfInput.value = rawQuery;
+      Wayfinder.lookupRoom();
+      return true;
+    }
     const resolved = this.resolveRoom(rawQuery);
     if (!resolved) {
       const lang = this.getCurrentLang();
@@ -432,16 +438,6 @@ const RoomFinder = {
 
     // Render Room Guidance Route Banner
     this.renderRoomRouteBanner(resolved, routeInfo);
-
-    // Announce via VoiceConcierge if available
-    if (typeof VoiceConcierge !== "undefined" && !VoiceConcierge.isMuted) {
-      const announceText =
-        lang === "ar"
-          ? `تم تحديد مسار الغرفة ${resolved.roomNumber} في ${resolved.wing.nameAr}، ${resolved.floor.nameAr}. المسافة ${routeInfo.meters} متراً.`
-          : `Route mapped to Room ${resolved.roomNumber} in ${resolved.wing.nameEn}, ${resolved.floor.nameEn}. Distance is ${routeInfo.meters} meters.`;
-      VoiceConcierge.speak(announceText);
-    }
-
     return true;
   },
 

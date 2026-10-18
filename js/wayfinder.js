@@ -355,7 +355,17 @@ const Wayfinder = {
     const t = typeof i18n !== "undefined" && i18n[lang] ? i18n[lang] : i18n.ar;
 
     if (!savedRoom) {
-      App.openSaveRoomModal();
+      if (typeof App !== "undefined" && typeof App.openSaveRoomModal === "function") {
+        App.openSaveRoomModal();
+      } else {
+        const input = document.getElementById("roomSearchInput");
+        if (input) {
+          input.focus();
+          if (typeof App !== "undefined" && App.showToast) {
+            App.showToast(t.enter_room_first || "يرجى كتابة رقم غرفتك أولاً", "ℹ️");
+          }
+        }
+      }
       return;
     }
 
@@ -477,6 +487,55 @@ const Wayfinder = {
       }
     }
   },
+
+  swapPoints() {
+    if (typeof App !== "undefined" && typeof App.playBeep === "function") {
+      App.playBeep(700, 60);
+    }
+    const origin = document.getElementById("selectOrigin");
+    const dest = document.getElementById("selectDestination");
+    if (!origin || !dest) return;
+    const prevOrigin = origin.value;
+    const prevDest = dest.value;
+    if (prevDest) origin.value = prevDest;
+    if (prevOrigin && prevOrigin !== "LIVE_GUEST_LOCATION") dest.value = prevOrigin;
+    if (dest.value) {
+      this.calculateRoute();
+    }
+  },
+
+  setTab(tab) {
+    if (typeof App !== "undefined" && typeof App.playBeep === "function") {
+      App.playBeep(650, 40);
+    }
+    const roomCard = document.getElementById("wfRoomCard");
+    const routeCard = document.getElementById("wfRouteCard");
+    const grid = document.getElementById("wfMainGrid");
+    const bRoom = document.getElementById("wfTabRoom");
+    const bRoute = document.getElementById("wfTabRoute");
+    const bBoth = document.getElementById("wfTabBoth");
+
+    const activeCls = "tap-effect px-3 py-1.5 rounded-xl text-xs font-black bg-amber-500 text-slate-950 shadow-md transition";
+    const inactiveCls = "tap-effect px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-amber-500/15 hover:text-amber-700 dark:hover:text-amber-300 transition";
+
+    if (bRoom) bRoom.className = tab === "room" ? activeCls : inactiveCls;
+    if (bRoute) bRoute.className = tab === "route" ? activeCls : inactiveCls;
+    if (bBoth) bBoth.className = tab === "both" ? activeCls : inactiveCls;
+
+    if (tab === "room") {
+      if (roomCard) roomCard.classList.remove("hidden");
+      if (routeCard) routeCard.classList.add("hidden");
+      if (grid) grid.className = "relative z-10 grid grid-cols-1 gap-4 mb-3";
+    } else if (tab === "route") {
+      if (roomCard) roomCard.classList.add("hidden");
+      if (routeCard) routeCard.classList.remove("hidden");
+      if (grid) grid.className = "relative z-10 grid grid-cols-1 gap-4 mb-3";
+    } else {
+      if (roomCard) roomCard.classList.remove("hidden");
+      if (routeCard) routeCard.classList.remove("hidden");
+      if (grid) grid.className = "relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3";
+    }
+  },
 };
 
 if (typeof window !== "undefined") {
@@ -501,6 +560,12 @@ if (typeof window !== "undefined") {
   };
   window.quickSelectRoom = window.quickSelectRoom || function (num) {
     Wayfinder.quickSelectRoom(num);
+  };
+  window.swapWayfinderPoints = window.swapWayfinderPoints || function () {
+    Wayfinder.swapPoints();
+  };
+  window.setWayfinderTab = window.setWayfinderTab || function (tab) {
+    Wayfinder.setTab(tab);
   };
 
   // Populate dropdowns on initial DOM ready

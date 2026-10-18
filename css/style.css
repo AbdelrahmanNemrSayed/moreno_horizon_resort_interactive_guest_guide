@@ -1214,6 +1214,37 @@ body.sunlight-mode .map-pin {
   }
 }
 
+/* Luxury 3D Cinematic Tour Floating HUD */
+.cinematic-tour-hud {
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), 0 0 25px rgba(245, 158, 11, 0.25) !important;
+  animation: cinematicHudSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cinematicHudSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Luxury Photo Gallery & Lightbox Styles */
+.gallery-tab-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+.gallery-card {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gallery-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 35px -8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.25);
+}
+
 .beacon-vertical-beam {
   position: absolute;
   bottom: 0;
@@ -2820,40 +2851,26 @@ main {
 .room-beacon-badge {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  border: 2px solid #dda15e;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ea580c 100%);
+  border: 2px solid #fef08a;
   border-radius: 9999px;
-  padding: 0.35rem 0.85rem;
+  padding: 0;
   box-shadow:
-    0 0 25px rgba(221, 161, 94, 0.8),
-    0 8px 24px rgba(0, 0, 0, 0.7);
-  white-space: nowrap;
+    0 0 25px rgba(239, 68, 68, 0.85),
+    0 8px 24px rgba(0, 0, 0, 0.75);
 }
 
 .room-beacon-icon {
-  font-size: 1.15rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  font-size: 1.25rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 .room-beacon-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-  text-align: right;
-}
-
-.room-beacon-text .room-num {
-  font-size: 0.8rem;
-  font-weight: 900;
-  color: #fbbf24;
-  letter-spacing: -0.02em;
-}
-
-.room-beacon-text .room-floor {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #e2e8f0;
+  display: none !important;
 }
 
 .room-beacon-pin-pointer {
@@ -2950,29 +2967,27 @@ main {
 .dest-pin-badge {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ea580c 100%);
   border: 2px solid #fef08a;
   border-radius: 9999px;
-  padding: 0.35rem 0.85rem;
+  padding: 0;
   box-shadow:
     0 0 25px rgba(239, 68, 68, 0.85),
     0 8px 24px rgba(0, 0, 0, 0.75);
-  white-space: nowrap;
 }
 
 .dest-pin-icon {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   animation: pinEmojiPulse 1.4s ease-in-out infinite alternate;
 }
 
 .dest-pin-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-  text-align: right;
+  display: none !important;
 }
 
 .dest-pin-name {
@@ -3491,27 +3506,10 @@ main {
   letter-spacing: -0.01em;
 }
 
-/* On mobile: compact 42px circular floating action button so it never covers content! */
+/* On mobile: hide floating action button since it is now natively embedded in the bottom navigation bar! */
 @media (max-width: 640px) {
   .voice-nav-fab {
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    justify-content: center;
-    bottom: 4.8rem;
-    right: 0.85rem;
-    box-shadow:
-      0 8px 20px rgba(0, 0, 0, 0.45),
-      0 0 16px rgba(245, 158, 11, 0.4);
-  }
-  .voice-nav-fab .voice-fab-text {
-    display: none;
-  }
-  .voice-nav-fab .voice-fab-pulse {
-    display: none;
-  }
-  .voice-nav-fab .voice-fab-icon {
-    font-size: 1.25rem;
+    display: none !important;
   }
 }
 
@@ -4074,3 +4072,39 @@ main {
     animation: none !important;
   }
 }
+
+/* ========================================================
+   Mobile Ergonomics & Viewport Polish (Smartphones & Tablets)
+   ======================================================== */
+@media (max-width: 640px) {
+  /* Safe area & responsive header height */
+  header {
+    padding-top: max(0.25rem, env(safe-area-inset-top, 0px)) !important;
+  }
+
+  /* Compact gutters for maximum content width without side clipping */
+  main {
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px)) !important;
+    padding-top: 0.65rem !important;
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 12px)) !important;
+  }
+
+  /* Refined touch targets & luxury mobile bottom navigation */
+  .mobile-bottom-nav {
+    padding-top: 0.35rem !important;
+    padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 10px)) !important;
+  }
+
+  .mobile-nav-item {
+    padding: 0.2rem 0.35rem !important;
+    min-width: 48px !important;
+    font-size: 0.62rem !important;
+  }
+
+  /* Floating AI Voice Guide hidden on mobile dock screens (integrated in bottom nav) */
+  .voice-nav-fab {
+    display: none !important;
+  }
+}
+

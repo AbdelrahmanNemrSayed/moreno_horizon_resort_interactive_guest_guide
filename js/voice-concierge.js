@@ -19,7 +19,7 @@
 const VoiceConcierge = {
   isInitialized: false,
   isListening: false,
-  isMuted: false,
+  isMuted: true,
   recognition: null,
   activeLanguage: "ar-EG",
   lastSpokenText: "",
@@ -339,21 +339,74 @@ const VoiceConcierge = {
       return resortPois.find((p) => p.id === "M");
     }
 
-    // Clinic & Pharmacy
+    // Pharmacy
+    const pharmacyKeywords = [
+      "صيدليه",
+      "صيدلية",
+      "دواء",
+      "ادويه",
+      "علاج",
+      "pharmacy",
+      "apotheke",
+      "аптека",
+    ];
+    if (pharmacyKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "pharmacy");
+    }
+
+    // Clinic
     const clinicKeywords = [
       "عياده",
       "دكتور",
       "طبيب",
-      "صيدليه",
       "اسعاف",
+      "طوارئ",
       "clinic",
       "doctor",
-      "pharmacy",
       "клиника",
       "arzt",
     ];
     if (clinicKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
       return resortPois.find((p) => p.id === "15");
+    }
+
+    // Beach Snacks
+    const beachSnackKeywords = [
+      "سناكس بيتش",
+      "سناك بيتش",
+      "سناكس الشاطئ",
+      "سناك الشاطئ",
+      "سناكس الشاطيء",
+      "beach snack",
+      "strand snack",
+    ];
+    if (beachSnackKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "snack_beach");
+    }
+
+    // Aqua Snacks
+    const aquaSnackKeywords = [
+      "سناكس اكوا",
+      "سناك اكوا",
+      "سناكس الاكوا",
+      "سناك الاكوا",
+      "aqua snack",
+    ];
+    if (aquaSnackKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "snack_aqua");
+    }
+
+    // Piano Bar
+    const pianoKeywords = [
+      "بيانو",
+      "بيانو بار",
+      "piano",
+      "piano bar",
+      "لاوندج",
+      "lounge",
+    ];
+    if (pianoKeywords.some((k) => normQuery.includes(this.normalizeText(k)))) {
+      return resortPois.find((p) => p.id === "7");
     }
 
     // Aqua park
@@ -567,99 +620,40 @@ const VoiceConcierge = {
    */
   speak(text) {
     if (this.isMuted || !text) return;
-
-    // Use unified HD Neural Audio Guide engine if available
-    if (
-      typeof ConciergeAudioGuide !== "undefined" &&
-      ConciergeAudioGuide.speak
-    ) {
-      ConciergeAudioGuide.speak(text, this.getCurrentLangKey());
-      this.lastSpokenText = text;
-      return;
-    }
-
-    if (!("speechSynthesis" in window)) return;
-
-    try {
-      window.speechSynthesis.cancel(); // Stop any pending speech
-
-      const langKey = this.getCurrentLangKey();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = this.LANG_MAP[langKey] || "ar-EG";
-      utterance.rate = langKey === "ar" ? 0.9 : 0.95;
-      utterance.pitch = langKey === "ar" ? 1.02 : 1.0;
-
-      // Select natural Egyptian voice if available
-      const voices = window.speechSynthesis.getVoices();
-      if (voices && voices.length > 0) {
-        const matchVoice =
-          voices.find((v) => {
-            const l = (v.lang || "").toLowerCase();
-            const n = (v.name || "").toLowerCase();
-            return (
-              (l.includes("eg") ||
-                n.includes("egypt") ||
-                n.includes("salma") ||
-                n.includes("shakir") ||
-                n.includes("maged")) &&
-              !n.includes("hoda") &&
-              !n.includes("desktop")
-            );
-          }) ||
-          voices.find(
-            (v) =>
-              (v.lang || "").toLowerCase().startsWith(langKey) &&
-              !(v.name || "").toLowerCase().includes("hoda"),
-          );
-
-        if (matchVoice) {
-          utterance.voice = matchVoice;
-        }
-      }
-
-      window.speechSynthesis.speak(utterance);
-      this.lastSpokenText = text;
-    } catch (err) {
-      console.warn("[VoiceConcierge] Speech synthesis failed:", err);
+    // Spoken speech voice completely disabled per user preference
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
   },
 
   /**
-   * Turn-by-Turn Spoken Navigation Hooks called by MapEngine
+   * Turn-by-Turn Visual Navigation Hooks called by MapEngine (Voice speech silenced)
    */
   onRouteCalculated({ destTitle, meters, minutes }) {
-    if (this.isMuted) return;
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
     const lang = this.getCurrentLangKey();
     const dict = this.RESPONSES[lang] || this.RESPONSES.ar;
     const message = dict.routeStart(destTitle, meters);
-    this.lastSpokenStepIdx = 0; // Mark step 0 as handled by routeStart so it doesn't collide
-    this.speak(message);
+    this.lastSpokenStepIdx = 0;
     this.showToast(`🧭 ${message}`);
   },
 
   onTurnStep(step, stepIdx, totalSteps) {
-    if (this.isMuted) return;
-    // Skip step 0 (already announced in routeStart) and last step (handled on arrival)
-    if (stepIdx === 0 || (totalSteps && stepIdx >= totalSteps - 1)) return;
-    if (this.lastSpokenStepIdx === stepIdx) return;
-    this.lastSpokenStepIdx = stepIdx;
-
-    if (step && step.instruction) {
-      this.speak(step.instruction);
-    }
+    // Spoken turn step voice silenced - visual HUD guidance only
+    return;
   },
 
   onDestinationArrived(destPoi, destName) {
-    this.playArrivalChime();
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
     const lang = this.getCurrentLangKey();
     const dict = this.RESPONSES[lang] || this.RESPONSES.ar;
     const targetName =
       destName || (destPoi ? destPoi.nameAr || destPoi.name : "");
     const message = dict.arrival(targetName);
-    // Let chime ring for 300ms before speaking congratulatory arrival
-    setTimeout(() => {
-      this.speak(message);
-    }, 320);
     this.showToast(`🎉 ${message}`);
   },
 

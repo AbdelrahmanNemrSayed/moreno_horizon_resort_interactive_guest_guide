@@ -101,6 +101,14 @@ const MapEngine = {
       this.syncExternalNavParent();
       setTimeout(() => this.fitToViewport(), 100);
     });
+
+    window.addEventListener("languagechange", (e) => {
+      const newLang =
+        (e && e.detail && e.detail.lang) ||
+        (typeof App !== "undefined" && App.currentLang) ||
+        "ar";
+      this.updateLanguage(newLang);
+    });
   },
 
   fitToViewport() {
@@ -436,13 +444,17 @@ const MapEngine = {
     if (id === "2") return "🤿";
     if (id === "3") return "🎪";
     if (id === "4") return "🎠";
-    if (id === "5" || id === "7" || id === "9") return "🍹";
+    if (id === "5" || id === "9") return "🍹";
     if (id === "6" || id === "8" || id === "12") return "🍽️";
+    if (id === "7") return "🎹";
+    if (id === "snack_beach") return "🥪";
+    if (id === "snack_aqua") return "🌭";
     if (id === "10") return "🎾";
     if (id === "11") return "🏊‍♂️";
     if (id === "13" || id === "17") return "🅿️";
     if (id === "14" || id === "18") return "🚪";
-    if (id === "15") return "🏥";
+    if (id === "15") return "🩺";
+    if (id === "pharmacy") return "💊";
     if (id === "16") return "🕌";
     if (id === "MLS") return "🛍️";
     return "📍";
@@ -1240,7 +1252,11 @@ const MapEngine = {
                 : `U-turn ${dir}`,
           instruction: isAr
             ? "استدير وارجع لورا، وكمل مع الممشى."
-            : "Make a full U-turn and follow the path.",
+            : isRu
+              ? "Развернитесь и следуйте по дорожке."
+              : isDe
+                ? "Wenden Sie und folgen Sie dem Fußweg."
+                : "Make a full U-turn and follow the path.",
         };
       } else if (abs >= 100) {
         // Sharp turn
@@ -1255,7 +1271,11 @@ const MapEngine = {
                 : `Sharp turn ${dir}`,
           instruction: isAr
             ? `اكسر ${dir} جامد مع الممر.`
-            : `Make a sharp ${dir} turn at the junction.`,
+            : isRu
+              ? `Поверните ${dir} на развилке.`
+              : isDe
+                ? `Biegen Sie scharf nach ${dir} ab.`
+                : `Make a sharp ${dir} turn at the junction.`,
         };
       } else if (abs >= 45) {
         // Normal turn
@@ -1263,7 +1283,7 @@ const MapEngine = {
           icon: isRight ? "↪️" : "↩️",
           title: isAr
             ? `حود ${dir} عند الممر`
-            : (t.nav_route_turn_title || "انعطف {direction} عند الممر").replace(
+            : (t.nav_route_turn_title || (isRu ? `Поверните {direction}` : isDe ? `Biegen Sie nach {direction} ab` : `Turn {direction}`)).replace(
                 "{direction}",
                 dir,
               ),
@@ -1271,7 +1291,7 @@ const MapEngine = {
             ? `حود ${dir} وامشي مع الممر.`
             : (
                 t.nav_route_turn_instruction ||
-                "اتبع الممر {direction} حتى نقطة الانعطاف التالية."
+                (isRu ? `Следуйте по дорожке {direction}.` : isDe ? `Folgen Sie dem Pfad nach {direction}.` : `Follow the walkway {direction}.`)
               ).replace("{direction}", dir),
         };
       } else {
@@ -1287,7 +1307,11 @@ const MapEngine = {
                 : `Slight ${dir}`,
           instruction: isAr
             ? `ميل ${dir} شوية مع الممشى.`
-            : `Continue with a slight bend ${dir} along the path.`,
+            : isRu
+              ? `Слегка поверните ${dir} вдоль дорожки.`
+              : isDe
+                ? `Halten Sie sich leicht ${dir} auf dem Weg.`
+                : `Continue with a slight bend ${dir} along the path.`,
         };
       }
     };
@@ -1320,16 +1344,16 @@ const MapEngine = {
         distMeters: totalMeters,
         title: isAr
           ? `ابدأ من [${origin.name}]`
-          : `${t.nav_route_start_title || "ابدأ من"} [${origin.name}]`,
+          : `${t.nav_route_start_title || (isRu ? "Начните от" : isDe ? "Starten bei" : "Start from")} [${origin.name}]`,
         instruction: isAr
           ? isAccessible
             ? "المسار محدد للوصول الميسر. يلا بينا، امشي مع الممشى."
             : "يلا بينا! امشي مع الممشى اللي قدامك."
           : isAccessible
             ? t.nav_route_accessibility_notice ||
-              "♿ المسار المحدد مُعدَّل للوصول الميسر والكراسي المتحركة."
+              (isRu ? "♿ Безбарьерный маршрут. Следуйте по дорожке." : isDe ? "♿ Barrierefreie Route. Folgen Sie dem Fußweg." : "♿ Accessible path selected. Follow the walkway.")
             : t.nav_route_start_instruction ||
-              "توجه نحو أقرب ممشى معبد مستعيناً بالخريطة أعلاه.",
+              (isRu ? "Следуйте по дорожке, ориентируясь по карте выше." : isDe ? "Folgen Sie dem befestigten Weg anhand der Karte oben." : "Follow the paved walkway using the map above."),
       },
     ];
 
@@ -1364,7 +1388,11 @@ const MapEngine = {
       const landmarkCue = landmark
         ? isAr
           ? ` جنب ${landmark}`
-          : ` (near ${landmark})`
+          : isRu
+            ? ` рядом с ${landmark}`
+            : isDe
+              ? ` nahe ${landmark}`
+              : ` (near ${landmark})`
         : "";
 
       steps.push({
@@ -1381,7 +1409,11 @@ const MapEngine = {
           (nextPointDist > 5
             ? isAr
               ? `، وكمل ${nextPointDist} متر.`
-              : ` Then walk ${nextPointDist}m.`
+              : isRu
+                ? `, затем пройдите ${nextPointDist}м.`
+                : isDe
+                  ? `, dann ${nextPointDist}m weitergehen.`
+                  : `, then walk ${nextPointDist}m.`
             : "."),
       });
     }
@@ -1395,13 +1427,13 @@ const MapEngine = {
       distMeters: 0,
       title: isAr
         ? `وصلت إلى ${target.name}`
-        : (t.nav_route_arrive_title || "وصلت إلى {destination}").replace(
+        : (t.nav_route_arrive_title || (isRu ? "Вы прибыли: {destination}" : isDe ? "Ziel erreicht: {destination}" : "Arrived at {destination}")).replace(
             "{destination}",
             target.name,
           ),
       instruction: isAr
         ? `حمد الله ع السلامة! نورت ${target.name}، اتفضل استمتع بوقتك.`
-        : (t.nav_route_arrive_instruction || "وصلت إلى {destination}.").replace(
+        : (t.nav_route_arrive_instruction || (isRu ? "Вы находитесь у объекта «{destination}»." : isDe ? "Sie sind jetzt bei {destination}." : "You are now at {destination}.")).replace(
             "{destination}",
             target.name,
           ),
@@ -1518,14 +1550,8 @@ const MapEngine = {
     let progressPx = 0;
     let lastTime = performance.now();
 
-    // ── Natural Egyptian Audio-Walk Pacing ──
-    // Egyptian Arabic turn instructions take ~3.8 to 4.5s per turn.
-    // Ensure total duration allows every instruction to be spoken clearly without rushing or audio cutoffs.
-    const navSteps =
-      (this.activeNavigation && this.activeNavigation.steps) || [];
-    const minTimeForVoice = Math.max(14, navSteps.length * 4.4);
-    const minTimeForDist = totalDistPx / 20; // gentle ~50 m/min resort stroll pace
-    const simDuration = Math.max(minTimeForVoice, minTimeForDist);
+    // Natural walking simulation pacing
+    const simDuration = Math.max(10, totalDistPx / 25);
     const baseSpeedPxPerSec = totalDistPx / simDuration;
     let currentHeading = 0;
 
@@ -1549,19 +1575,12 @@ const MapEngine = {
     }
     this.centerCameraOnWalker(startPctX, startPctY);
 
-    // Spoken departure confirmation on simulation start
-    const targetTitle =
-      this.lastRouteDestTitle || this.activeNavigation?.targetPoi?.nameAr || "";
-    if (typeof VoiceConcierge !== "undefined" && !VoiceConcierge.isMuted) {
-      VoiceConcierge.lastSpokenStepIdx = 0;
-      if (typeof ConciergeAudioGuide !== "undefined") {
-        ConciergeAudioGuide.stop();
-      }
-      setTimeout(() => {
-        VoiceConcierge.speak(
-          `يلا بينا! بدأنا التحرك لـ ${targetTitle}، امشي مع الممشى اللي قدامك.`,
-        );
-      }, 120);
+    // Cancel any ongoing speech synthesis on simulation start (mute voice guidance during simulation)
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    if (typeof ConciergeAudioGuide !== "undefined" && ConciergeAudioGuide.stop) {
+      ConciergeAudioGuide.stop();
     }
 
     const updateHud = (remainingMeters) => {
@@ -1585,26 +1604,8 @@ const MapEngine = {
       const dt = Math.min(0.1, (now - lastTime) / 1000);
       lastTime = now;
 
-      // Natural walking speed with gentle pause/slowdown if turn audio instruction is still speaking
-      let currentSpeedMult = this.simSpeed;
-      const isVoiceActive =
-        typeof ConciergeAudioGuide !== "undefined" &&
-        ConciergeAudioGuide.isSpeaking;
-      if (
-        isVoiceActive &&
-        this.activeNavigation &&
-        this.activeNavigation.steps
-      ) {
-        const nextStepIdx = this.activeNavigation.currentStepIdx + 1;
-        const nextStep = this.activeNavigation.steps[nextStepIdx];
-        if (nextStep && typeof nextStep.cumDistPx === "number") {
-          const distToTurn = nextStep.cumDistPx - progressPx;
-          if (distToTurn > 0 && distToTurn < 25) {
-            // Near upcoming turn: slow down so guest hears instruction before turning
-            currentSpeedMult *= 0.4;
-          }
-        }
-      }
+      // Natural walking speed along route
+      const currentSpeedMult = this.simSpeed;
 
       progressPx += baseSpeedPxPerSec * currentSpeedMult * dt;
       this.walkProgress = Math.min(1, progressPx / totalDistPx);
@@ -1631,14 +1632,29 @@ const MapEngine = {
         const targetPoi = this.activeNavigation
           ? this.activeNavigation.targetPoi
           : null;
-        if (
+        if (typeof App !== "undefined" && App.playBeep) {
+          App.playBeep(1200);
+        } else if (
           typeof VoiceConcierge !== "undefined" &&
-          VoiceConcierge.onDestinationArrived
+          VoiceConcierge.playArrivalChime
         ) {
-          VoiceConcierge.onDestinationArrived(
-            targetPoi,
-            targetPoi ? targetPoi.nameAr || targetPoi.name : "",
-          );
+          VoiceConcierge.playArrivalChime();
+        }
+
+        const targetName =
+          (targetPoi && (targetPoi.nameAr || targetPoi.name)) ||
+          this.lastRouteDestTitle ||
+          "";
+        const toastMsg =
+          lang === "ar"
+            ? `🎉 لقد وصلت إلى وجهتك بسلام: ${targetName}`
+            : lang === "ru"
+              ? `🎉 Вы успешно прибыли: ${targetName}`
+              : lang === "de"
+                ? `🎉 Sie haben Ihr Ziel erreicht: ${targetName}`
+                : `🎉 You have arrived at your destination: ${targetName}`;
+        if (typeof App !== "undefined" && App.showToast) {
+          App.showToast(toastMsg);
         }
 
         setTimeout(() => {
@@ -1786,8 +1802,11 @@ const MapEngine = {
     const walker = document.getElementById("simWalkerMarker");
     if (walker) walker.remove();
 
-    if (typeof ConciergeAudioGuide !== "undefined") {
+    if (typeof ConciergeAudioGuide !== "undefined" && ConciergeAudioGuide.stop) {
       ConciergeAudioGuide.stop();
+    }
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
 
     // Smoothly re-frame the camera to showcase the route or resort
@@ -2048,8 +2067,8 @@ const MapEngine = {
       }
     }
     if (!dropdown) return;
-    const q = (query || "").trim().toLowerCase();
-    if (!q) {
+    const rawVal = (query || "").trim();
+    if (!rawVal) {
       dropdown.classList.add("hidden");
       dropdown.innerHTML = "";
       return;
@@ -2057,7 +2076,66 @@ const MapEngine = {
 
     const lang =
       typeof App !== "undefined" && App.currentLang ? App.currentLang : "ar";
-    const matches = resortPois
+
+    // 1. Check for Room Number search (normalized Arabic numerals)
+    const normalizedRaw = rawVal.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+    const roomNumCandidate = parseInt(normalizedRaw, 10);
+    let matchedRoomHtml = "";
+
+    if (!isNaN(roomNumCandidate) && roomNumCandidate >= 1000 && roomNumCandidate <= 2800) {
+      const buildings = (typeof resortPois !== "undefined" ? resortPois : []).filter((p) => p.isBuilding);
+      let matchedBuilding = null;
+      let matchedFloor = "";
+      for (const b of buildings) {
+        if (!b.rooms) continue;
+        for (const r of b.rooms) {
+          const isMatch = r.exact
+            ? r.exact.includes(roomNumCandidate)
+            : roomNumCandidate >= r.min && roomNumCandidate <= r.max;
+          if (isMatch) {
+            matchedBuilding = b;
+            matchedFloor = r.floor;
+            break;
+          }
+        }
+        if (matchedBuilding) break;
+      }
+
+      if (matchedBuilding) {
+        const locBld =
+          typeof getLocalizedPoi === "function"
+            ? getLocalizedPoi(matchedBuilding, lang)
+            : { name: matchedBuilding.nameAr };
+        const locFlr =
+          typeof getLocalizedFloor === "function"
+            ? getLocalizedFloor(matchedFloor, lang)
+            : matchedFloor;
+        const roomLabel = lang === "ar" ? `غرفة ${roomNumCandidate}` : (lang === "ru" ? `Номер ${roomNumCandidate}` : (lang === "de" ? `Zimmer ${roomNumCandidate}` : `Room ${roomNumCandidate}`));
+        const subLabel = lang === "ar" ? "تحديد المسار والاتجاهات المباشرة فورياً 🧭" : "Direct walking path & room locator 🧭";
+        const btnLabel = lang === "ar" ? "📍 حدد" : "📍 Go";
+
+        matchedRoomHtml = `
+          <div onclick="MapEngine.selectRoomFromSearch('${roomNumCandidate}')" class="p-2.5 bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-transparent hover:bg-amber-500/25 cursor-pointer flex items-center justify-between border-b border-amber-500/30 transition rounded-xl mb-1 shadow-sm">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 font-black text-sm flex items-center justify-center shadow-md">🚪</span>
+              <div>
+                <div class="text-xs font-black text-amber-800 dark:text-amber-300">
+                  ${roomLabel} <span class="text-slate-800 dark:text-slate-100 font-bold">(${locBld.name} - ${locFlr})</span>
+                </div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                  ${subLabel}
+                </div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg btn-royal-gold text-slate-950 font-black text-xs shadow-sm">${btnLabel}</span>
+          </div>
+        `;
+      }
+    }
+
+    // 2. Filter resort POIs / facilities
+    const q = rawVal.toLowerCase();
+    const matches = (typeof resortPois !== "undefined" ? resortPois : [])
       .filter((p) => {
         const numMatch =
           String(p.num).toLowerCase().includes(q) ||
@@ -2067,19 +2145,20 @@ const MapEngine = {
         const tagMatch = p.tagAr && p.tagAr.toLowerCase().includes(q);
         return numMatch || nameArMatch || nameEnMatch || tagMatch;
       })
-      .slice(0, 7);
+      .slice(0, matchedRoomHtml ? 5 : 7);
 
-    if (matches.length === 0) {
+    if (!matchedRoomHtml && matches.length === 0) {
       dropdown.innerHTML = `
         <div class="p-3 text-xs text-slate-400 text-center font-bold">
-          لا توجد نتائج مطابقة لمصطلح البحث
+          ${lang === 'ar' ? 'لا توجد نتائج مطابقة لمصطلح البحث' : 'No matching resort facilities or rooms found'}
         </div>
       `;
       dropdown.classList.remove("hidden");
       return;
     }
 
-    dropdown.innerHTML = matches
+    let resultsHtml = matchedRoomHtml;
+    resultsHtml += matches
       .map((poi) => {
         const loc =
           typeof getLocalizedPoi === "function"
@@ -2101,6 +2180,7 @@ const MapEngine = {
       })
       .join("");
 
+    dropdown.innerHTML = resultsHtml;
     dropdown.classList.remove("hidden");
   },
 
@@ -2112,6 +2192,49 @@ const MapEngine = {
     if (input) input.value = "";
     if (clearBtn) clearBtn.classList.add("hidden");
     this.selectPoi(id);
+  },
+
+  selectRoomFromSearch(roomNum) {
+    const dropdown = document.getElementById("mapPoiSearchResults");
+    const clearBtn = document.getElementById("mapPoiSearchClear");
+    if (dropdown) dropdown.classList.add("hidden");
+    if (clearBtn) clearBtn.classList.remove("hidden");
+
+    // Sync input values
+    const input = document.getElementById("mapPoiSearchInput");
+    if (input) input.value = roomNum;
+    const wfInput = document.getElementById("roomSearchInput");
+    if (wfInput) wfInput.value = roomNum;
+
+    // Trigger full Wayfinder lookup
+    if (typeof Wayfinder !== "undefined" && typeof Wayfinder.lookupRoom === "function") {
+      Wayfinder.lookupRoom();
+    }
+  },
+
+  executeOmniSearch(query) {
+    const rawVal = (query || "").trim();
+    if (!rawVal) return;
+    const normalizedRaw = rawVal.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+    const roomNum = parseInt(normalizedRaw, 10);
+    if (!isNaN(roomNum) && roomNum >= 1000 && roomNum <= 2800) {
+      this.selectRoomFromSearch(roomNum);
+      return;
+    }
+    const q = rawVal.toLowerCase();
+    const match = (typeof resortPois !== "undefined" ? resortPois : []).find((p) => {
+      return (
+        String(p.num).toLowerCase() === q ||
+        String(p.id).toLowerCase() === q ||
+        (p.nameAr && p.nameAr.toLowerCase().includes(q)) ||
+        (p.nameEn && p.nameEn.toLowerCase().includes(q))
+      );
+    });
+    if (match) {
+      this.selectFromSearch(match.id);
+    } else {
+      this.searchPois(query);
+    }
   },
 
   focusPreset(id) {
@@ -2181,7 +2304,7 @@ const MapEngine = {
         (typeof window !== "undefined" && window.resortPois) ||
         (typeof resortPois !== "undefined" && resortPois) ||
         [];
-      const poi = poisList.find((p) => p.id === id);
+      const poi = poisList.find((p) => String(p.id) === String(id));
       if (poi) {
         const locFn =
           (typeof window !== "undefined" && window.getLocalizedPoi) ||
@@ -2200,7 +2323,11 @@ const MapEngine = {
           else name = poi.nameAr;
         }
         if (name) {
-          labelSpan.textContent = `${name} (${poi.num})`;
+          if (poi.num && /^[A-Za-z0-9]+$/.test(poi.num)) {
+            labelSpan.textContent = `${name} (${poi.num})`;
+          } else {
+            labelSpan.textContent = name;
+          }
         }
       }
     });
@@ -2471,9 +2598,278 @@ const MapEngine = {
     this.updatePinBillboards();
   },
 
+  // ========================================================
+  // Luxury Guided 3D Cinematic Resort Tour (الجولة السينمائية الفاخرة)
+  // ========================================================
+  isCinematicTourActive: false,
+  cinematicTourIndex: 0,
+  cinematicTourTimer: null,
+  cinematicTourInterval: null,
+  cinematicTourPaused: false,
+  cinematicStepDuration: 6000,
+
+  cinematicTourStops: [
+    { id: "M", pitch: 50, bearing: -12, scale: 1.62 },
+    { id: "12", pitch: 52, bearing: 0, scale: 1.65 },
+    { id: "7", pitch: 52, bearing: 15, scale: 1.7 },
+    { id: "11", pitch: 48, bearing: -15, scale: 1.62 },
+    { id: "3", pitch: 50, bearing: 20, scale: 1.65 },
+    { id: "snack_aqua", pitch: 48, bearing: 10, scale: 1.7 },
+    { id: "9", pitch: 50, bearing: -18, scale: 1.65 },
+    { id: "8", pitch: 52, bearing: 5, scale: 1.68 },
+    { id: "5", pitch: 48, bearing: -12, scale: 1.65 },
+    { id: "1", pitch: 45, bearing: 0, scale: 1.55 }
+  ],
+
+  toggleCinematicTour() {
+    if (this.isCinematicTourActive) {
+      this.stopCinematicTour();
+    } else {
+      this.startCinematicTour();
+    }
+  },
+
+  startCinematicTour(startIndex = 0) {
+    this.stopOrbitTour();
+    this.closePopover();
+    this.scrollToMap();
+
+    this.isCinematicTourActive = true;
+    this.cinematicTourIndex = startIndex;
+    this.cinematicTourPaused = false;
+
+    if (typeof App !== "undefined" && App.playBeep) App.playBeep(850, 120);
+
+    // Ensure 3D mode is active
+    this.is3D = true;
+    this.set3DButtonsActive(true);
+
+    // Create or show the Floating Cinematic HUD
+    this.renderCinematicTourHud();
+
+    // Start playing the step
+    this.playCinematicTourStep(this.cinematicTourIndex);
+  },
+
+  renderCinematicTourHud() {
+    let hud = document.getElementById("cinematicTourHud");
+    if (!hud) {
+      const viewport = document.getElementById("mapViewport");
+      if (!viewport) return;
+      hud = document.createElement("div");
+      hud.id = "cinematicTourHud";
+      hud.className = "cinematic-tour-hud absolute bottom-3 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[480px] z-40 bg-slate-950/90 backdrop-blur-2xl border border-amber-400/40 rounded-2xl shadow-2xl p-3 sm:p-3.5 text-white transition-all duration-300";
+      viewport.appendChild(hud);
+    }
+    hud.style.display = "block";
+    hud.style.opacity = "1";
+  },
+
+  playCinematicTourStep(index) {
+    if (!this.isCinematicTourActive) return;
+
+    if (index >= this.cinematicTourStops.length) {
+      this.finishCinematicTour();
+      return;
+    }
+
+    this.cinematicTourIndex = index;
+    const stop = this.cinematicTourStops[index];
+    const poisList = (typeof resortPois !== "undefined" ? resortPois : []) || [];
+    const poi = poisList.find((p) => String(p.id).trim().toUpperCase() === String(stop.id).trim().toUpperCase());
+
+    if (!poi || !poi.coords) {
+      this.nextCinematicTourStep();
+      return;
+    }
+
+    // Camera Flight Transition (1.6s smooth swoop)
+    this.flyToCinematic(
+      poi.coords.x,
+      poi.coords.y,
+      stop.scale || 1.65,
+      stop.pitch || 50,
+      stop.bearing || 0,
+      1600
+    );
+
+    // Spotlight active landmark & sonar ripples
+    this.showTourSpotlight(poi, index, this.cinematicTourStops.length);
+
+    // Update HUD content with localized name and luxury description
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const loc = typeof getLocalizedPoi === "function" ? getLocalizedPoi(poi, lang) : { name: poi.nameAr, desc: poi.descriptionAr };
+    const icon = this.getPoiIcon(poi);
+
+    const hud = document.getElementById("cinematicTourHud");
+    if (hud) {
+      const total = this.cinematicTourStops.length;
+      const stepText = lang === "ar" ? `المحطة ${index + 1} من ${total}` : `Stop ${index + 1} of ${total}`;
+      const pauseTitle = this.cinematicTourPaused ? (lang === "ar" ? "استئناف" : "Resume") : (lang === "ar" ? "إيقاف مؤقت" : "Pause");
+      const pauseIcon = this.cinematicTourPaused ? "▶️" : "⏸️";
+
+      hud.innerHTML = `
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-sm shrink-0">
+              🚁 ${stepText}
+            </span>
+            <span class="text-[11px] font-bold text-amber-300 truncate">${poi.category || "Moreno Resort"}</span>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="MapEngine.prevCinematicTourStep()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/25 text-white text-xs flex items-center justify-center tap-effect transition" title="المحطة السابقة">⏮️</button>
+            <button id="tourPauseBtn" onclick="MapEngine.togglePauseCinematicTour()" class="w-7 h-7 rounded-lg bg-amber-500/25 hover:bg-amber-500/45 text-amber-300 text-xs flex items-center justify-center tap-effect transition" title="${pauseTitle}">${pauseIcon}</button>
+            <button onclick="MapEngine.nextCinematicTourStep()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/25 text-white text-xs flex items-center justify-center tap-effect transition" title="المحطة التالية">⏭️</button>
+            <button onclick="MapEngine.stopCinematicTour()" class="w-7 h-7 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 text-xs flex items-center justify-center tap-effect transition" title="إنهاء الجولة">✕</button>
+          </div>
+        </div>
+        <div class="flex items-start gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-2xl flex items-center justify-center shrink-0 border border-amber-400/30 shadow-inner">${icon}</div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-black text-white truncate flex items-center gap-1.5">
+              <span>${loc.name || poi.nameAr}</span>
+              ${poi.num && /^[A-Za-z0-9]+$/.test(poi.num) ? `<span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/30 text-amber-300">#${poi.num}</span>` : ""}
+            </h4>
+            <p class="text-xs text-slate-300 line-clamp-2 mt-0.5 leading-relaxed">${loc.desc || poi.descriptionAr || ""}</p>
+          </div>
+        </div>
+        <div class="mt-2.5 h-1 w-full bg-white/10 rounded-full overflow-hidden">
+          <div id="tourProgressBar" class="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-300 w-0 transition-all duration-100 ease-linear"></div>
+        </div>
+      `;
+    }
+
+    // Progress bar animation & step timer
+    this.startStepTimer();
+  },
+
+  startStepTimer() {
+    if (this.cinematicTourTimer) clearTimeout(this.cinematicTourTimer);
+    if (this.cinematicTourInterval) clearInterval(this.cinematicTourInterval);
+
+    const progressBar = document.getElementById("tourProgressBar");
+    if (progressBar) progressBar.style.width = "0%";
+
+    const intervalMs = 100;
+    const totalSteps = this.cinematicStepDuration / intervalMs;
+    let currentTick = 0;
+
+    this.cinematicTourInterval = setInterval(() => {
+      if (!this.isCinematicTourActive) {
+        clearInterval(this.cinematicTourInterval);
+        return;
+      }
+      if (this.cinematicTourPaused) return;
+
+      currentTick++;
+      const pct = Math.min(100, (currentTick / totalSteps) * 100);
+      const bar = document.getElementById("tourProgressBar");
+      if (bar) bar.style.width = `${pct}%`;
+
+      if (currentTick >= totalSteps) {
+        clearInterval(this.cinematicTourInterval);
+        this.nextCinematicTourStep();
+      }
+    }, intervalMs);
+  },
+
+  nextCinematicTourStep() {
+    if (!this.isCinematicTourActive) return;
+    if (this.cinematicTourInterval) clearInterval(this.cinematicTourInterval);
+    if (this.cinematicTourIndex + 1 < this.cinematicTourStops.length) {
+      this.playCinematicTourStep(this.cinematicTourIndex + 1);
+    } else {
+      this.finishCinematicTour();
+    }
+  },
+
+  prevCinematicTourStep() {
+    if (!this.isCinematicTourActive) return;
+    if (this.cinematicTourInterval) clearInterval(this.cinematicTourInterval);
+    const prev = Math.max(0, this.cinematicTourIndex - 1);
+    this.playCinematicTourStep(prev);
+  },
+
+  togglePauseCinematicTour() {
+    this.cinematicTourPaused = !this.cinematicTourPaused;
+    const btn = document.getElementById("tourPauseBtn");
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    if (btn) {
+      btn.textContent = this.cinematicTourPaused ? "▶️" : "⏸️";
+      btn.title = this.cinematicTourPaused ? (lang === "ar" ? "استئناف" : "Resume") : (lang === "ar" ? "إيقاف مؤقت" : "Pause");
+    }
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(this.cinematicTourPaused ? (lang === "ar" ? "تم إيقاف الجولة مؤقتاً ⏸️" : "Tour paused ⏸️") : (lang === "ar" ? "تم استئناف الجولة ▶️" : "Tour resumed ▶️"));
+    }
+  },
+
+  finishCinematicTour() {
+    const lang = (typeof App !== "undefined" && App.currentLang) || "ar";
+    const msg = lang === "ar"
+      ? "✨ اكتملت الجولة السينمائية لمنتجع مورينو هورايزون! نتمنى لك إقامة ساحرة 🏝️"
+      : "✨ Moreno Horizon cinematic tour completed! Wishing you an unforgettable stay 🏝️";
+
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(msg, "🎉", 5000);
+    }
+    if (typeof App !== "undefined" && App.playChime) {
+      App.playChime();
+    }
+
+    // Smoothly fly back to full resort overview
+    this.flyToCinematic(50, 50, 1.15, 38, 0, 2200);
+
+    const hud = document.getElementById("cinematicTourHud");
+    if (hud) {
+      hud.innerHTML = `
+        <div class="flex items-center justify-between gap-3 text-center p-1">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🎉</span>
+            <div class="text-right">
+              <h4 class="text-sm font-black text-amber-300">${lang === "ar" ? "اكتملت الجولة بنجاح" : "Tour Completed"}</h4>
+              <p class="text-xs text-slate-300">${lang === "ar" ? "نتمنى لك أطيب الأوقات في مورينو هورايزون" : "Enjoy your stay at Moreno Horizon Resort"}</p>
+            </div>
+          </div>
+          <button onclick="MapEngine.stopCinematicTour()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs tap-effect transition shadow">
+            ${lang === "ar" ? "إغلاق" : "Close"}
+          </button>
+        </div>
+      `;
+      setTimeout(() => {
+        if (this.isCinematicTourActive) {
+          this.stopCinematicTour();
+        }
+      }, 7000);
+    }
+  },
+
+  stopCinematicTour() {
+    this.isCinematicTourActive = false;
+    this.cinematicTourPaused = false;
+    if (this.cinematicTourInterval) {
+      clearInterval(this.cinematicTourInterval);
+      this.cinematicTourInterval = null;
+    }
+    if (this.cinematicTourTimer) {
+      clearTimeout(this.cinematicTourTimer);
+      this.cinematicTourTimer = null;
+    }
+
+    this.clearTourSpotlight();
+
+    const hud = document.getElementById("cinematicTourHud");
+    if (hud) {
+      hud.style.opacity = "0";
+      setTimeout(() => {
+        if (hud && !this.isCinematicTourActive) hud.remove();
+      }, 300);
+    }
+  },
+
   selectPoi(id, shouldScroll = false) {
     if (typeof App !== "undefined" && App.playBeep) App.playBeep(750);
     this.stopOrbitTour();
+    this.stopCinematicTour();
     const strId = String(id != null ? id : "").trim();
     const poi = resortPois.find(
       (p) => String(p.id).trim().toUpperCase() === strId.toUpperCase(),
@@ -2583,10 +2979,6 @@ const MapEngine = {
       <div class="dest-pin-body">
         <div class="dest-pin-badge">
           <span class="dest-pin-icon">📍</span>
-          <div class="dest-pin-text">
-            <span class="dest-pin-name">${loc.name}</span>
-            <span class="dest-pin-cat">${loc.category || poi.categoryNameAr || ""}</span>
-          </div>
         </div>
         <div class="dest-pin-pointer"></div>
       </div>
@@ -2782,7 +3174,7 @@ const MapEngine = {
     if (!beacon) {
       beacon = document.createElement("div");
       beacon.id = "activeRoomBeacon";
-      beacon.className = "active-room-beacon";
+      beacon.className = "destination-location-pin";
       const overlay = document.getElementById("pinsOverlay");
       if (overlay) overlay.appendChild(beacon);
     }
@@ -2790,15 +3182,14 @@ const MapEngine = {
     beacon.style.left = `${coords.x}%`;
     beacon.style.top = `${coords.y}%`;
     beacon.innerHTML = `
-      <div class="room-beacon-pulse"></div>
-      <div class="room-beacon-badge">
-        <span class="room-beacon-icon">🔑</span>
-        <div class="room-beacon-text">
-          <span class="room-num">غرفة ${roomNum}</span>
-          <span class="room-floor">${buildingName ? buildingName + " • " : ""}${floorName || ""}</span>
+      <div class="dest-pin-ground-pulse"></div>
+      <div class="dest-pin-ground-target"></div>
+      <div class="dest-pin-body">
+        <div class="dest-pin-badge">
+          <span class="dest-pin-icon">📍</span>
         </div>
+        <div class="dest-pin-pointer"></div>
       </div>
-      <div class="room-beacon-pin-pointer"></div>
     `;
   },
 
@@ -3079,11 +3470,87 @@ const MapEngine = {
       ? this.walkProgress * 100
       : ((nav.currentStepIdx + 1) / total) * 100;
 
-    const stepOfText = (t.nav_step_of || "الخطوة {current} من {total}")
+    const minUnit =
+      lang === "ar"
+        ? "د"
+        : lang === "ru"
+          ? "мин"
+          : lang === "de"
+            ? "Min"
+            : "min";
+    const mUnit = lang === "ar" ? "م" : lang === "ru" ? "м" : "m";
+    const metricsText = `⏱️ ${nav.minutes} ${minUnit} (${nav.meters}${mUnit})`;
+
+    const stepOfText = (t.nav_step_of || (lang === "ar" ? "الخطوة {current} من {total}" : lang === "ru" ? "Шаг {current} из {total}" : lang === "de" ? "Schritt {current} von {total}" : "Step {current} of {total}"))
       .replace("{current}", nav.currentStepIdx + 1)
       .replace("{total}", total);
 
     const isLastStep = nav.currentStepIdx === total - 1;
+
+    const accessibleText = nav.isAccessible
+      ? lang === "ar"
+        ? "♿ مسار ميسر"
+        : lang === "ru"
+          ? "♿ Без барьеров"
+          : lang === "de"
+            ? "♿ Barrierefrei"
+            : "♿ Step-Free"
+      : lang === "ar"
+        ? "♿ ميسر"
+        : lang === "ru"
+          ? "♿ Доступ"
+          : lang === "de"
+            ? "♿ Barrierefrei"
+            : "♿ Accessible";
+
+    const finishBtnText =
+      t.nav_step_finish ||
+      (lang === "ar"
+        ? "إنهاء الملاحة ✓"
+        : lang === "ru"
+          ? "Завершить маршрут ✓"
+          : lang === "de"
+            ? "Wegweiser beenden ✓"
+            : "Finish Walk ✓");
+
+    const nextBtnText =
+      t.nav_step_next ||
+      (lang === "ar"
+        ? "التالية ➔"
+        : lang === "ru"
+          ? "Далее ➔"
+          : lang === "de"
+            ? "Weiter ➔"
+            : "Next ➔");
+
+    const prevBtnTitle =
+      t.nav_step_prev ||
+      (lang === "ar"
+        ? "السابقة"
+        : lang === "ru"
+          ? "Назад"
+          : lang === "de"
+            ? "Zurück"
+            : "Previous");
+
+    const endBtnTitle =
+      t.nav_end ||
+      (lang === "ar"
+        ? "إنهاء الملاحة"
+        : lang === "ru"
+          ? "Завершить"
+          : lang === "de"
+            ? "Beenden"
+            : "End Navigation");
+
+    const speedBtnTitle =
+      lang === "ar"
+        ? "سرعة المحاكاة"
+        : lang === "ru"
+          ? "Скорость симуляции"
+          : lang === "de"
+            ? "Simulationsgeschwindigkeit"
+            : "Simulation Speed";
 
     const simBtnText = isSimActive
       ? isPaused
@@ -3150,7 +3617,7 @@ const MapEngine = {
                 <h4 class="text-xs font-black text-white truncate">${step.title}</h4>
               </div>
               <div class="text-[10px] font-mono text-cyan-300 font-bold truncate">
-                ⏱️ ${nav.minutes} د (${nav.meters}م)
+                ${metricsText}
               </div>
             </div>
           </div>
@@ -3163,7 +3630,7 @@ const MapEngine = {
             <button onclick="MapEngine.toggleHudCollapse()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 font-bold flex items-center justify-center text-xs transition tap-effect" title="${lang === "ar" ? "توسيع التفاصيل" : "Expand"}">
               ▼
             </button>
-            <button onclick="MapEngine.endTurnByTurn()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-white font-bold flex items-center justify-center text-xs transition tap-effect" title="${t.nav_end || "إنهاء الملاحة"}">
+            <button onclick="MapEngine.endTurnByTurn()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-white font-bold flex items-center justify-center text-xs transition tap-effect" title="${endBtnTitle}">
               ✕
             </button>
           </div>
@@ -3182,7 +3649,7 @@ const MapEngine = {
               ${stepOfText}
             </span>
             <span class="text-[10px] font-mono text-cyan-300 font-bold" id="turnHudMetrics">
-              ⏱️ ${nav.minutes} د (${nav.meters}م)
+              ${metricsText}
             </span>
             ${
               isLiveNav
@@ -3195,14 +3662,14 @@ const MapEngine = {
                 : ""
             }
             <button onclick="MapEngine.toggleStepFree()" class="text-[9px] px-2 py-0.5 rounded-full ${nav.isAccessible ? "bg-emerald-500 text-white" : "bg-white/10 text-slate-300"} font-bold transition">
-              ${nav.isAccessible ? "♿ مسار ميسر" : "♿ ميسر"}
+              ${accessibleText}
             </button>
           </div>
           <div class="flex items-center gap-1">
             <button onclick="MapEngine.toggleHudCollapse()" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-amber-300 font-bold flex items-center justify-center text-xs transition tap-effect" title="${lang === "ar" ? "تصغير الشريط" : "Collapse"}">
               ▲
             </button>
-            <button onclick="MapEngine.endTurnByTurn()" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white font-bold flex items-center justify-center text-xs transition tap-effect" title="${t.nav_end || "إنهاء الملاحة"}">
+            <button onclick="MapEngine.endTurnByTurn()" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white font-bold flex items-center justify-center text-xs transition tap-effect" title="${endBtnTitle}">
               ✕
             </button>
           </div>
@@ -3221,14 +3688,14 @@ const MapEngine = {
             <span>${simBtnIcon}</span>
             <span class="truncate">${simBtnText}</span>
           </button>
-          <button onclick="MapEngine.toggleSimSpeed()" class="tap-effect py-1.5 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 font-bold text-xs" title="سرعة المحاكاة">
+          <button onclick="MapEngine.toggleSimSpeed()" class="tap-effect py-1.5 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 font-bold text-xs" title="${speedBtnTitle}">
             ${this.simSpeed || this.walkSpeed || 1}x ⚡
           </button>
-          <button onclick="MapEngine.prevTurnStep()" ${nav.currentStepIdx === 0 ? "disabled" : ""} class="tap-effect py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-25 text-white font-bold text-xs" title="السابقة">
+          <button onclick="MapEngine.prevTurnStep()" ${nav.currentStepIdx === 0 ? "disabled" : ""} class="tap-effect py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-25 text-white font-bold text-xs" title="${prevBtnTitle}">
             ⬅️
           </button>
           <button onclick="${isLastStep ? "MapEngine.endTurnByTurn()" : "MapEngine.nextTurnStep()"}" class="tap-effect py-1.5 px-3 rounded-xl ${isLastStep ? "bg-emerald-500 text-white font-black" : "bg-white/15 hover:bg-white/25 text-white font-bold"} text-xs">
-            ${isLastStep ? t.nav_step_finish || "إنهاء ✓" : t.nav_step_next || "التالية ➔"}
+            ${isLastStep ? finishBtnText : nextBtnText}
           </button>
         </div>
       `;
@@ -3240,8 +3707,12 @@ const MapEngine = {
       this.updateWalkerBeacon(step.coords);
     }
 
-    // AI Voice Concierge turn-by-turn spoken guidance
-    if (typeof VoiceConcierge !== "undefined" && VoiceConcierge.onTurnStep) {
+    // AI Voice Concierge turn-by-turn spoken guidance (suppressed during walk simulation)
+    if (
+      !isSimActive &&
+      typeof VoiceConcierge !== "undefined" &&
+      VoiceConcierge.onTurnStep
+    ) {
       VoiceConcierge.onTurnStep(step, nav.currentStepIdx, total);
     }
   },
@@ -3265,6 +3736,59 @@ const MapEngine = {
 
   toggleWalkSpeed() {
     this.toggleSimSpeed();
+  },
+
+  updateLanguage(lang) {
+    const safeLang =
+      lang || (typeof App !== "undefined" && App.currentLang) || "ar";
+
+    // 1. If Turn-by-Turn Navigation is active, re-generate all steps in the new language!
+    if (
+      this.activeNavigation &&
+      this.activeNavigation.originPoi &&
+      this.activeNavigation.targetPoi
+    ) {
+      const savedStepIdx = this.activeNavigation.currentStepIdx || 0;
+      this.activeNavigation.steps = this.buildWalkwaySteps(
+        this.activeNavigation.originPoi,
+        this.activeNavigation.targetPoi,
+        safeLang,
+        this.activeNavigation.isAccessible,
+      );
+      this.activeNavigation.currentStepIdx = Math.min(
+        savedStepIdx,
+        Math.max(0, this.activeNavigation.steps.length - 1),
+      );
+      this.renderTurnStep(false);
+    }
+
+    // 2. Re-render landmark presets
+    if (typeof this.updateLandmarkPresetLabels === "function") {
+      this.updateLandmarkPresetLabels(safeLang);
+    }
+
+    // 3. Update active popover if open
+    if (this.activePoi && typeof this.showPopover === "function") {
+      this.showPopover(this.activePoi);
+    }
+
+    // 4. Update simulation walker label if present
+    const walkerLabel = document.querySelector(
+      "#simWalkerAvatarWrapper .sim-walker-label",
+    );
+    if (walkerLabel) {
+      walkerLabel.textContent =
+        safeLang === "ar"
+          ? "أنت الآن"
+          : safeLang === "ru"
+            ? "Вы здесь"
+            : safeLang === "de"
+              ? "Ihr Standort"
+              : "You are here";
+    }
+
+    // 5. Re-render pins so titles/tooltips update
+    this.renderPins();
   },
 
   initWalkerMarker(coords) {

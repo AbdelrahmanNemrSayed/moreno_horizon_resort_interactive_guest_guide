@@ -85,16 +85,16 @@ const bundleCode = `/**
     if (!poi) return { name: '', desc: '' };
     lang = lang || 'ar';
     var name = poi.nameAr;
-    var desc = poi.descAr;
+    var desc = poi.descAr || poi.descriptionAr || '';
     if (lang === 'en') {
       name = poi.nameEn || poi.nameAr;
-      desc = poi.descEn || poi.descAr;
+      desc = poi.descEn || poi.descriptionEn || desc;
     } else if (lang === 'ru') {
       name = poi.nameRu || poi.nameAr;
-      desc = poi.descRu || poi.descAr;
+      desc = poi.descRu || poi.descriptionRu || desc;
     } else if (lang === 'de') {
       name = poi.nameDe || poi.nameAr;
-      desc = poi.descDe || poi.descAr;
+      desc = poi.descDe || poi.descriptionDe || desc;
     }
     return { name: name, desc: desc };
   }

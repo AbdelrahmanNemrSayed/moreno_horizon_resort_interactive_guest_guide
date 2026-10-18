@@ -72,7 +72,7 @@
     />
 
     <!-- Local Standalone Tailwind CSS (100% Offline, Zero-CDN Dependency) -->
-    <link rel="stylesheet" href="css/tailwind-compiled.css?v=58.0" />
+    <link rel="stylesheet" href="css/tailwind-compiled.css?v=75.0" />
 
     <!-- Pre-render Theme & Language Guard + Immediate Resilient Dispatchers -->
     <script>
@@ -139,7 +139,7 @@
     </script>
 
     <!-- Resource Hints & Critical Asset Preloads -->
-    <link rel="preload" href="css/style.css?v=58.0" as="style" />
+    <link rel="preload" href="css/style.css?v=75.0" as="style" />
     <link
       rel="preload"
       href="assets/images/hero_resort.jpg"
@@ -148,7 +148,7 @@
     />
 
     <!-- Modular Stylesheet -->
-    <link rel="stylesheet" href="css/style.css?v=58.0" />
+    <link rel="stylesheet" href="css/style.css?v=75.0" />
   </head>
 
   <body
@@ -159,15 +159,15 @@
       class="sticky top-0 z-40 glass-nav border-b border-amber-500/30 shadow-lg shadow-black/20 transition-all duration-300"
     >
       <div
-        class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2"
+        class="max-w-6xl mx-auto px-2.5 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2"
       >
         <!-- Brand Logo & Name -->
         <a
           href="#home"
-          class="flex items-center gap-2 sm:gap-2.5 group shrink-0"
+          class="flex items-center gap-1.5 sm:gap-2.5 group shrink-0"
         >
           <div
-            class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white p-1 shadow-md shadow-amber-500/20 border border-amber-400/60 shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden"
+            class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white p-1 shadow-md shadow-amber-500/20 border border-amber-400/60 shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden"
           >
             <img
               src="assets/images/moreno_logo.jpg"
@@ -193,15 +193,15 @@
         </a>
 
         <!-- Action Buttons Container -->
-        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
           <!-- Spotlight Search Trigger -->
           <button
             onclick="App.openSpotlightSearch()"
             title="بحث سريع في مرافق وخدمات المنتجع"
-              aria-label="بحث سريع في مرافق وخدمات المنتجع"
-              data-i18n-title="nav_quick_search_title"
-              data-i18n-aria="nav_quick_search_title"
-            class="tap-effect flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl border border-amber-400/30 bg-white/90 dark:bg-slate-800/90 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-amber-400 hover:shadow-gold-glow"
+            aria-label="بحث سريع في مرافق وخدمات المنتجع"
+            data-i18n-title="nav_quick_search_title"
+            data-i18n-aria="nav_quick_search_title"
+            class="tap-effect flex items-center gap-1 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-amber-400/30 bg-white/90 dark:bg-slate-800/90 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-amber-400 hover:shadow-gold-glow"
           >
             <span>🔍</span>
             <span class="hidden lg:inline" data-i18n="nav_search">بحث</span>
@@ -217,7 +217,7 @@
             title="تسجيل الدخول لشبكة الإنترنت / Hotspot Login"
             aria-label="تسجيل الدخول لشبكة الإنترنت"
             data-i18n-title="nav_hotspot_title"
-            class="tap-effect flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border border-teal-500/50 bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-bold hover:bg-teal-500/25 hover:shadow-sea-glow"
+            class="tap-effect flex items-center gap-1 px-1.5 sm:px-2.5 py-1.5 rounded-xl border border-teal-500/50 bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-bold hover:bg-teal-500/25 hover:shadow-sea-glow"
           >
             <span>📶</span>
             <span class="hidden sm:inline" data-i18n="nav_hotspot"
@@ -231,7 +231,7 @@
             title="طوارئ واستقبال المنتجع / Emergency & Reception"
             aria-label="طوارئ واستقبال المنتجع"
             data-i18n-title="nav_emergency_title"
-            class="tap-effect flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border border-rose-500/50 bg-rose-500/15 text-rose-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-500/25"
+            class="tap-effect flex items-center gap-1 px-1.5 sm:px-2.5 py-1.5 rounded-xl border border-rose-500/50 bg-rose-500/15 text-rose-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-500/25"
           >
             <span>🆘</span>
             <span class="hidden sm:inline" data-i18n="nav_emergency"
@@ -239,13 +239,13 @@
             >
           </button>
 
-          <!-- Cinematic Promo Video Trigger (Mobile + Desktop) -->
+          <!-- Cinematic Promo Video Trigger (Desktop/Tablet) -->
           <button
             onclick="App.openCinematicPromoVideo()"
             title="فيديو ترويجي وسينمائي للمنتجع"
             aria-label="فيديو ترويجي وسينمائي للمنتجع"
             data-i18n-title="nav_promo_video_title"
-            class="tap-effect flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/50 bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-bold hover:bg-amber-500/25 hover:shadow-gold-glow"
+            class="tap-effect hidden md:flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/50 bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-bold hover:bg-amber-500/25 hover:shadow-gold-glow"
           >
             <span>🎬</span>
             <span class="hidden sm:inline" data-i18n="nav_promo_video"
@@ -286,14 +286,14 @@
               title="اختيار لغة العرض"
               aria-label="اختيار لغة العرض"
               data-i18n-title="nav_lang_title"
-              class="tap-effect appearance-none pl-5 pr-2 py-1.5 rounded-xl border border-amber-400/40 bg-white/90 dark:bg-slate-800/90 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-gold max-w-[80px] sm:max-w-none"
+              class="tap-effect appearance-none pl-4 pr-1 sm:pl-5 sm:pr-2 py-1.5 rounded-xl border border-amber-400/40 bg-white/90 dark:bg-slate-800/90 text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-gold max-w-[66px] sm:max-w-none"
             >
               <option value="ar">العربية (AR)</option>
               <option value="en">English (EN)</option>
               <option value="ru">Русский (RU)</option>
               <option value="de">Deutsch (DE)</option>
             </select>
-            <span class="absolute left-1.5 top-2 pointer-events-none text-xs"
+            <span class="absolute left-1 top-2 pointer-events-none text-[11px] sm:text-xs"
               >🌐</span
             >
           </div>
@@ -306,9 +306,6 @@
             aria-label="كتم / تشغيل الصوت"
             data-i18n-title="nav_audio_btn_title"
             data-i18n-aria="nav_audio_btn_title"
-            data-i18n-title="nav_audio_btn_title"
-            data-i18n-aria="nav_audio_btn_title"
-            data-i18n-title="nav_audio_title"
             class="tap-effect hidden sm:flex p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300"
           >
             <span id="audioIcon">🔊</span>
@@ -321,7 +318,7 @@
             title="تبديل المظهر الداكن / الفاتح"
             aria-label="تبديل المظهر الداكن / الفاتح"
             data-i18n-title="nav_dark_mode_title"
-            class="tap-effect p-2 rounded-xl border border-amber-400/40 bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:border-amber-400"
+            class="tap-effect p-1.5 sm:p-2 rounded-xl border border-amber-400/40 bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:border-amber-400"
           >
             <svg
               id="sunIcon"
@@ -357,11 +354,11 @@
     </header>
 
     <!-- Main Content Container -->
-    <main class="max-w-6xl mx-auto px-3 sm:px-4 pt-3 pb-28" id="home">
+    <main class="max-w-6xl mx-auto px-2.5 sm:px-4 pt-2 sm:pt-3 pb-24 sm:pb-28" id="home">
       <!-- Live Guest Announcement Banner (Admin Broadcast) -->
       <section
         id="liveGuestAnnouncement"
-        class="hidden mb-3 p-3.5 rounded-2xl border shadow-lg transition duration-300 relative overflow-hidden"
+        class="hidden mb-2.5 sm:mb-3 p-3 sm:p-3.5 rounded-2xl border shadow-lg transition duration-300 relative overflow-hidden"
       >
         <div class="flex items-start justify-between gap-3 relative z-10">
           <div class="flex items-start gap-3 min-w-0">
@@ -388,7 +385,7 @@
 
       <!-- Live Status Banner & Hurghada Clock -->
       <section
-        class="mb-3 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white to-sky-500/10 dark:from-brand-deep/80 dark:via-brand-ocean/50 dark:to-amber-500/20 border border-amber-400/35 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md"
+        class="mb-2.5 sm:mb-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white to-sky-500/10 dark:from-brand-deep/80 dark:via-brand-ocean/50 dark:to-amber-500/20 border border-amber-400/35 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs shadow-md"
       >
         <div class="flex items-center gap-2">
           <span
@@ -396,11 +393,12 @@
           ></span>
           <span
             id="resortGreeting"
+            data-i18n="hero_welcome"
             class="font-extrabold text-slate-900 dark:text-white"
             >أهلاً بك في منتجع مورينو هورايزون</span
           >
         </div>
-        <div class="flex items-center gap-3 text-[11px] font-mono font-bold">
+        <div class="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-[11px] font-mono font-bold">
           <span
             class="text-amber-800 dark:text-amber-200/90"
             data-i18n="resort_time"
@@ -408,25 +406,25 @@
           >
           <span
             id="resortClock"
-            class="px-2.5 py-0.5 rounded-lg bg-amber-500/15 dark:bg-black/40 text-amber-900 dark:text-amber-300 font-black border border-amber-500/30 dark:border-amber-400/40 shadow-sm"
+            class="px-2 py-0.5 rounded-lg bg-amber-500/15 dark:bg-black/40 text-amber-900 dark:text-amber-300 font-black border border-amber-500/30 dark:border-amber-400/40 shadow-sm"
             >--:--:--</span
           >
         </div>
       </section>
 
       <!-- Current Weather & Marine Forecast -->
-      <section class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-4">
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
         <div
-          class="luxury-weather-card p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-amber-500/25 shadow-md flex items-center gap-2.5"
+          class="luxury-weather-card p-2 sm:p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-amber-500/25 shadow-md flex items-center gap-2 sm:gap-2.5"
         >
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center text-xl shadow-md shrink-0"
+            class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center text-lg sm:text-xl shadow-md shrink-0"
           >
             ☀️
           </div>
           <div>
             <span
-              class="block text-[10px] text-slate-400 font-bold"
+              class="block text-[9px] sm:text-[10px] text-slate-400 font-bold"
               id="wlblTemp"
               data-i18n="wlblTemp"
               >طقس الغردقة اليوم</span
@@ -441,16 +439,16 @@
         </div>
 
         <div
-          class="luxury-weather-card p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-cyan-500/25 shadow-md flex items-center gap-2.5"
+          class="luxury-weather-card p-2 sm:p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-cyan-500/25 shadow-md flex items-center gap-2 sm:gap-2.5"
         >
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-300 text-slate-950 flex items-center justify-center text-xl shadow-md shrink-0"
+            class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-300 text-slate-950 flex items-center justify-center text-lg sm:text-xl shadow-md shrink-0"
           >
             🤿
           </div>
           <div>
             <span
-              class="block text-[10px] text-slate-400 font-bold"
+              class="block text-[9px] sm:text-[10px] text-slate-400 font-bold"
               id="wlblSea"
               data-i18n="wlblSea"
               >حالة البحر والغطس</span
@@ -465,16 +463,16 @@
         </div>
 
         <div
-          class="luxury-weather-card p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-amber-500/25 shadow-md flex items-center gap-2.5"
+          class="luxury-weather-card p-2 sm:p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-amber-500/25 shadow-md flex items-center gap-2 sm:gap-2.5"
         >
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-rose-400 text-white flex items-center justify-center text-xl shadow-md shrink-0"
+            class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-rose-400 text-white flex items-center justify-center text-lg sm:text-xl shadow-md shrink-0"
           >
             🧴
           </div>
           <div>
             <span
-              class="block text-[10px] text-slate-400 font-bold"
+              class="block text-[9px] sm:text-[10px] text-slate-400 font-bold"
               id="wlblUv"
               data-i18n="wlblUv"
               >مؤشر الشمس (UV)</span
@@ -489,16 +487,16 @@
         </div>
 
         <div
-          class="luxury-weather-card p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-indigo-500/25 shadow-md flex items-center gap-2.5"
+          class="luxury-weather-card p-2 sm:p-3 rounded-2xl bg-white/90 dark:bg-brand-cardDark/90 border border-indigo-500/25 shadow-md flex items-center gap-2.5"
         >
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-400 text-white flex items-center justify-center text-xl shadow-md shrink-0"
+            class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-400 text-white flex items-center justify-center text-lg sm:text-xl shadow-md shrink-0"
           >
             🌅
           </div>
           <div>
             <span
-              class="block text-[10px] text-slate-400 font-bold"
+              class="block text-[9px] sm:text-[10px] text-slate-400 font-bold"
               id="wlblSunset"
               data-i18n="wlblSunset"
               >غروب الشمس بالمارينا</span
@@ -526,53 +524,10 @@
         الملاحة.
       </p>
 
-      <!-- Real-time Sun & Shade Live Radar Bar -->
-      <div
-        onclick="App.openSunShadeModal()"
-        class="cursor-pointer tap-effect mb-5 p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white to-amber-100/40 dark:from-amber-500/20 dark:via-brand-cardDark/80 dark:to-brand-sea/15 border border-amber-400/40 hover:border-amber-500/70 shadow-lg shadow-amber-500/10 transition flex items-center justify-between gap-3"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 font-black text-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 shrink-0"
-          >
-            ☀️
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span
-                class="text-xs font-black text-slate-900 dark:text-white"
-                data-i18n="sun_shade_title"
-                >رادار التشميس والظل الذكي</span
-              >
-              <span
-                class="px-2.5 py-0.5 rounded-full badge-royal-gold text-[10px] font-extrabold"
-                >Live Radar</span
-              >
-            </div>
-            <p
-              id="sunShadeSummaryText"
-              class="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-snug"
-            >
-              تتبّع مسار الشمس ومناطق الظل لحظة بلحظة في منتجع مورينو هورايزون
-            </p>
-          </div>
-        </div>
-        <div class="flex items-center gap-1.5 shrink-0">
-          <span
-            class="text-xs font-black text-amber-700 dark:text-amber-400 hidden sm:inline"
-            data-i18n="sun_shade_btn"
-            >استكشف الأماكن</span
-          >
-          <span
-            class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold flex items-center justify-center text-sm"
-            >➔</span
-          >
-        </div>
-      </div>
 
       <!-- Ultra-Luxury Hero Banner with Real Aerial Photo Background -->
       <section
-        class="relative rounded-3xl overflow-hidden shadow-2xl mb-5 border border-amber-400/35 text-white min-h-[260px] flex items-center"
+        class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl mb-3.5 sm:mb-5 border border-amber-400/35 text-white min-h-[200px] sm:min-h-[260px] flex items-center"
       >
         <!-- Background Image with Gradient Overlay -->
         <img
@@ -586,9 +541,9 @@
           class="absolute inset-0 bg-gradient-to-r from-brand-navy/95 via-brand-navy/85 to-transparent"
         ></div>
 
-        <div class="relative z-10 p-5 sm:p-8 max-w-xl">
+        <div class="relative z-10 p-4 sm:p-8 max-w-xl">
           <div
-            class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-royal-gold text-xs font-bold mb-3 shadow-md"
+            class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full badge-royal-gold text-[10px] sm:text-xs font-bold mb-2 sm:mb-3 shadow-md"
           >
             <span
               class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
@@ -600,26 +555,26 @@
           <h1
             id="heroTitle"
             data-i18n="heroTitle"
-            class="text-2xl sm:text-3xl lg:text-4xl font-black mb-2.5 leading-tight text-gold-gradient drop-shadow-md"
+            class="text-xl sm:text-3xl lg:text-4xl font-black mb-1.5 sm:mb-2.5 leading-tight text-gold-gradient drop-shadow-md"
           >
             أهلاً بك في مورينو
           </h1>
           <p
             id="heroSubtitle"
             data-i18n="heroSubtitle"
-            class="text-slate-200 text-xs sm:text-sm leading-relaxed mb-4 drop-shadow"
+            class="text-slate-200 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 drop-shadow"
           >
             استكشف الخريطة التفاعلية الحقيقية للمنتجع، حدد مسار غرفتك بالذكاء
             الاصطناعي، تصفح قوائم الطعام واطلب خدمات الغرف بلمسة واحدة.
           </p>
 
           <!-- Fast Actions Strip -->
-          <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onclick="openAiChatModal()"
               id="heroAiBtn"
-              class="tap-effect btn-royal-gold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg"
+              class="tap-effect btn-royal-gold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg"
             >
               <span>✨</span>
               <span data-i18n="heroAiBtn">مساعد مورينو</span>
@@ -629,7 +584,7 @@
               type="button"
               onclick="openCinematicPromoVideo()"
               id="heroPromoVideoBtn"
-              class="tap-effect px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-xl border border-amber-300/40 hover:brightness-110"
+              class="tap-effect px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-xl border border-amber-300/40 hover:brightness-110"
             >
               <span>🎬</span>
               <span data-i18n="heroPromoVideoBtn">فيديو العرض الترويجي</span>
@@ -639,7 +594,7 @@
               type="button"
               onclick="startCinematicTour()"
               id="heroTourBtn"
-              class="tap-effect px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-teal-600 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md hover:brightness-110"
+              class="tap-effect px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-sky-500 to-teal-600 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md hover:brightness-110"
             >
               <span>🗺️</span>
               <span data-i18n="heroTourBtn">جولة سينمائية</span>
@@ -649,7 +604,7 @@
               type="button"
               onclick="openGalleryModal()"
               id="heroGalleryBtn"
-              class="tap-effect btn-royal-glass px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5"
+              class="tap-effect btn-royal-glass px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs flex items-center gap-1.5"
             >
               <span>🖼️</span>
               <span data-i18n="heroGalleryBtn">معرض الصور</span>
@@ -659,7 +614,7 @@
               type="button"
               onclick="openCompendiumModal()"
               id="heroCompendiumBtn"
-              class="tap-effect btn-royal-glass px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5"
+              class="tap-effect btn-royal-glass px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs flex items-center gap-1.5"
             >
               <span>📘</span>
               <span data-i18n="heroCompendiumBtn">دليل الإقامة</span>
@@ -669,10 +624,9 @@
       </section>
 
       <!-- Personal VIP Guest Hub & Live Meal Dashboard -->
-      <!-- Personal VIP Guest Hub & Live Meal Dashboard -->
       <section
         id="guestDashboardSection"
-        class="relative overflow-hidden rounded-3xl p-4 sm:p-6 shadow-2xl mb-6"
+        class="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl mb-3.5 sm:mb-6"
       >
         <!-- Decorative ambient glows -->
         <div
@@ -751,9 +705,9 @@
               </span>
               <span
                 id="currentMealLiveStatus"
-                class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-800 dark:text-amber-300 font-bold border border-amber-400/40 shadow-sm"
+                class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-800 dark:text-amber-300 font-bold border border-amber-400/40 shadow-sm inline-flex items-center gap-1.5 transition-all"
               >
-                <span data-i18n="guest_meal_checking">جارِ فحص التوقيت...</span>
+                <span>جارِ فحص التوقيت...</span>
               </span>
             </div>
 
@@ -866,7 +820,7 @@
               class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"
             >
               <span>🧭</span>
-              <span data-i18n="guest_room_route">مسار غرفتي المباشر:</span>
+              <span data-i18n="guest_room_route_label">مسار غرفتي المباشر:</span>
             </span>
             <div class="flex-1 flex">
               <button
@@ -877,11 +831,12 @@
                 <div class="text-right">
                   <span
                     class="text-xs font-black block"
-                    data-i18n="guest_room_route"
+                    data-i18n="my_room_route_map"
                     >مسار غرفتي على الخريطة</span
                   >
                   <span
                     class="text-[10px] text-amber-700 dark:text-amber-300 font-bold block"
+                    data-i18n="direct_directions_instant"
                     >تحديد الاتجاهات المباشرة فورياً</span
                   >
                 </div>
@@ -891,213 +846,410 @@
         </div>
       </section>
 
-      <!-- Smart Room Wayfinder 2.0 -->
+      <!-- Smart Room Wayfinder 2.0 (5-Star Luxury Edition) -->
       <section
-        class="bg-white/85 dark:bg-brand-cardDark rounded-3xl p-4 sm:p-6 shadow-xl border border-amber-500/25 mb-6"
+        class="relative bg-gradient-to-br from-white/95 via-amber-50/15 to-white/90 dark:from-brand-cardDark/95 dark:via-slate-900/95 dark:to-slate-950/95 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl border border-amber-500/30 mb-3.5 sm:mb-6 backdrop-blur-xl transition-all duration-300 overflow-hidden"
         id="wayfinder-section"
       >
-        <div
-          class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4"
-        >
-          <div>
-            <h2
-              id="wfTitle"
-              class="text-base sm:text-lg font-black flex items-center gap-2"
-            >
-              <span class="text-xl">🧭</span>
-              <span
-                id="wfTitleText"
-                data-i18n="wfTitleText"
-                class="text-gold-gradient font-black"
-                >دليل الغرف والمسارات الذكي (Wayfinder 2.0)</span
+        <!-- Luxury Ambient Glow Background Orbs -->
+        <div class="pointer-events-none absolute -top-16 -end-16 w-60 h-60 rounded-full bg-amber-400/10 dark:bg-amber-500/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-16 -start-16 w-60 h-60 rounded-full bg-emerald-400/10 dark:bg-emerald-500/10 blur-3xl"></div>
+
+        <!-- Section Top Header & Mode Toolbar -->
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 mb-5 pb-4 border-b border-amber-500/20">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400/25 to-amber-600/35 border border-amber-400/40 flex items-center justify-center text-xl shadow-md text-amber-500 shrink-0">
+              🧭
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2
+                  id="wfTitle"
+                  class="text-base sm:text-lg font-black"
+                >
+                  <span
+                    id="wfTitleText"
+                    data-i18n="wfTitleText"
+                    class="text-gold-gradient font-black"
+                    >دليل الغرف والمسارات الذكي (Wayfinder 2.0)</span
+                  >
+                </h2>
+                <span class="hidden sm:inline-flex text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-400/30 font-bold">
+                  Live 3D GPS
+                </span>
+              </div>
+              <p
+                id="wfSubtitle"
+                data-i18n="wfSubtitle"
+                class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
               >
-            </h2>
-            <p
-              id="wfSubtitle"
-              data-i18n="wfSubtitle"
-              class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-            >
-              اكتب رقم غرفتك لنحدد لك المبنى والطابق ونسلط الضوء على مكانه
-              بالخريطة فورياً.
-            </p>
+                اكتب رقم غرفتك لنحدد لك المبنى والطابق ونسلط الضوء على مكانه بالخريطة فورياً.
+              </p>
+            </div>
           </div>
 
-          <!-- Sample room shortcuts & 1-Tap My Room -->
-          <div class="flex items-center gap-1.5 flex-wrap">
+          <!-- Quick Action Controls & Mode Switcher -->
+          <div class="flex items-center gap-2 flex-wrap self-start lg:self-auto">
+            <!-- Mode Segmented Tabs -->
+            <div class="inline-flex p-1 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-inner">
+              <button
+                type="button"
+                id="wfTabBoth"
+                onclick="setWayfinderTab('both')"
+                class="tap-effect px-3 py-1.5 rounded-xl text-xs font-black bg-amber-500 text-slate-950 shadow-md transition"
+              >
+                <span data-i18n="wf_tab_both">✨ كلاهما</span>
+              </button>
+              <button
+                type="button"
+                id="wfTabRoom"
+                onclick="setWayfinderTab('room')"
+                class="tap-effect px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-amber-500/15 hover:text-amber-700 dark:hover:text-amber-300 transition"
+              >
+                <span data-i18n="wf_tab_room">🛏️ الغرفة</span>
+              </button>
+              <button
+                type="button"
+                id="wfTabRoute"
+                onclick="setWayfinderTab('route')"
+                class="tap-effect px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-amber-500/15 hover:text-amber-700 dark:hover:text-amber-300 transition"
+              >
+                <span data-i18n="wf_tab_route">🧭 المسار</span>
+              </button>
+            </div>
+
+            <!-- Fast Voice Assistant Trigger -->
             <button
               onclick="openVoiceNavigator()"
-              class="px-3 py-1.5 text-xs font-black rounded-xl bg-gradient-to-r from-amber-500/25 to-amber-600/30 text-amber-800 dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/40 transition tap-effect flex items-center gap-1.5 shadow-sm"
+              class="px-3 py-1.5 text-xs font-black rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/25 text-amber-800 dark:text-amber-300 border border-amber-500/35 hover:bg-amber-500/35 transition tap-effect flex items-center gap-1.5 shadow-sm"
+              title="توجيه صوتي ذكي"
             >
               <span>🎙️</span>
               <span data-i18n="voice_nav_btn">إلى أين تريد الذهاب؟</span>
             </button>
+
+            <!-- 1-Tap Saved Room Navigation -->
             <button
               onclick="takeMeToMyRoom()"
-              class="px-3 py-1.5 text-xs font-black rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition tap-effect flex items-center gap-1"
+              class="px-3 py-1.5 text-xs font-black rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-300 border border-amber-500/35 transition tap-effect flex items-center gap-1 shadow-sm"
+              title="توجيه لموقعي أو غرفتي المسجلة"
             >
               <span>🏠</span>
-              <span data-i18n="fab_my_room">خذني إلى غرفتي 🏠</span>
-            </button>
-            <span
-              class="text-xs text-slate-400 font-semibold"
-              id="wfSampleLbl"
-              data-i18n="wfSampleLbl"
-              >غرف تجريبية:</span
-            >
-            <button
-              onclick="quickSelectRoom('1520')"
-              class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-slate-950 transition border border-transparent hover:border-amber-400/50"
-            >
-              1520 (N)
-            </button>
-            <button
-              onclick="quickSelectRoom('1815')"
-              class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-slate-950 transition border border-transparent hover:border-amber-400/50"
-            >
-              1815 (N)
-            </button>
-            <button
-              onclick="quickSelectRoom('2015')"
-              class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-slate-950 transition border border-transparent hover:border-amber-400/50"
-            >
-              2015 (S)
-            </button>
-            <button
-              onclick="quickSelectRoom('2210')"
-              class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-slate-950 transition border border-transparent hover:border-amber-400/50"
-            >
-              2210 (S)
-            </button>
-            <button
-              onclick="quickSelectRoom('1124')"
-              class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-slate-950 transition border border-transparent hover:border-amber-400/50"
-            >
-              1124 (M)
-            </button>
-            <button
-              onclick="quickSelectRoom('2610')"
-              class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-slate-950 transition border border-transparent hover:border-amber-400/50"
-            >
-              2610 (MLS)
+              <span data-i18n="fab_my_room">خذني إلى غرفتي</span>
             </button>
           </div>
         </div>
 
-        <!-- Controls: Direct Room Box or Custom Origin -> Destination -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5 mb-3">
-          <!-- Room Input Box -->
-          <div class="md:col-span-4 relative">
-            <input
-              type="text"
-              inputmode="numeric"
-              id="roomSearchInput"
-              data-i18n-ph="room_placeholder"
-              placeholder="اكتب رقم غرفتك (مثلاً: 1520 أو 2015)..."
-              class="w-full ps-4 pe-24 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 dark:text-slate-100 placeholder-slate-400"
-              oninput="
-                if (typeof Wayfinder !== 'undefined' && Wayfinder.onRoomInput)
-                  Wayfinder.onRoomInput(this.value);
-              "
-              onkeypress="if (event.key === 'Enter') handleRoomLookup();"
-            />
-            <button
-              onclick="handleRoomLookup()"
-              class="absolute inset-y-2 end-2 px-3.5 py-1 rounded-xl btn-royal-gold text-xs font-black transition flex items-center justify-center"
-            >
-              <span id="wfBtnGo" data-i18n="wfBtnGo">حدد غرفتي</span>
-            </button>
+        <!-- Main Cards Grid: Room Locator & Route Planner -->
+        <div id="wfMainGrid" class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
+          <!-- Sub-Card 1: Room Locator -->
+          <div
+            id="wfRoomCard"
+            class="p-4 sm:p-5 rounded-2xl bg-white/70 dark:bg-slate-850/80 border border-amber-500/20 shadow-sm flex flex-col justify-between gap-3.5 transition-all"
+          >
+            <!-- Card Header -->
+            <div class="flex items-center justify-between pb-1 border-b border-slate-200/60 dark:border-slate-800/80">
+              <span class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <span>🚪</span>
+                <span data-i18n="wf_card_room_title">تحديد موقع الغرفة المباشر</span>
+              </span>
+              <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-400/15 px-2 py-0.5 rounded-full border border-amber-400/30">
+                1000 - 2800
+              </span>
+            </div>
 
-            <!-- Live Room Number Suggestions Dropdown -->
-            <div
-              id="roomSuggestionsBox"
-              class="hidden absolute top-full start-0 end-0 mt-1.5 p-1.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-20 space-y-1"
-            ></div>
+            <!-- Room Input with Embedded Gold Action Button -->
+            <div class="relative">
+              <span class="absolute inset-y-0 start-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+                🔍
+              </span>
+              <input
+                type="text"
+                inputmode="numeric"
+                id="roomSearchInput"
+                data-i18n-ph="room_placeholder"
+                placeholder="اكتب رقم غرفتك (مثلاً: 1520 أو 2015)..."
+                class="w-full ps-10 pe-28 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition"
+                oninput="
+                  if (typeof Wayfinder !== 'undefined' && Wayfinder.onRoomInput)
+                    Wayfinder.onRoomInput(this.value);
+                "
+                onkeypress="if (event.key === 'Enter') handleRoomLookup();"
+              />
+              <button
+                onclick="handleRoomLookup()"
+                class="absolute inset-y-1.5 end-1.5 px-4 py-1.5 rounded-xl btn-royal-gold text-xs font-black transition flex items-center justify-center gap-1 shadow-md tap-effect"
+              >
+                <span>📍</span>
+                <span id="wfBtnGo" data-i18n="wfBtnGo">حدد غرفتي</span>
+              </button>
+
+              <!-- Live Room Number Suggestions Dropdown -->
+              <div
+                id="roomSuggestionsBox"
+                class="hidden absolute top-full start-0 end-0 mt-1.5 p-1.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-20 space-y-1"
+              ></div>
+            </div>
+
+            <!-- Organized Sample Room Chips by Building -->
+            <div>
+              <span
+                class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5"
+                id="wfSampleLbl"
+                data-i18n="wfSampleLbl"
+              >
+                🔑 غرف للتجربة السريعة (اختر للتحديد الفوري):
+              </span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <!-- North Building -->
+                <button
+                  type="button"
+                  onclick="quickSelectRoom('1520')"
+                  class="tap-effect px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span data-i18n="sample_room_north_1520">1520 (شمالي)</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="quickSelectRoom('1815')"
+                  class="tap-effect px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span data-i18n="sample_room_north_1815">1815 (شمالي)</span>
+                </button>
+
+                <!-- South Building -->
+                <button
+                  type="button"
+                  onclick="quickSelectRoom('2015')"
+                  class="tap-effect px-2.5 py-1 text-[11px] font-bold rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30 transition flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                  <span data-i18n="sample_room_south_2015">2015 (جنوبي)</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="quickSelectRoom('2210')"
+                  class="tap-effect px-2.5 py-1 text-[11px] font-bold rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30 transition flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                  <span data-i18n="sample_room_south_2210">2210 (جنوبي)</span>
+                </button>
+
+                <!-- Main Building -->
+                <button
+                  type="button"
+                  onclick="quickSelectRoom('1124')"
+                  class="tap-effect px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 transition flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  <span data-i18n="sample_room_main_1124">1124 (رئيسي)</span>
+                </button>
+
+                <!-- Mall Building -->
+                <button
+                  type="button"
+                  onclick="quickSelectRoom('2610')"
+                  class="tap-effect px-2.5 py-1 text-[11px] font-bold rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 transition flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                  <span data-i18n="sample_room_mall_2610">2610 (تجاري)</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- Custom Origin (From) -->
-          <div class="md:col-span-3">
-            <select
-              id="selectOrigin"
-              title="نقطة الانطلاق (من)"
-              aria-label="نقطة الانطلاق"
-              data-i18n-title="wf_origin_prompt"
-              data-i18n-aria="wf_origin_prompt"
-              class="w-full px-3 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="M">📍 الاستقبال واللوبي الرئيسي (M)</option>
-              <option value="N">📍 المبنى الشمالي (North N)</option>
-              <option value="S">📍 المبنى الجنوبي (South S)</option>
-              <option value="MLS">📍 المبنى التجاري (Mall MLS)</option>
-              <option value="1">📍 منطقة الشاطئ والمارينا (1)</option>
-              <option value="3">📍 الأكوا بارك والزلاجات (3)</option>
-              <option value="11">📍 مسبح لوتس المركزي (11)</option>
-              <option value="8">📍 مطعم لا ماما الإيطالي (8)</option>
-              <option value="18">📍 البوابة الرئيسية للمنتجع (18)</option>
-            </select>
-          </div>
+          <!-- Sub-Card 2: Point-to-Point Route Planner -->
+          <div
+            id="wfRouteCard"
+            class="p-4 sm:p-5 rounded-2xl bg-white/70 dark:bg-slate-850/80 border border-amber-500/20 shadow-sm flex flex-col justify-between gap-3.5 transition-all"
+          >
+            <!-- Card Header -->
+            <div class="flex items-center justify-between pb-1 border-b border-slate-200/60 dark:border-slate-800/80">
+              <span class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <span>🧭</span>
+                <span data-i18n="wf_card_route_title">مخطط مسارات المشي (من ⬅ إلى)</span>
+              </span>
+              <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-400/15 px-2 py-0.5 rounded-full border border-emerald-400/30" data-i18n="wf_badge_3d_sim">
+                محاكاة 3D 🚶‍♂️
+              </span>
+            </div>
 
-          <!-- Custom Destination (To) -->
-          <div class="md:col-span-3">
-            <select
-              id="selectDestination"
-              title="وجهة الوصول (إلى)"
-              aria-label="وجهة الوصول"
-              data-i18n-title="wf_dest_prompt"
-              data-i18n-aria="wf_dest_prompt"
-              class="w-full px-3 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="">🎯 الوجهة: اختر مرفقاً أو مبنى...</option>
-              <option value="N">المبنى الشمالي (North N)</option>
-              <option value="S">المبنى الجنوبي (South S)</option>
-              <option value="M">المبنى الرئيسي (Lobby M)</option>
-              <option value="MLS">المبنى التجاري (Mall MLS)</option>
-              <option value="1">منطقة الشاطئ والمارينا (1)</option>
-              <option value="3">أكوا بارك والزلاجات (3)</option>
-              <option value="5">بار الشاطئ (5)</option>
-              <option value="6">المطعم الشرقي وسناك بار (6)</option>
-              <option value="8">مطعم لا ماما الإيطالي (8)</option>
-              <option value="12">مطعم سيرينا البوفيه (12)</option>
-              <option value="11">مسبح لوتس (11)</option>
-              <option value="9">النادي الصحي والسبا (9)</option>
-              <option value="10">ملاعب التنس (10)</option>
-              <option value="2">مركز الغوص (2)</option>
-              <option value="15">العيادة والصيدلية (15)</option>
-              <option value="16">مسجد المنتجع (16)</option>
-              <option value="18">البوابة الرئيسية (18)</option>
-            </select>
-          </div>
+            <!-- Origin, Swap, and Destination Controls -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+              <!-- Custom Origin (From) -->
+              <div class="sm:col-span-5 relative">
+                <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                  <span>📍</span>
+                  <span data-i18n="wf_origin_label">نقطة الانطلاق (من):</span>
+                </label>
+                <select
+                  id="selectOrigin"
+                  title="نقطة الانطلاق (من)"
+                  aria-label="نقطة الانطلاق"
+                  data-i18n-title="wf_origin_prompt"
+                  data-i18n-aria="wf_origin_prompt"
+                  class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 truncate transition"
+                >
+                  <option value="M">📍 الاستقبال واللوبي الرئيسي (M)</option>
+                  <option value="N">📍 المبنى الشمالي (North N)</option>
+                  <option value="S">📍 المبنى الجنوبي (South S)</option>
+                  <option value="MLS">📍 المبنى التجاري (Mall MLS)</option>
+                  <option value="1">📍 منطقة الشاطئ والمارينا (1)</option>
+                  <option value="3">📍 الأكوا بارك والزلاجات (3)</option>
+                  <option value="snack_aqua">📍 سناكس أكوا بارك</option>
+                  <option value="5">📍 بار الشاطئ (5)</option>
+                  <option value="snack_beach">📍 سناكس بيتش</option>
+                  <option value="6">📍 المطعم الشرقي وسناك بار (6)</option>
+                  <option value="8">📍 مطعم لا ماما الإيطالي (8)</option>
+                  <option value="12">📍 مطعم سيرينا البوفيه (12)</option>
+                  <option value="7">📍 بيانو بار ولوبي لاوندج (7)</option>
+                  <option value="11">📍 مسبح لوتس بول (11)</option>
+                  <option value="15">📍 العيادة الطبية (15)</option>
+                  <option value="pharmacy">📍 صيدلية المنتجع</option>
+                  <option value="16">📍 مسجد المنتجع (16)</option>
+                  <option value="18">📍 البوابة الرئيسية للمنتجع (18)</option>
+                </select>
+              </div>
 
-          <!-- Action Buttons -->
-          <div class="md:col-span-2 flex items-center gap-2">
-            <button
-              onclick="calculateCustomRoute()"
-              class="tap-effect w-full py-3 rounded-2xl btn-royal-gold text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-md"
-            >
-              <span>🚀</span>
-              <span id="wfBtnDraw" data-i18n="wfBtnDraw">توجيه</span>
-            </button>
-            <button
-              onclick="resetWayfinder()"
-              title="إعادة ضبط"
-              aria-label="إعادة ضبط"
-              data-i18n-title="wf_reset_title"
-              class="tap-effect p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white"
-            >
-              🔄
-            </button>
+              <!-- Swap Button -->
+              <div class="sm:col-span-2 flex justify-center pt-1 sm:pt-4">
+                <button
+                  type="button"
+                  onclick="swapWayfinderPoints()"
+                  title="تبديل نقطة الانطلاق والوجهة"
+                  data-i18n-title="wf_swap_title"
+                  class="tap-effect w-9 h-9 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-black text-sm flex items-center justify-center transition shadow-sm"
+                >
+                  ⇄
+                </button>
+              </div>
+
+              <!-- Custom Destination (To) -->
+              <div class="sm:col-span-5 relative">
+                <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                  <span>🎯</span>
+                  <span data-i18n="wf_dest_label">الوجهة المقصودة (إلى):</span>
+                </label>
+                <select
+                  id="selectDestination"
+                  title="وجهة الوصول (إلى)"
+                  aria-label="وجهة الوصول"
+                  data-i18n-title="wf_dest_prompt"
+                  data-i18n-aria="wf_dest_prompt"
+                  class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 truncate transition"
+                >
+                  <option value="">🎯 الوجهة: اختر مرفقاً أو مبنى...</option>
+                  <option value="N">المبنى الشمالي (North N)</option>
+                  <option value="S">المبنى الجنوبي (South S)</option>
+                  <option value="M">المبنى الرئيسي (Lobby M)</option>
+                  <option value="MLS">المبنى التجاري (Mall MLS)</option>
+                  <option value="1">منطقة الشاطئ والمارينا (1)</option>
+                  <option value="3">أكوا بارك والزلاجات (3)</option>
+                  <option value="snack_aqua">سناكس أكوا بارك</option>
+                  <option value="5">بار الشاطئ (5)</option>
+                  <option value="snack_beach">سناكس بيتش</option>
+                  <option value="6">المطعم الشرقي وسناك بار (6)</option>
+                  <option value="8">مطعم لا ماما الإيطالي (8)</option>
+                  <option value="12">مطعم سيرينا البوفيه (12)</option>
+                  <option value="7">بيانو بار ولوبي لاوندج (7)</option>
+                  <option value="11">مسبح لوتس بول (11)</option>
+                  <option value="9">النادي الصحي والسبا (9)</option>
+                  <option value="10">ملاعب التنس (10)</option>
+                  <option value="2">مركز الغوص (2)</option>
+                  <option value="15">العيادة الطبية (15)</option>
+                  <option value="pharmacy">صيدلية المنتجع</option>
+                  <option value="16">مسجد المنتجع (16)</option>
+                  <option value="18">البوابة الرئيسية (18)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Action Buttons Bar -->
+            <div class="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onclick="calculateCustomRoute()"
+                class="tap-effect flex-1 py-2.5 px-4 rounded-xl btn-royal-gold text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-md"
+              >
+                <span>🚀</span>
+                <span id="wfBtnDraw" data-i18n="wfBtnDraw">رسم المسار والتوجيه المباشر</span>
+              </button>
+              <button
+                type="button"
+                onclick="resetWayfinder()"
+                title="إعادة ضبط"
+                aria-label="إعادة ضبط"
+                data-i18n-title="wf_reset_title"
+                class="tap-effect px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white transition flex items-center justify-center"
+              >
+                <span>🔄</span>
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Result Banner for Directions & Room Details -->
         <div
           id="routeResultBanner"
-          class="hidden mt-3 p-4 rounded-2xl bg-sky-50 dark:bg-slate-800/90 border border-sky-100 dark:border-slate-700 transition-all"
+          class="hidden mt-3 p-4 rounded-2xl bg-sky-50 dark:bg-slate-800/90 border border-sky-100 dark:border-slate-700 transition-all shadow-md"
         ></div>
       </section>
 
+      <!-- Resilient Wayfinder Tab Controller -->
+      <script>
+        function setWayfinderTab(tab) {
+          if (typeof Wayfinder !== 'undefined' && typeof Wayfinder.setTab === 'function') {
+            Wayfinder.setTab(tab);
+            return;
+          }
+          var roomCard = document.getElementById("wfRoomCard");
+          var routeCard = document.getElementById("wfRouteCard");
+          var grid = document.getElementById("wfMainGrid");
+          var bRoom = document.getElementById("wfTabRoom");
+          var bRoute = document.getElementById("wfTabRoute");
+          var bBoth = document.getElementById("wfTabBoth");
+
+          var activeCls = "tap-effect px-3 py-1.5 rounded-xl text-xs font-black bg-amber-500 text-slate-950 shadow-md transition";
+          var inactiveCls = "tap-effect px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-amber-500/15 hover:text-amber-700 dark:hover:text-amber-300 transition";
+
+          if (bRoom) bRoom.className = tab === "room" ? activeCls : inactiveCls;
+          if (bRoute) bRoute.className = tab === "route" ? activeCls : inactiveCls;
+          if (bBoth) bBoth.className = tab === "both" ? activeCls : inactiveCls;
+
+          if (tab === "room") {
+            if (roomCard) roomCard.classList.remove("hidden");
+            if (routeCard) routeCard.classList.add("hidden");
+            if (grid) grid.className = "relative z-10 grid grid-cols-1 gap-4 mb-3";
+          } else if (tab === "route") {
+            if (roomCard) roomCard.classList.add("hidden");
+            if (routeCard) routeCard.classList.remove("hidden");
+            if (grid) grid.className = "relative z-10 grid grid-cols-1 gap-4 mb-3";
+          } else {
+            if (roomCard) roomCard.classList.remove("hidden");
+            if (routeCard) routeCard.classList.remove("hidden");
+            if (grid) grid.className = "relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3";
+          }
+        }
+
+        function swapWayfinderPoints() {
+          if (typeof Wayfinder !== 'undefined' && typeof Wayfinder.swapPoints === 'function') {
+            Wayfinder.swapPoints();
+            return;
+          }
+          var origin = document.getElementById("selectOrigin");
+          var dest = document.getElementById("selectDestination");
+          if (!origin || !dest) return;
+          var temp = origin.value;
+          origin.value = dest.value || "M";
+          if (temp && temp !== "LIVE_GUEST_LOCATION") dest.value = temp;
+        }
+      </script>
+
       <!-- Interactive illustrated resort map with visual perspective controls -->
       <section
-        class="bg-white/90 dark:bg-brand-cardDark rounded-3xl p-4 sm:p-6 shadow-xl border border-amber-500/25 mb-6"
+        class="bg-white/90 dark:bg-brand-cardDark rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl border border-amber-500/25 mb-3.5 sm:mb-6"
         id="map-section"
       >
         <!-- Map Header & Controls -->
@@ -1156,16 +1308,7 @@
                 >جولة المعالم</span
               >
             </button>
-            <button
-              onclick="App.openSunShadeModal()"
-              title="رادار مسار الشمس ومناطق الظل"
-              class="tap-effect px-2.5 h-8 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-extrabold text-xs shadow-sm hover:border-amber-400/40 border border-transparent flex items-center gap-1"
-            >
-              <span>☀️</span>
-              <span class="hidden md:inline" data-i18n="sun_shade_btn"
-                >رادار الشمس والظل</span
-              >
-            </button>
+
             <button
               onclick="MapEngine.toggle3D()"
               id="btnToggle3D"
@@ -1242,6 +1385,7 @@
               id="btnToggleApDebug"
               class="map-layer-pill tap-effect text-amber-600 dark:text-amber-400 hover:text-amber-500 border border-amber-500/40 bg-amber-500/10 font-bold"
               title="معايرة نقاط الواي فاي للمسؤولين (AP Calibration & RSSI Debug)"
+              data-i18n-title="layer_ap_debug_title"
             >
               <span>📡</span>
               <span data-i18n="layer_ap_debug">معايرة APs (Debug)</span>
@@ -1266,11 +1410,11 @@
         <div
           class="bg-slate-50/80 dark:bg-slate-900/50 p-3 sm:p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800/80 mb-3 space-y-2.5 shadow-xs"
         >
-          <!-- Tier 1: Search Bar with Autocomplete Suggestions Dropdown -->
+          <!-- Tier 1: Unified Omni-Search Bar (Facilities + Room Numbers) -->
           <div class="relative">
             <div class="relative flex items-center">
               <span
-                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none text-slate-400"
+                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none text-amber-500"
               >
                 <svg
                   class="w-4 h-4"
@@ -1290,13 +1434,13 @@
                 type="text"
                 id="mapPoiSearchInput"
                 oninput="MapEngine.searchPois(this.value)"
-                placeholder="ابحث في الخريطة: مطعم، مسبح، شاطئ، سبا، رقم المعلم..."
-                data-i18n-ph="map_search_placeholder"
-                data-i18n-ph="map_search_placeholder"
-                class="w-full ps-10 pe-16 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs transition"
+                onkeypress="if (event.key === 'Enter') MapEngine.executeOmniSearch(this.value);"
+                placeholder="ابحث في الخريطة: مطعم، مسبح أو اكتب رقم غرفتك (مثال: 2015)..."
+                data-i18n-ph="map_omni_search_placeholder"
+                class="w-full ps-10 pe-24 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs transition"
               />
               <div
-                class="absolute inset-y-0 end-0 pe-2.5 flex items-center gap-1.5"
+                class="absolute inset-y-0 end-0 pe-2 flex items-center gap-1.5"
               >
                 <button
                   id="mapPoiSearchClear"
@@ -1318,51 +1462,23 @@
                 >
                   🎙️
                 </button>
+                <button
+                  type="button"
+                  onclick="MapEngine.executeOmniSearch(document.getElementById('mapPoiSearchInput').value)"
+                  class="px-2.5 py-1.5 rounded-lg btn-royal-gold text-slate-950 font-black text-xs transition tap-effect flex items-center gap-1 shadow-sm"
+                  title="تحديد الوجهة أو مسار الغرفة"
+                >
+                  <span>📍</span>
+                  <span data-i18n="omni_search_btn">بحث</span>
+                </button>
               </div>
             </div>
 
-            <!-- Live POI Search Results Dropdown -->
+            <!-- Live POI & Room Search Results Dropdown -->
             <div
               id="mapPoiSearchResults"
               class="hidden absolute top-full start-0 end-0 mt-1.5 p-1.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-30 max-h-64 overflow-y-auto space-y-1"
             ></div>
-          </div>
-
-          <!-- Room Number Quick Finder Search Bar -->
-          <div class="relative">
-            <div class="relative flex items-center">
-              <span
-                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none text-amber-500 font-bold text-sm"
-              >
-                🚪
-              </span>
-              <input
-                type="text"
-                id="mapRoomSearchInput"
-                placeholder="أدخل رقم الغرفة (مثال: 2015) / Enter Room Number"
-                data-i18n-ph="room_search_placeholder"
-                class="w-full ps-10 pe-20 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs transition"
-                onkeypress="
-                  if (event.key === 'Enter')
-                    RoomFinder.navigateToRoom(this.value);
-                "
-              />
-              <div class="absolute inset-y-0 end-0 pe-2 flex items-center">
-                <button
-                  type="button"
-                  onclick="
-                    RoomFinder.navigateToRoom(
-                      document.getElementById('mapRoomSearchInput').value,
-                    )
-                  "
-                  class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-brand-gold hover:brightness-110 text-slate-950 font-black text-xs transition tap-effect flex items-center gap-1 shadow-sm"
-                  title="تحديد مسار الغرفة فوراً"
-                >
-                  <span>🧭</span>
-                  <span data-i18n="room_search_btn">دخول</span>
-                </button>
-              </div>
-            </div>
           </div>
 
           <!-- Tier 2: Landmark Quick Jump Chips (Responsive Flex-Wrap, No Cutoff) -->
@@ -1406,11 +1522,46 @@
               🍕 <span data-preset-label="8" data-i18n="chip_lamama_8">مطعم لا ماما (8)</span>
             </button>
             <button
+              data-preset-id="7"
+              onclick="MapEngine.focusPreset('7')"
+              class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
+            >
+              🎹 <span data-preset-label="7" data-i18n="chip_piano_7">بيانو بار (7)</span>
+            </button>
+            <button
+              data-preset-id="snack_beach"
+              onclick="MapEngine.focusPreset('snack_beach')"
+              class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
+            >
+              🥪 <span data-preset-label="snack_beach" data-i18n="chip_snack_beach">سناكس بيتش</span>
+            </button>
+            <button
+              data-preset-id="snack_aqua"
+              onclick="MapEngine.focusPreset('snack_aqua')"
+              class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
+            >
+              🌭 <span data-preset-label="snack_aqua" data-i18n="chip_snack_aqua">سناكس أكوا</span>
+            </button>
+            <button
               data-preset-id="11"
               onclick="MapEngine.focusPreset('11')"
               class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
             >
-              🏊 <span data-preset-label="11" data-i18n="chip_lotus_11">مسبح لوتس (11)</span>
+              🏊 <span data-preset-label="11" data-i18n="chip_lotus_11">لوتس بول (11)</span>
+            </button>
+            <button
+              data-preset-id="15"
+              onclick="MapEngine.focusPreset('15')"
+              class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
+            >
+              🩺 <span data-preset-label="15" data-i18n="chip_clinic_15">العيادة (15)</span>
+            </button>
+            <button
+              data-preset-id="pharmacy"
+              onclick="MapEngine.focusPreset('pharmacy')"
+              class="landmark-preset-btn px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 transition tap-effect"
+            >
+              💊 <span data-preset-label="pharmacy" data-i18n="chip_pharmacy">الصيدلية</span>
             </button>
             <button
               data-preset-id="1"
@@ -1728,16 +1879,17 @@
           <span class="text-[10px] font-bold" data-i18n="nav_map">الخريطة</span>
         </button>
 
-        <!-- 3. Smart Hub (Elevated Center Highlight) -->
+        <!-- 3. AI Voice Wayfinder & Concierge (Elevated Amber Highlight Button) -->
         <button
-          onclick="App.openSmartHubModal()"
-          id="bottomNavHub"
-          class="tap-effect flex flex-col items-center justify-center gap-1 bg-gradient-to-tr from-amber-500 via-brand-gold to-amber-600 text-slate-950 px-3.5 py-1.5 rounded-2xl shadow-xl -translate-y-3 border-2 border-white dark:border-slate-900 glow-gold transition"
-          title="المساعد الذكي"
+          onclick="openVoiceNavigator()"
+          id="bottomNavVoice"
+          class="tap-effect flex flex-col items-center justify-center gap-0.5 bg-gradient-to-tr from-amber-500 via-brand-gold to-amber-600 text-slate-950 w-12 h-12 rounded-full shadow-xl -translate-y-3.5 border-2 border-white dark:border-slate-900 glow-gold transition hover:scale-105 active:scale-95"
+          title="المرشد الصوتي الذكي (Voice Navigator)"
+          aria-label="المرشد الصوتي"
         >
-          <span class="text-xl leading-none">⚡</span>
-          <span class="text-[9px] font-black" data-i18n="nav_smart_hub"
-            >المساعد</span
+          <span class="text-xl leading-none">🎙️</span>
+          <span class="text-[8px] font-black leading-none" data-i18n="voice_nav_short"
+            >صوتي</span
           >
         </button>
 
@@ -2790,55 +2942,103 @@
       </div>
     </div>
 
-    <!-- Sun & Shade Live Radar Modal -->
+
+
+    <!-- Luxury Resort Photo Gallery Modal -->
     <div
-      id="sunShadeModal"
-      class="modal fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300"
+      id="resortGalleryModal"
+      class="modal fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-xl hidden transition-all duration-300"
+      role="dialog"
+      aria-modal="true"
     >
       <div
-        class="relative w-full max-w-2xl bg-white dark:bg-brand-cardDark rounded-3xl shadow-2xl border border-amber-500/30 overflow-hidden flex flex-col max-h-[90vh]"
+        class="relative w-full max-w-5xl bg-white dark:bg-brand-cardDark rounded-3xl shadow-2xl border border-amber-500/30 overflow-hidden flex flex-col max-h-[92vh]"
       >
-        <!-- Header -->
+        <!-- Modal Header -->
         <div
-          class="p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-brand-sand/10 to-teal-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
+          class="p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-brand-sand/10 to-teal-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 min-w-0">
             <div
-              class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-xl flex items-center justify-center shadow-md"
+              class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-xl flex items-center justify-center shadow-md shrink-0"
             >
-              ☀️
+              🖼️
             </div>
-            <div>
+            <div class="min-w-0">
               <h3
-                class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2"
+                class="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate"
+                data-i18n="gallery_title"
               >
-                <span data-i18n="sun_shade_title"
-                  >رادار التشميس والظل الذكي</span
-                >
+                معرض لقطات منتجع مورينو هورايزون
               </h3>
               <p
-                class="text-xs text-slate-500 dark:text-slate-400"
-                data-i18n="sun_shade_subtitle"
+                class="text-xs text-slate-500 dark:text-slate-400 truncate"
+                data-i18n="gallery_sub"
               >
-                تتبّع مسار الشمس ومناطق الظل لحظة بلحظة في منتجع مورينو هورايزون
+                جولة بصرية في أرجاء المنتجع الفاخر والشاطئ والمسابح
               </p>
             </div>
           </div>
           <button
-            onclick="App.closeModal('sunShadeModal')"
-            class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center font-bold text-sm transition tap-effect"
+            onclick="App.closeGalleryModal()"
+            class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-500 dark:text-slate-400 flex items-center justify-center font-black text-sm transition tap-effect shrink-0"
+            title="إغلاق المعرض"
           >
             ✕
           </button>
         </div>
 
-        <!-- Scrollable Content -->
+        <!-- Filter Category Tabs -->
         <div
-          class="p-4 sm:p-5 overflow-y-auto space-y-4"
-          id="sunShadeModalContent"
+          class="px-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-800/80 flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0"
+          id="galleryFilterBar"
         >
-          <!-- Rendered dynamically by App.openSunShadeModal() -->
+          <button onclick="GalleryManager.filter('all')" class="gallery-tab-btn active px-3.5 py-1.5 rounded-xl text-xs font-black transition tap-effect" data-category="all">🌟 الكل (49)</button>
+          <button onclick="GalleryManager.filter('beach')" class="gallery-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition tap-effect" data-category="beach">🏖️ الشاطئ والمارينا</button>
+          <button onclick="GalleryManager.filter('pools')" class="gallery-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition tap-effect" data-category="pools">🏊 المسابح والأكوا بارك</button>
+          <button onclick="GalleryManager.filter('dining')" class="gallery-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition tap-effect" data-category="dining">🍽️ المطاعم والبارات</button>
+          <button onclick="GalleryManager.filter('rooms')" class="gallery-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition tap-effect" data-category="rooms">🛏️ الغرف والأجنحة</button>
+          <button onclick="GalleryManager.filter('spa')" class="gallery-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition tap-effect" data-category="spa">💆 السبا والاستجمام</button>
         </div>
+
+        <!-- Scrollable Photo Grid -->
+        <div
+          class="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0"
+        >
+          <div
+            id="galleryPhotoGrid"
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4"
+          >
+            <!-- Rendered by GalleryManager -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-Screen Lightbox Image Viewer -->
+    <div
+      id="galleryLightboxModal"
+      class="fixed inset-0 z-60 bg-black/95 backdrop-blur-2xl hidden flex flex-col justify-between p-3 sm:p-6 transition-all duration-300 select-none"
+    >
+      <div class="flex items-center justify-between text-white z-20">
+        <div class="flex items-center gap-2">
+          <span class="text-xs px-2.5 py-1 rounded-full bg-white/15 font-bold" id="lightboxCounter">1 / 49</span>
+          <span class="text-sm font-black text-amber-300 hidden sm:inline" id="lightboxTitle"></span>
+        </div>
+        <button onclick="GalleryManager.closeLightbox()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center font-bold text-lg tap-effect">✕</button>
+      </div>
+
+      <div class="relative flex-1 flex items-center justify-center my-2 overflow-hidden">
+        <button onclick="GalleryManager.prevLightbox()" class="absolute left-2 sm:left-4 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/80 border border-white/20 text-white flex items-center justify-center text-xl tap-effect">‹</button>
+        
+        <img id="lightboxMainImg" src="" alt="Resort Photo" class="max-h-full max-w-full rounded-2xl object-contain shadow-2xl transition-transform duration-300" />
+
+        <button onclick="GalleryManager.nextLightbox()" class="absolute right-2 sm:right-4 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/80 border border-white/20 text-white flex items-center justify-center text-xl tap-effect">›</button>
+      </div>
+
+      <div class="text-center text-white z-20 px-4">
+        <h4 id="lightboxCaptionTitle" class="text-sm font-black sm:hidden text-amber-300 mb-0.5"></h4>
+        <p id="lightboxCaptionDesc" class="text-xs text-slate-300 max-w-xl mx-auto"></p>
       </div>
     </div>
 
@@ -2981,6 +3181,36 @@
                 class="voice-chip-btn px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs tap-effect"
               >
                 🍽️ مطعم سيرينا
+              </button>
+              <button
+                onclick="VoiceNavigator.processVoiceQuery('بيانو بار')"
+                class="voice-chip-btn px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs tap-effect"
+              >
+                🎹 بيانو بار
+              </button>
+              <button
+                onclick="VoiceNavigator.processVoiceQuery('سناكس بيتش')"
+                class="voice-chip-btn px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs tap-effect"
+              >
+                🥪 سناكس بيتش
+              </button>
+              <button
+                onclick="VoiceNavigator.processVoiceQuery('سناكس اكوا')"
+                class="voice-chip-btn px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs tap-effect"
+              >
+                🌭 سناكس أكوا
+              </button>
+              <button
+                onclick="VoiceNavigator.processVoiceQuery('العيادة')"
+                class="voice-chip-btn px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs tap-effect"
+              >
+                🩺 العيادة
+              </button>
+              <button
+                onclick="VoiceNavigator.processVoiceQuery('الصيدلية')"
+                class="voice-chip-btn px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs tap-effect"
+              >
+                💊 الصيدلية
               </button>
               <button
                 onclick="VoiceNavigator.processVoiceQuery('السبا')"
@@ -3343,61 +3573,6 @@
       </div>
     </div>
 
-    <!-- Royal Floating Mobile Bottom Dock (Smart App Navigation) -->
-    <nav class="mobile-bottom-nav" aria-label="شريط التنقل السريع">
-      <button
-        onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-        class="mobile-nav-item active tap-effect"
-        title="الرئيسية"
-      >
-        <span class="nav-icon">🏰</span>
-        <span data-i18n="mob_nav_home" class="font-bold">الرئيسية</span>
-      </button>
-      <button
-        onclick="
-          document
-            .getElementById('map-section')
-            .scrollIntoView({ behavior: 'smooth' })
-        "
-        class="mobile-nav-item tap-effect"
-        title="الخريطة"
-      >
-        <span class="nav-icon">🗺️</span>
-        <span data-i18n="mob_nav_map" class="font-bold">الخريطة</span>
-      </button>
-      <button
-        onclick="
-          document
-            .getElementById('wayfinder-section')
-            .scrollIntoView({ behavior: 'smooth' })
-        "
-        class="mobile-nav-item tap-effect"
-        title="الملاحة"
-      >
-        <span class="nav-icon">🧭</span>
-        <span data-i18n="mob_nav_nav" class="font-bold">الملاحة</span>
-      </button>
-      <button
-        onclick="
-          document
-            .getElementById('guestDashboardSection')
-            .scrollIntoView({ behavior: 'smooth' })
-        "
-        class="mobile-nav-item tap-effect"
-        title="غرفتي"
-      >
-        <span class="nav-icon">👑</span>
-        <span data-i18n="mob_nav_room" class="font-bold">غرفتي</span>
-      </button>
-      <button
-        onclick="openEmergencyDrawer()"
-        class="mobile-nav-item tap-effect"
-        title="الطوارئ"
-      >
-        <span class="nav-icon">🆘</span>
-        <span data-i18n="mob_nav_emergency" class="font-bold">طوارئ</span>
-      </button>
-    </nav>
 
     <!-- Floating AI Voice Concierge & Wayfinder Button (Ultra-Compact & Luxury) -->
     <button
@@ -3415,18 +3590,19 @@
     </button>
 
     <!-- Modular Scripts Architecture (Immediate synchronous execution in DOM order) -->
-    <script type="module" src="shared/positioning-core.js?v=58.0"></script>
-    <script src="js/core/i18n-engine.js?v=58.0"></script>
-    <script src="js/locales-bundle.js?v=58.0"></script>
-    <script src="js/data.js?v=58.0"></script>
-    <script src="js/virtual-resort-map.js?v=58.0"></script>
-    <script src="js/geofence-service.js?v=58.0"></script>
-    <script src="js/map-matcher.js?v=58.0"></script>
-    <script src="js/map-engine.js?v=58.0"></script>
-    <script src="js/voice-concierge.js?v=58.0"></script>
-    <script src="js/wayfinder.js?v=58.0"></script>
-    <script src="js/room-finder.js?v=58.0"></script>
-    <script src="js/templates/view-templates.js?v=58.0"></script>
-    <script src="js/app.js?v=58.0"></script>
+    <script type="module" src="shared/positioning-core.js?v=75.0"></script>
+    <script src="js/core/i18n-engine.js?v=75.0"></script>
+    <script src="js/locales-bundle.js?v=75.0"></script>
+    <script src="js/data.js?v=75.0"></script>
+    <script src="js/virtual-resort-map.js?v=75.0"></script>
+    <script src="js/geofence-service.js?v=75.0"></script>
+    <script src="js/map-matcher.js?v=75.0"></script>
+    <script src="js/map-engine.js?v=75.0"></script>
+    <script src="js/voice-concierge.js?v=75.0"></script>
+    <script src="js/wayfinder.js?v=75.0"></script>
+    <script src="js/room-finder.js?v=75.0"></script>
+    <script src="js/templates/view-templates.js?v=75.0"></script>
+    <script src="js/gallery-manager.js?v=75.0"></script>
+    <script src="js/app.js?v=75.0"></script>
   </body>
 </html>
