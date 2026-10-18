@@ -3,7 +3,7 @@
  * Network-First Strategy with Offline Cache Fallback
  */
 
-const CACHE_NAME = "moreno-guide-v75";
+const CACHE_NAME = "moreno-guide-v76";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -17,26 +17,27 @@ const ASSETS_TO_CACHE = [
   "./assets/icons/favicon-32x32.png",
   "./assets/icons/favicon-16x16.png",
   "./css/tailwind-compiled.css",
-  "./css/tailwind-compiled.css?v=75.0",
+  "./css/tailwind-compiled.css?v=76.0",
   "./css/style.css",
-  "./css/style.css?v=75.0",
-  "./shared/positioning-core.js?v=75.0",
-  "./js/core/i18n-engine.js?v=75.0",
-  "./js/locales-bundle.js?v=75.0",
-  "./js/data.js?v=75.0",
-  "./js/virtual-resort-map.js?v=75.0",
-  "./js/geofence-service.js?v=75.0",
-  "./js/map-matcher.js?v=75.0",
-  "./js/map-engine.js?v=75.0",
-  "./js/voice-concierge.js?v=75.0",
-  "./js/wayfinder.js?v=75.0",
-  "./js/room-finder.js?v=75.0",
-  "./js/templates/view-templates.js?v=75.0",
-  "./js/gallery-manager.js?v=75.0",
-  "./js/app.js?v=75.0",
+  "./css/style.css?v=76.0",
+  "./shared/positioning-core.js?v=76.0",
+  "./js/core/i18n-engine.js?v=76.0",
+  "./js/locales-bundle.js?v=76.0",
+  "./js/data.js?v=76.0",
+  "./js/virtual-resort-map.js?v=76.0",
+  "./js/geofence-service.js?v=76.0",
+  "./js/map-matcher.js?v=76.0",
+  "./js/map-engine.js?v=76.0",
+  "./js/voice-concierge.js?v=76.0",
+  "./js/wayfinder.js?v=76.0",
+  "./js/room-finder.js?v=76.0",
+  "./js/templates/view-templates.js?v=76.0",
+  "./js/gallery-manager.js?v=76.0",
+  "./js/app.js?v=76.0",
   "./moreno_resort_map_new.png",
   "./assets/images/moreno_logo.jpg",
   "./assets/images/hero_resort.jpg",
+  "./assets/images/moreno_spa_resort.png",
 ];
 
 // 1. Install Event: Cache Core App Shell rapidly without network flooding
